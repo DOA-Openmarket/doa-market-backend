@@ -68,5 +68,7 @@ Get image repository
 Get image tag
 */}}
 {{- define "doa-market.imageTag" -}}
-{{- .Values.services.[.serviceName].image.tag | default .Values.defaults.image.tag | default "latest" }}
+{{- $service := index .Values.services .serviceName | default dict }}
+{{- $image := $service.image | default dict }}
+{{- $image.tag | default .Values.defaults.image.tag | default "latest" }}
 {{- end }}
