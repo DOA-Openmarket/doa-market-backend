@@ -1,0 +1,3 @@
+image:
+  repository: 478266318018.dkr.ecr.ap-northeast-2.amazonaws.com/doa-market-api-gateway
+  tag: bea2c6e
