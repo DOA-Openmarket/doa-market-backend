@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [main, develop]
   workflow_dispatch:
+    inputs:
+      target_services:
+        description: 'Target services (JSON array, e.g. ["cart-service"])'
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -92,11 +97,16 @@ jobs:
       - name: Set output variables
         id: set-outputs
         run: |
-          echo "services=${{ steps.filter.outputs.changes }}" >> $GITHUB_OUTPUT
-          if [ "${{ steps.filter.outputs.changes }}" != "[]" ]; then
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.target_services }}" != "" ]]; then
+            echo 'services=${{ inputs.target_services }}' >> $GITHUB_OUTPUT
             echo "any_changed=true" >> $GITHUB_OUTPUT
           else
-            echo "any_changed=false" >> $GITHUB_OUTPUT
+            echo 'services=${{ steps.filter.outputs.changes }}' >> $GITHUB_OUTPUT
+            if [ "${{ steps.filter.outputs.changes }}" != "[]" ]; then
+              echo "any_changed=true" >> $GITHUB_OUTPUT
+            else
+              echo "any_changed=false" >> $GITHUB_OUTPUT
+            fi
           fi
 
   build-and-push:
