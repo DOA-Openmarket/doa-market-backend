@@ -92,34 +92,8 @@ jobs:
       - name: Set output variables
         id: set-outputs
         run: |
-          CHANGED_SERVICES=()
-          if [[ "${{ steps.filter.outputs.api-gateway }}" == 'true' ]]; then CHANGED_SERVICES+=('"api-gateway"'); fi
-          if [[ "${{ steps.filter.outputs.auth-service }}" == 'true' ]]; then CHANGED_SERVICES+=('"auth-service"'); fi
-          if [[ "${{ steps.filter.outputs.product-service }}" == 'true' ]]; then CHANGED_SERVICES+=('"product-service"'); fi
-          if [[ "${{ steps.filter.outputs.order-service }}" == 'true' ]]; then CHANGED_SERVICES+=('"order-service"'); fi
-          if [[ "${{ steps.filter.outputs.payment-service }}" == 'true' ]]; then CHANGED_SERVICES+=('"payment-service"'); fi
-          if [[ "${{ steps.filter.outputs.user-service }}" == 'true' ]]; then CHANGED_SERVICES+=('"user-service"'); fi
-          if [[ "${{ steps.filter.outputs.cart-service }}" == 'true' ]]; then CHANGED_SERVICES+=('"cart-service"'); fi
-          if [[ "${{ steps.filter.outputs.review-service }}" == 'true' ]]; then CHANGED_SERVICES+=('"review-service"'); fi
-          if [[ "${{ steps.filter.outputs.notification-service }}" == 'true' ]]; then CHANGED_SERVICES+=('"notification-service"'); fi
-          if [[ "${{ steps.filter.outputs.search-service }}" == 'true' ]]; then CHANGED_SERVICES+=('"search-service"'); fi
-          if [[ "${{ steps.filter.outputs.inventory-service }}" == 'true' ]]; then CHANGED_SERVICES+=('"inventory-service"'); fi
-          if [[ "${{ steps.filter.outputs.seller-service }}" == 'true' ]]; then CHANGED_SERVICES+=('"seller-service"'); fi
-          if [[ "${{ steps.filter.outputs.admin-service }}" == 'true' ]]; then CHANGED_SERVICES+=('"admin-service"'); fi
-          if [[ "${{ steps.filter.outputs.file-service }}" == 'true' ]]; then CHANGED_SERVICES+=('"file-service"'); fi
-          if [[ "${{ steps.filter.outputs.banner-service }}" == 'true' ]]; then CHANGED_SERVICES+=('"banner-service"'); fi
-          if [[ "${{ steps.filter.outputs.coupon-service }}" == 'true' ]]; then CHANGED_SERVICES+=('"coupon-service"'); fi
-          if [[ "${{ steps.filter.outputs.shipping-service }}" == 'true' ]]; then CHANGED_SERVICES+=('"shipping-service"'); fi
-          if [[ "${{ steps.filter.outputs.stats-service }}" == 'true' ]]; then CHANGED_SERVICES+=('"stats-service"'); fi
-          if [[ "${{ steps.filter.outputs.settlement-service }}" == 'true' ]]; then CHANGED_SERVICES+=('"settlement-service"'); fi
-
-          if [ ${#CHANGED_SERVICES[@]} -gt 0 ]; then
-            echo "services=[${CHANGED_SERVICES[*]}]" >> $GITHUB_OUTPUT
-            echo "any_changed=true" >> $GITHUB_OUTPUT
-          else
-            echo "services=[]" >> $GITHUB_OUTPUT
-            echo "any_changed=false" >> $GITHUB_OUTPUT
-          fi
+          echo 'services=["api-gateway","auth-service","product-service","order-service","payment-service","user-service","cart-service","review-service","notification-service","search-service","inventory-service","seller-service","admin-service","file-service","banner-service","coupon-service","shipping-service","stats-service","settlement-service"]' >> $GITHUB_OUTPUT
+          echo "any_changed=true" >> $GITHUB_OUTPUT
 
   build-and-push:
     name: Build and Push
