@@ -1,0 +1,114 @@
+version: '3.8'
+
+# 로컬 개발을 위한 오버라이드 파일
+# 사용법: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  api-gateway:
+    volumes:
+      - ./api-gateway:/app
+      - /app/node_modules
+    command: npm run dev
+
+  auth-service:
+    volumes:
+      - ./auth-service:/app
+      - /app/node_modules
+    command: npm run dev
+
+  user-service:
+    volumes:
+      - ./user-service:/app
+      - /app/node_modules
+    command: npm run dev
+
+  product-service:
+    volumes:
+      - ./product-service:/app
+      - /app/node_modules
+    command: npm run dev
+
+  order-service:
+    volumes:
+      - ./order-service:/app
+      - /app/node_modules
+    command: npm run dev
+
+  payment-service:
+    volumes:
+      - ./payment-service:/app
+      - /app/node_modules
+    command: npm run dev
+
+  shipping-service:
+    volumes:
+      - ./shipping-service:/app
+      - /app/node_modules
+    command: npm run dev
+
+  seller-service:
+    volumes:
+      - ./seller-service:/app
+      - /app/node_modules
+    command: npm run dev
+
+  settlement-service:
+    volumes:
+      - ./settlement-service:/app
+      - /app/node_modules
+    command: npm run dev
+
+  coupon-service:
+    volumes:
+      - ./coupon-service:/app
+      - /app/node_modules
+    command: npm run dev
+
+  inventory-service:
+    volumes:
+      - ./inventory-service:/app
+      - /app/node_modules
+    command: npm run dev
+
+  notification-service:
+    volumes:
+      - ./notification-service:/app
+      - /app/node_modules
+    command: npm run dev
+
+  review-service:
+    volumes:
+      - ./review-service:/app
+      - /app/node_modules
+    command: npm run dev
+
+  search-service:
+    volumes:
+      - ./search-service:/app
+      - /app/node_modules
+    command: npm run dev
+
+  admin-service:
+    volumes:
+      - ./admin-service:/app
+      - /app/node_modules
+    command: npm run dev
+
+  file-service:
+    volumes:
+      - ./file-service:/app
+      - /app/node_modules
+    command: npm run dev
+
+  stats-service:
+    volumes:
+      - ./stats-service:/app
+      - /app/node_modules
+    command: npm run dev
+
+  banner-service:
+    volumes:
+      - ./banner-service:/app
+      - /app/node_modules
+    command: npm run dev
+

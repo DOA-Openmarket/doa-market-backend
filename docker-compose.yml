@@ -1,0 +1,538 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # 인프라 서비스
+  # ============================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: doa-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql
+    networks:
+      - doa-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: doa-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - doa-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================
+  # API Gateway
+  # ============================================
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: doa-api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      LOG_LEVEL: debug
+      CORS_ORIGINS: http://localhost:3000,http://localhost:5173
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-your-access-secret-change-in-production}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-your-refresh-secret-change-in-production}
+      RATE_LIMIT_WINDOW_MS: 900000
+      RATE_LIMIT_MAX_REQUESTS: 100
+      AUTH_RATE_LIMIT_MAX: 5
+      # Service URLs
+      AUTH_SERVICE_URL: http://auth-service:3001
+      USER_SERVICE_URL: http://user-service:3002
+      PRODUCT_SERVICE_URL: http://product-service:3003
+      ORDER_SERVICE_URL: http://order-service:3004
+      PAYMENT_SERVICE_URL: http://payment-service:3005
+      SHIPPING_SERVICE_URL: http://shipping-service:3006
+      SELLER_SERVICE_URL: http://seller-service:3007
+      SETTLEMENT_SERVICE_URL: http://settlement-service:3008
+      COUPON_SERVICE_URL: http://coupon-service:3009
+      INVENTORY_SERVICE_URL: http://inventory-service:3010
+      NOTIFICATION_SERVICE_URL: http://notification-service:3011
+      REVIEW_SERVICE_URL: http://review-service:3012
+      SEARCH_SERVICE_URL: http://search-service:3013
+      ADMIN_SERVICE_URL: http://admin-service:3014
+      FILE_SERVICE_URL: http://file-service:3015
+      STATS_SERVICE_URL: http://stats-service:3016
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - doa-network
+    restart: unless-stopped
+
+  # ============================================
+  # 마이크로 서비스
+  # ============================================
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: doa-auth-service
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      SERVICE_NAME: auth-service
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: doa_auth
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_SYNCHRONIZE: "true"
+      DB_LOGGING: "true"
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-your-access-secret-change-in-production}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-your-refresh-secret-change-in-production}
+      JWT_ACCESS_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CORS_ORIGIN: http://localhost:3000,http://localhost:5173
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - doa-network
+    restart: unless-stopped
+
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    container_name: doa-user-service
+    ports:
+      - "3002:3002"
+    environment:
+      NODE_ENV: development
+      PORT: 3002
+      SERVICE_NAME: user-service
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: doa_users
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_SYNCHRONIZE: "true"
+      DB_LOGGING: "true"
+      CORS_ORIGIN: http://localhost:3000,http://localhost:5173
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - doa-network
+    restart: unless-stopped
+
+  product-service:
+    build:
+      context: ./product-service
+      dockerfile: Dockerfile
+    container_name: doa-product-service
+    ports:
+      - "3003:3003"
+    environment:
+      NODE_ENV: development
+      PORT: 3003
+      SERVICE_NAME: product-service
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: doa_products
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_SYNCHRONIZE: "true"
+      DB_LOGGING: "true"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CORS_ORIGIN: http://localhost:3000,http://localhost:5173
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - doa-network
+    restart: unless-stopped
+
+  order-service:
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    container_name: doa-order-service
+    ports:
+      - "3004:3004"
+    environment:
+      NODE_ENV: development
+      PORT: 3004
+      SERVICE_NAME: order-service
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: doa_orders
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_SYNCHRONIZE: "true"
+      DB_LOGGING: "true"
+      CORS_ORIGIN: http://localhost:3000,http://localhost:5173
+      PRODUCT_SERVICE_URL: http://product-service:3003
+      INVENTORY_SERVICE_URL: http://inventory-service:3010
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - doa-network
+    restart: unless-stopped
+
+  payment-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    container_name: doa-payment-service
+    ports:
+      - "3005:3005"
+    environment:
+      NODE_ENV: development
+      PORT: 3005
+      SERVICE_NAME: payment-service
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: doa_payments
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_SYNCHRONIZE: "true"
+      DB_LOGGING: "true"
+      CORS_ORIGIN: http://localhost:3000,http://localhost:5173
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - doa-network
+    restart: unless-stopped
+
+  shipping-service:
+    build:
+      context: ./shipping-service
+      dockerfile: Dockerfile
+    container_name: doa-shipping-service
+    ports:
+      - "3006:3006"
+    environment:
+      NODE_ENV: development
+      PORT: 3006
+      SERVICE_NAME: shipping-service
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: doa_shippings
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_SYNCHRONIZE: "true"
+      DB_LOGGING: "true"
+      CORS_ORIGIN: http://localhost:3000,http://localhost:5173
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - doa-network
+    restart: unless-stopped
+
+  seller-service:
+    build:
+      context: ./seller-service
+      dockerfile: Dockerfile
+    container_name: doa-seller-service
+    ports:
+      - "3007:3007"
+    environment:
+      NODE_ENV: development
+      PORT: 3007
+      SERVICE_NAME: seller-service
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: doa_sellers
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_SYNCHRONIZE: "true"
+      DB_LOGGING: "true"
+      CORS_ORIGIN: http://localhost:3000,http://localhost:5173
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - doa-network
+    restart: unless-stopped
+
+  settlement-service:
+    build:
+      context: ./settlement-service
+      dockerfile: Dockerfile
+    container_name: doa-settlement-service
+    ports:
+      - "3008:3008"
+    environment:
+      NODE_ENV: development
+      PORT: 3008
+      SERVICE_NAME: settlement-service
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: doa_settlements
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_SYNCHRONIZE: "true"
+      DB_LOGGING: "true"
+      CORS_ORIGIN: http://localhost:3000,http://localhost:5173
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - doa-network
+    restart: unless-stopped
+
+  coupon-service:
+    build:
+      context: ./coupon-service
+      dockerfile: Dockerfile
+    container_name: doa-coupon-service
+    ports:
+      - "3009:3009"
+    environment:
+      NODE_ENV: development
+      PORT: 3009
+      SERVICE_NAME: coupon-service
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: doa_coupons
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_SYNCHRONIZE: "true"
+      DB_LOGGING: "true"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CORS_ORIGIN: http://localhost:3000,http://localhost:5173
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - doa-network
+    restart: unless-stopped
+
+  inventory-service:
+    build:
+      context: ./inventory-service
+      dockerfile: Dockerfile
+    container_name: doa-inventory-service
+    ports:
+      - "3010:3010"
+    environment:
+      NODE_ENV: development
+      PORT: 3010
+      SERVICE_NAME: inventory-service
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: doa_inventory
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_SYNCHRONIZE: "true"
+      DB_LOGGING: "true"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CORS_ORIGIN: http://localhost:3000,http://localhost:5173
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - doa-network
+    restart: unless-stopped
+
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    container_name: doa-notification-service
+    ports:
+      - "3011:3011"
+    environment:
+      NODE_ENV: development
+      PORT: 3011
+      SERVICE_NAME: notification-service
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: doa_notifications
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_SYNCHRONIZE: "true"
+      DB_LOGGING: "true"
+      CORS_ORIGIN: http://localhost:3000,http://localhost:5173
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - doa-network
+    restart: unless-stopped
+
+  review-service:
+    build:
+      context: ./review-service
+      dockerfile: Dockerfile
+    container_name: doa-review-service
+    ports:
+      - "3012:3012"
+    environment:
+      NODE_ENV: development
+      PORT: 3012
+      SERVICE_NAME: review-service
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: doa_reviews
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_SYNCHRONIZE: "true"
+      DB_LOGGING: "true"
+      CORS_ORIGIN: http://localhost:3000,http://localhost:5173
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - doa-network
+    restart: unless-stopped
+
+  search-service:
+    build:
+      context: ./search-service
+      dockerfile: Dockerfile
+    container_name: doa-search-service
+    ports:
+      - "3013:3013"
+    environment:
+      NODE_ENV: development
+      PORT: 3013
+      SERVICE_NAME: search-service
+      CORS_ORIGIN: http://localhost:3000,http://localhost:5173
+    networks:
+      - doa-network
+    restart: unless-stopped
+
+  admin-service:
+    build:
+      context: ./admin-service
+      dockerfile: Dockerfile
+    container_name: doa-admin-service
+    ports:
+      - "3014:3014"
+    environment:
+      NODE_ENV: development
+      PORT: 3014
+      SERVICE_NAME: admin-service
+      CORS_ORIGIN: http://localhost:3000,http://localhost:5173
+    networks:
+      - doa-network
+    restart: unless-stopped
+
+  file-service:
+    build:
+      context: ./file-service
+      dockerfile: Dockerfile
+    container_name: doa-file-service
+    ports:
+      - "3015:3015"
+    environment:
+      NODE_ENV: development
+      PORT: 3015
+      SERVICE_NAME: file-service
+      CORS_ORIGIN: http://localhost:3000,http://localhost:5173
+    networks:
+      - doa-network
+    restart: unless-stopped
+
+  stats-service:
+    build:
+      context: ./stats-service
+      dockerfile: Dockerfile
+    container_name: doa-stats-service
+    ports:
+      - "3016:3016"
+    environment:
+      NODE_ENV: development
+      PORT: 3016
+      SERVICE_NAME: stats-service
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: doa_stats
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_SYNCHRONIZE: "true"
+      DB_LOGGING: "true"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CORS_ORIGIN: http://localhost:3000,http://localhost:5173
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - doa-network
+    restart: unless-stopped
+
+  banner-service:
+    build:
+      context: ./banner-service
+      dockerfile: Dockerfile
+    container_name: doa-banner-service
+    ports:
+      - "3017:3017"
+    environment:
+      NODE_ENV: development
+      PORT: 3017
+      SERVICE_NAME: banner-service
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: doa_banners
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_SYNCHRONIZE: "true"
+      DB_LOGGING: "true"
+      CORS_ORIGIN: http://localhost:3000,http://localhost:5173
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - doa-network
+    restart: unless-stopped
+
+networks:
+  doa-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+
