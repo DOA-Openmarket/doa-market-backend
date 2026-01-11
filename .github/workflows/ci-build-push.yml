@@ -160,9 +160,17 @@ jobs:
         if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
         env:
           IMAGE_TAG: ${{ steps.meta.outputs.sha_short }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
           # Update image tag in Helm values
-          sed -i "s|tag:.*|tag: $IMAGE_TAG|g" helm/doa-market/values/${{ matrix.service }}.yaml
+          FILE="helm/doa-market/values/${{ matrix.service }}.yaml"
+          mkdir -p "$(dirname "$FILE")"
+          if [ -f "$FILE" ]; then
+            sed -i "s|tag:.*|tag: $IMAGE_TAG|g" "$FILE"
+          else
+            echo "Creating new values file: $FILE"
+            printf "image:\n  repository: %s/doa-market-%s\n  tag: %s\n" "$ECR_REGISTRY" "${{ matrix.service }}" "$IMAGE_TAG" > "$FILE"
+          fi
 
       - name: Commit and push Helm changes
         if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
