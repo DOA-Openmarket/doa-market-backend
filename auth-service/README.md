@@ -1,6 +1,6 @@
 # Auth Service
 
-인증 및 인가를 담당하는 마이크로서비스입니다.
+인증 및 인가를 담당하는 마이크로서비스입니다. <!-- CI Trigger -->
 
 ## 기능
 
@@ -213,4 +213,3 @@ docker-compose logs postgres
 ## 라이선스
 
 MIT
-
