@@ -1,6 +1,6 @@
-import { DataTypes, Model, Optional } from 'sequelize';
-import { sequelize } from '../config/database';
-import Cart from './cart.model';
+import { DataTypes, Model, Optional } from "sequelize";
+import sequelize from "../config/database";
+import Cart from "./cart.model";
 
 interface CartItemAttributes {
   cartItemId: string;
@@ -12,9 +12,16 @@ interface CartItemAttributes {
   updatedAt?: Date;
 }
 
-interface CartItemCreationAttributes extends Optional<CartItemAttributes, 'cartItemId' | 'createdAt' | 'updatedAt'> {}
+interface CartItemCreationAttributes
+  extends Optional<
+    CartItemAttributes,
+    "cartItemId" | "createdAt" | "updatedAt"
+  > {}
 
-class CartItem extends Model<CartItemAttributes, CartItemCreationAttributes> implements CartItemAttributes {
+class CartItem
+  extends Model<CartItemAttributes, CartItemCreationAttributes>
+  implements CartItemAttributes
+{
   declare cartItemId: string;
   declare cartId: string;
   declare productId: string;
@@ -35,10 +42,10 @@ CartItem.init(
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: 'carts',
-        key: 'cartId',
+        model: "carts",
+        key: "cartId",
       },
-      onDelete: 'CASCADE',
+      onDelete: "CASCADE",
     },
     productId: {
       type: DataTypes.UUID,
@@ -59,21 +66,21 @@ CartItem.init(
   },
   {
     sequelize,
-    tableName: 'cart_items',
+    tableName: "cart_items",
     timestamps: true,
   }
 );
 
 // Define associations
 Cart.hasMany(CartItem, {
-  foreignKey: 'cartId',
-  as: 'items',
-  onDelete: 'CASCADE',
+  foreignKey: "cartId",
+  as: "items",
+  onDelete: "CASCADE",
 });
 
 CartItem.belongsTo(Cart, {
-  foreignKey: 'cartId',
-  as: 'cart',
+  foreignKey: "cartId",
+  as: "cart",
 });
 
 export default CartItem;

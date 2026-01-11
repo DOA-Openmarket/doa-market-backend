@@ -1,5 +1,5 @@
-import { DataTypes, Model, Optional } from 'sequelize';
-import { sequelize } from '../config/database';
+import { DataTypes, Model, Optional } from "sequelize";
+import sequelize from "../config/database";
 
 interface CartAttributes {
   cartId: string;
@@ -8,9 +8,13 @@ interface CartAttributes {
   updatedAt?: Date;
 }
 
-interface CartCreationAttributes extends Optional<CartAttributes, 'cartId' | 'createdAt' | 'updatedAt'> {}
+interface CartCreationAttributes
+  extends Optional<CartAttributes, "cartId" | "createdAt" | "updatedAt"> {}
 
-class Cart extends Model<CartAttributes, CartCreationAttributes> implements CartAttributes {
+class Cart
+  extends Model<CartAttributes, CartCreationAttributes>
+  implements CartAttributes
+{
   declare cartId: string;
   declare userId: string;
   declare readonly createdAt: Date;
@@ -32,7 +36,7 @@ Cart.init(
   },
   {
     sequelize,
-    tableName: 'carts',
+    tableName: "carts",
     timestamps: true,
   }
 );

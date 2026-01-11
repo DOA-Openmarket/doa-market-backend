@@ -92,8 +92,12 @@ jobs:
       - name: Set output variables
         id: set-outputs
         run: |
-          echo 'services=["api-gateway","auth-service","product-service","order-service","payment-service","user-service","cart-service","review-service","notification-service","search-service","inventory-service","seller-service","admin-service","file-service","banner-service","coupon-service","shipping-service","stats-service","settlement-service"]' >> $GITHUB_OUTPUT
-          echo "any_changed=true" >> $GITHUB_OUTPUT
+          echo "services=${{ steps.filter.outputs.changes }}" >> $GITHUB_OUTPUT
+          if [ "${{ steps.filter.outputs.changes }}" != "[]" ]; then
+            echo "any_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "any_changed=false" >> $GITHUB_OUTPUT
+          fi
 
   build-and-push:
     name: Build and Push
