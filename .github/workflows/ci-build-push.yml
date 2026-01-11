@@ -132,8 +132,8 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ steps.login-ecr.outputs.registry }}/doa-market-${{ matrix.service }}:${{ steps.meta.outputs.sha_short }}
-          format: 'sarif'
-          output: 'trivy-results.sarif'
+          format: "sarif"
+          output: "trivy-results.sarif"
         continue-on-error: true
 
       - name: Push Docker image to ECR
@@ -170,13 +170,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Send Slack notification
-        if: always()
+        if: always() && secrets.SLACK_WEBHOOK_URL != ''
         uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
           text: |
             Build ${{ job.status }}
             Services: ${{ needs.detect-changes.outputs.services }}
-          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
