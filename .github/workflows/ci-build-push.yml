@@ -136,7 +136,7 @@ jobs:
             -t $ECR_REGISTRY/doa-market-${{ matrix.service }}:$IMAGE_TAG \
             -t $ECR_REGISTRY/doa-market-${{ matrix.service }}:latest \
             -t $ECR_REGISTRY/doa-market-${{ matrix.service }}:${{ steps.meta.outputs.branch }} \
-            .
+            ${{ matrix.service }}
 
       - name: Run security scan
         uses: aquasecurity/trivy-action@master
