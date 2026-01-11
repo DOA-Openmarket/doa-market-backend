@@ -24,6 +24,10 @@ defaults:
     targetCPUUtilizationPercentage: 60
     targetMemoryUtilizationPercentage: 70
 
+  service:
+    type: ClusterIP
+    port: 80
+
   # Pod Disruption Budget (고가용성 보장)
   podDisruptionBudget:
     enabled: true
