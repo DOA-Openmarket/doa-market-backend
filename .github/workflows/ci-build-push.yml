@@ -187,7 +187,7 @@ jobs:
             sed -i "s|tag:.*|tag: $IMAGE_TAG|g" "$FILE"
           else
             echo "Creating new values file: $FILE"
-            printf "image:\n  repository: %s/doa-market-%s\n  tag: %s\nserviceAccount:\n  annotations: {}\n" "$ECR_REGISTRY" "${{ matrix.service }}" "$IMAGE_TAG" > "$FILE"
+            printf "image:\n  repository: %s/doa-market-%s\n  tag: %s\nserviceAccount:\n  annotations: {}\nservice:\n  type: ClusterIP\n  port: 80\n" "$ECR_REGISTRY" "${{ matrix.service }}" "$IMAGE_TAG" > "$FILE"
           fi
 
       - name: Commit and push Helm changes
