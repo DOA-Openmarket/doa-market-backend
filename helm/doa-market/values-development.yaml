@@ -1,0 +1,113 @@
+# Development environment overrides
+
+global:
+  environment: development
+  domain: dev.doa-market.com
+  registry: <YOUR_ECR_REGISTRY>
+
+# Development resources (minimal)
+defaults:
+  replicaCount: 1
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  autoscaling:
+    enabled: false
+
+# Development services configuration
+services:
+  api-gateway:
+    replicaCount: 1
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 200m
+        memory: 256Mi
+    ingress:
+      hosts:
+        - host: api-dev.doa-market.com
+          paths:
+            - path: /
+              pathType: Prefix
+      tls:
+        - secretName: api-dev-tls
+          hosts:
+            - api-dev.doa-market.com
+
+  product-service:
+    replicaCount: 1
+
+  order-service:
+    replicaCount: 1
+
+  payment-service:
+    replicaCount: 1
+
+  # Most services can stay at 1 replica in dev
+  user-service:
+    replicaCount: 1
+
+  cart-service:
+    replicaCount: 1
+
+  review-service:
+    replicaCount: 1
+
+  notification-service:
+    replicaCount: 1
+
+  search-service:
+    replicaCount: 1
+
+  inventory-service:
+    replicaCount: 1
+
+  seller-service:
+    replicaCount: 1
+
+  admin-service:
+    replicaCount: 1
+
+  file-service:
+    replicaCount: 1
+
+  banner-service:
+    replicaCount: 1
+
+  coupon-service:
+    replicaCount: 1
+
+  shipping-service:
+    replicaCount: 1
+
+  stats-service:
+    replicaCount: 1
+
+  settlement-service:
+    replicaCount: 1
+
+# Development database (can be in-cluster)
+database:
+  host: postgres.doa-market-dev.svc.cluster.local
+  port: 5432
+  existingSecret: db-credentials-dev
+
+# Development Redis (can be in-cluster)
+redis:
+  host: redis.doa-market-dev.svc.cluster.local
+  port: 6379
+  existingSecret: redis-credentials-dev
+
+# Development RabbitMQ (in-cluster)
+rabbitmq:
+  host: rabbitmq.doa-market-dev.svc.cluster.local
+  port: 5672
+  existingSecret: rabbitmq-credentials-dev

@@ -1,0 +1,140 @@
+{{- range $serviceName, $service := .Values.services }}
+{{- if $service.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $serviceName }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app: {{ $serviceName }}
+    {{- include "doa-market.labels" $ | nindent 4 }}
+spec:
+  replicas: {{ $service.replicaCount | default $.Values.defaults.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ $serviceName }}
+      {{- include "doa-market.selectorLabels" $ | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app: {{ $serviceName }}
+        {{- include "doa-market.selectorLabels" $ | nindent 8 }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: {{ $service.port | quote }}
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: {{ $serviceName }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: {{ $serviceName }}
+        image: "{{ $.Values.global.registry }}/doa-market-{{ $serviceName }}:{{ $service.image.tag | default $.Values.defaults.image.tag }}"
+        imagePullPolicy: {{ $service.image.pullPolicy | default $.Values.defaults.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ $service.port }}
+          protocol: TCP
+        env:
+        - name: NODE_ENV
+          value: {{ $.Values.global.environment }}
+        - name: PORT
+          value: {{ $service.port | quote }}
+        - name: SERVICE_NAME
+          value: {{ $serviceName }}
+        # Database configuration
+        - name: DB_HOST
+          value: {{ $.Values.database.host }}
+        - name: DB_PORT
+          value: {{ $.Values.database.port | quote }}
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ $.Values.database.existingSecret }}
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ $.Values.database.existingSecret }}
+              key: password
+        - name: DB_NAME
+          value: {{ $serviceName | replace "-" "_" }}
+        # Redis configuration
+        - name: REDIS_HOST
+          value: {{ $.Values.redis.host }}
+        - name: REDIS_PORT
+          value: {{ $.Values.redis.port | quote }}
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ $.Values.redis.existingSecret }}
+              key: password
+              optional: true
+        # RabbitMQ configuration (for event bus)
+        - name: RABBITMQ_HOST
+          value: {{ $.Values.rabbitmq.host }}
+        - name: RABBITMQ_PORT
+          value: {{ $.Values.rabbitmq.port | quote }}
+        - name: RABBITMQ_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ $.Values.rabbitmq.existingSecret }}
+              key: username
+              optional: true
+        - name: RABBITMQ_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ $.Values.rabbitmq.existingSecret }}
+              key: password
+              optional: true
+        {{- if $service.env }}
+        {{- toYaml $service.env | nindent 8 }}
+        {{- end }}
+        livenessProbe:
+          {{- toYaml ($.Values.defaults.livenessProbe | default dict) | nindent 10 }}
+        readinessProbe:
+          {{- toYaml ($.Values.defaults.readinessProbe | default dict) | nindent 10 }}
+        resources:
+          {{- toYaml ($service.resources | default $.Values.defaults.resources) | nindent 10 }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      {{- with $.Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if or $service.nodeAffinity $.Values.defaults.nodeAffinity }}
+      affinity:
+        nodeAffinity:
+          {{- toYaml ($service.nodeAffinity | default $.Values.defaults.nodeAffinity) | nindent 10 }}
+        {{- if or $service.podAntiAffinity $.Values.defaults.podAntiAffinity }}
+        podAntiAffinity:
+          {{- toYaml ($service.podAntiAffinity | default $.Values.defaults.podAntiAffinity) | nindent 10 }}
+        {{- end }}
+      {{- else if or $service.podAntiAffinity $.Values.defaults.podAntiAffinity }}
+      affinity:
+        podAntiAffinity:
+          {{- toYaml ($service.podAntiAffinity | default $.Values.defaults.podAntiAffinity) | nindent 10 }}
+      {{- end }}
+      {{- if ne ($service.spotEnabled | default $.Values.defaults.spotEnabled) false }}
+      tolerations:
+        {{- toYaml ($service.tolerations | default $.Values.defaults.tolerations) | nindent 8 }}
+      {{- else if $service.tolerations }}
+      tolerations:
+        {{- toYaml $service.tolerations | nindent 8 }}
+      {{- end }}
+{{- end }}
+{{- end }}

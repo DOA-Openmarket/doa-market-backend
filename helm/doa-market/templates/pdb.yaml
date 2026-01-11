@@ -1,0 +1,23 @@
+{{- range $serviceName, $service := .Values.services }}
+{{- if and $service.enabled $service.podDisruptionBudget.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ $serviceName }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app: {{ $serviceName }}
+    {{- include "doa-market.labels" $ | nindent 4 }}
+spec:
+  {{- if $service.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ $service.podDisruptionBudget.minAvailable }}
+  {{- else }}
+  maxUnavailable: {{ $service.podDisruptionBudget.maxUnavailable | default 1 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app: {{ $serviceName }}
+      {{- include "doa-market.selectorLabels" $ | nindent 6 }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,182 @@
+name: CI - Build and Push to ECR
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  AWS_REGION: ap-northeast-2
+  ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+
+jobs:
+  detect-changes:
+    name: Detect Changed Services
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.filter.outputs.changes }}
+      any_changed: ${{ steps.filter.outputs.any_changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            api-gateway:
+              - 'api-gateway/**'
+              - '_shared/**'
+            auth-service:
+              - 'auth-service/**'
+              - '_shared/**'
+            product-service:
+              - 'product-service/**'
+              - '_shared/**'
+            order-service:
+              - 'order-service/**'
+              - '_shared/**'
+            payment-service:
+              - 'payment-service/**'
+              - '_shared/**'
+            user-service:
+              - 'user-service/**'
+              - '_shared/**'
+            cart-service:
+              - 'cart-service/**'
+              - '_shared/**'
+            review-service:
+              - 'review-service/**'
+              - '_shared/**'
+            notification-service:
+              - 'notification-service/**'
+              - '_shared/**'
+            search-service:
+              - 'search-service/**'
+              - '_shared/**'
+            inventory-service:
+              - 'inventory-service/**'
+              - '_shared/**'
+            seller-service:
+              - 'seller-service/**'
+              - '_shared/**'
+            admin-service:
+              - 'admin-service/**'
+              - '_shared/**'
+            file-service:
+              - 'file-service/**'
+              - '_shared/**'
+            banner-service:
+              - 'banner-service/**'
+              - '_shared/**'
+            coupon-service:
+              - 'coupon-service/**'
+              - '_shared/**'
+            shipping-service:
+              - 'shipping-service/**'
+              - '_shared/**'
+            stats-service:
+              - 'stats-service/**'
+              - '_shared/**'
+            settlement-service:
+              - 'settlement-service/**'
+              - '_shared/**'
+
+  build-and-push:
+    name: Build and Push
+    needs: detect-changes
+    if: needs.detect-changes.outputs.any_changed == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: ${{ fromJSON(needs.detect-changes.outputs.services) }}
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Extract metadata
+        id: meta
+        run: |
+          echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "timestamp=$(date +%Y%m%d-%H%M%S)" >> $GITHUB_OUTPUT
+          echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+
+      - name: Build Docker image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ steps.meta.outputs.sha_short }}
+        run: |
+          docker build \
+            -f ${{ matrix.service }}/Dockerfile \
+            -t $ECR_REGISTRY/doa-market-${{ matrix.service }}:$IMAGE_TAG \
+            -t $ECR_REGISTRY/doa-market-${{ matrix.service }}:latest \
+            -t $ECR_REGISTRY/doa-market-${{ matrix.service }}:${{ steps.meta.outputs.branch }} \
+            .
+
+      - name: Run security scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.login-ecr.outputs.registry }}/doa-market-${{ matrix.service }}:${{ steps.meta.outputs.sha_short }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+        continue-on-error: true
+
+      - name: Push Docker image to ECR
+        if: github.event_name == 'push'
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ steps.meta.outputs.sha_short }}
+        run: |
+          docker push $ECR_REGISTRY/doa-market-${{ matrix.service }}:$IMAGE_TAG
+          docker push $ECR_REGISTRY/doa-market-${{ matrix.service }}:latest
+          docker push $ECR_REGISTRY/doa-market-${{ matrix.service }}:${{ steps.meta.outputs.branch }}
+
+      - name: Update Helm values (for ArgoCD)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          IMAGE_TAG: ${{ steps.meta.outputs.sha_short }}
+        run: |
+          # Update image tag in Helm values
+          sed -i "s|tag:.*|tag: $IMAGE_TAG|g" helm/doa-market/values/${{ matrix.service }}.yaml
+
+      - name: Commit and push Helm changes
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add helm/
+          git diff --staged --quiet || git commit -m "chore: update ${{ matrix.service }} image to ${{ steps.meta.outputs.sha_short }}"
+          git push
+
+  notify:
+    name: Notify Build Status
+    needs: [detect-changes, build-and-push]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Slack notification
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: |
+            Build ${{ job.status }}
+            Services: ${{ needs.detect-changes.outputs.services }}
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

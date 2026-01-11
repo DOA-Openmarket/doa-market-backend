@@ -1,0 +1,54 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: doa-market-development
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    environment: development
+    team: platform
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/DOA-Openmarket/doa-market-backend.git
+    targetRevision: develop
+    path: helm/doa-market
+    helm:
+      valueFiles:
+        - values.yaml
+        - values-development.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: doa-market-dev
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+    retry:
+      limit: 3
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 1m
+
+  revisionHistoryLimit: 5
+
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas
+
+  info:
+    - name: 'Environment'
+      value: 'development'
+    - name: 'Managed By'
+      value: 'ArgoCD'

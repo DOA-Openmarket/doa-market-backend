@@ -1,0 +1,205 @@
+# Global configuration
+global:
+  environment: production
+  domain: doa-market.com
+  registry: <YOUR_ECR_REGISTRY>
+  imagePullPolicy: IfNotPresent
+
+# Default values for all services
+defaults:
+  replicaCount: 2
+
+  image:
+    pullPolicy: IfNotPresent
+    tag: latest
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    tls:
+      enabled: true
+
+# Service-specific configurations
+services:
+  api-gateway:
+    enabled: true
+    port: 3000
+    replicaCount: 3
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+      requests:
+        cpu: 500m
+        memory: 512Mi
+    ingress:
+      enabled: true
+      hosts:
+        - host: api.doa-market.com
+          paths:
+            - path: /
+              pathType: Prefix
+      tls:
+        - secretName: api-tls
+          hosts:
+            - api.doa-market.com
+
+  auth-service:
+    enabled: true
+    port: 3001
+    replicaCount: 2
+
+  product-service:
+    enabled: true
+    port: 3002
+    replicaCount: 3
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+
+  order-service:
+    enabled: true
+    port: 3003
+    replicaCount: 3
+    resources:
+      limits:
+        cpu: 800m
+        memory: 768Mi
+
+  payment-service:
+    enabled: true
+    port: 3004
+    replicaCount: 2
+    resources:
+      limits:
+        cpu: 800m
+        memory: 768Mi
+
+  user-service:
+    enabled: true
+    port: 3005
+    replicaCount: 2
+
+  cart-service:
+    enabled: true
+    port: 3006
+    replicaCount: 2
+
+  review-service:
+    enabled: true
+    port: 3007
+    replicaCount: 2
+
+  notification-service:
+    enabled: true
+    port: 3008
+    replicaCount: 2
+
+  search-service:
+    enabled: true
+    port: 3009
+    replicaCount: 2
+
+  inventory-service:
+    enabled: true
+    port: 3010
+    replicaCount: 2
+
+  seller-service:
+    enabled: true
+    port: 3011
+    replicaCount: 2
+
+  admin-service:
+    enabled: true
+    port: 3012
+    replicaCount: 2
+
+  file-service:
+    enabled: true
+    port: 3013
+    replicaCount: 2
+
+  banner-service:
+    enabled: true
+    port: 3014
+    replicaCount: 1
+
+  coupon-service:
+    enabled: true
+    port: 3015
+    replicaCount: 2
+
+  shipping-service:
+    enabled: true
+    port: 3016
+    replicaCount: 2
+
+  stats-service:
+    enabled: true
+    port: 3017
+    replicaCount: 1
+
+  settlement-service:
+    enabled: true
+    port: 3018
+    replicaCount: 2
+
+# Database configuration (shared)
+database:
+  host: postgres.doa-market.svc.cluster.local
+  port: 5432
+  existingSecret: db-credentials
+
+# Redis configuration (shared)
+redis:
+  host: redis.doa-market.svc.cluster.local
+  port: 6379
+  existingSecret: redis-credentials
+
+# RabbitMQ configuration (for event bus)
+rabbitmq:
+  host: rabbitmq.doa-market.svc.cluster.local
+  port: 5672
+  existingSecret: rabbitmq-credentials

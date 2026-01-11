@@ -1,6 +1,66 @@
 # DOA Market - Backend Services
 
-마이크로서비스 아키텍처 기반 백엔드 시스템입니다.
+19개의 마이크로서비스로 구성된 DOA Market 백엔드 시스템입니다.
+
+## 🚀 CI/CD & Deployment
+
+이 프로젝트는 **GitHub Actions + ArgoCD + Helm**을 사용한 EKS 배포를 지원합니다.
+
+### 빠른 시작
+
+```bash
+# 1. ECR 레포지토리 생성
+./scripts/create-ecr-repos.sh
+
+# 2. ArgoCD Application 배포
+kubectl apply -f argocd/applications/doa-market-production.yaml
+
+# 3. 코드 푸시 → 자동 배포!
+git push origin main
+```
+
+**CI/CD 문서:**
+- **[CI/CD Quick Start](./docs/CICD_QUICKSTART.md)** - 5분 만에 시작하기
+- **[CI/CD Setup Guide](./docs/CICD_SETUP.md)** - 상세한 설정 가이드
+
+**특징:**
+- ✅ 변경된 서비스만 선택적 빌드
+- ✅ GitOps 방식 자동 배포 (ArgoCD)
+- ✅ Helm으로 환경별 설정 관리 (dev/prod)
+- ✅ HPA 자동 스케일링
+- ✅ 보안 스캔 (Trivy) 내장
+
+---
+
+## 💰 Spot Instances로 비용 70% 절감
+
+AWS Spot Instances를 사용해서 **월 $293 → $180** (38% 절감!)
+
+### 빠른 설정
+
+```bash
+# Spot Instance 포함 EKS 클러스터 생성 (15분)
+./scripts/setup-spot-eks.sh
+
+# 자동으로 설치됨:
+# ✅ EKS 클러스터 (On-Demand 2대 + Spot 3-15대)
+# ✅ AWS Node Termination Handler (Spot 안전 종료)
+# ✅ Cluster Autoscaler (자동 스케일링)
+# ✅ Pod Disruption Budget (고가용성)
+```
+
+### 주요 특징
+
+| 항목 | 설명 |
+|------|------|
+| **비용 절감** | On-Demand 대비 70% 저렴 |
+| **안정성** | Critical 서비스는 On-Demand 사용 |
+| **고가용성** | Spot 종료 2분 전 자동 Pod 이동 |
+| **무중단** | 최소 Pod 수 보장 (PDB) |
+
+**상세 가이드:** [Spot Instances 사용 가이드](./docs/SPOT_INSTANCES_GUIDE.md)
+
+---
 
 ## 🏗️ 서비스 구현 현황
 

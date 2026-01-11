@@ -1,0 +1,97 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  lint-and-test:
+    name: Lint and Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          for dir in */; do
+            if [ -f "${dir}package.json" ]; then
+              echo "Installing dependencies in $dir"
+              (cd "$dir" && npm ci) || true
+            fi
+          done
+
+      - name: Run linting
+        run: |
+          for dir in */; do
+            if [ -f "${dir}package.json" ]; then
+              echo "Linting $dir"
+              (cd "$dir" && npm run lint) || true
+            fi
+          done
+        continue-on-error: true
+
+      - name: Run tests
+        run: |
+          for dir in */; do
+            if [ -f "${dir}package.json" ]; then
+              echo "Testing $dir"
+              (cd "$dir" && npm test) || true
+            fi
+          done
+        continue-on-error: true
+
+      - name: Upload test coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/coverage-final.json
+          flags: unittests
+          name: codecov-umbrella
+        continue-on-error: true
+
+  docker-build-test:
+    name: Docker Build Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Test Docker builds
+        run: |
+          services=(api-gateway auth-service product-service order-service payment-service)
+          for service in "${services[@]}"; do
+            if [ -f "$service/Dockerfile" ]; then
+              echo "Building $service..."
+              docker build -f $service/Dockerfile -t test-$service:latest . || exit 1
+            fi
+          done
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'

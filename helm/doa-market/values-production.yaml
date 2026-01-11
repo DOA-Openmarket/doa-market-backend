@@ -1,0 +1,174 @@
+# Production environment overrides
+
+global:
+  environment: production
+  domain: doa-market.com
+  registry: <YOUR_ECR_REGISTRY>  # e.g., 123456789012.dkr.ecr.ap-northeast-2.amazonaws.com
+
+# Production resource limits (more generous)
+defaults:
+  replicaCount: 3
+
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 20
+    targetCPUUtilizationPercentage: 60
+    targetMemoryUtilizationPercentage: 70
+
+  # Pod Disruption Budget (고가용성 보장)
+  podDisruptionBudget:
+    enabled: true
+    maxUnavailable: 1  # 동시에 1개 Pod만 중단 가능
+
+  # Spot Instance 설정
+  spotEnabled: true
+  tolerations:
+    - key: spot
+      operator: Equal
+      value: "true"
+      effect: NoSchedule
+
+  # Node Affinity (Spot 선호)
+  nodeAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 80
+        preference:
+          matchExpressions:
+            - key: capacity-type
+              operator: In
+              values:
+                - spot
+      - weight: 20
+        preference:
+          matchExpressions:
+            - key: capacity-type
+              operator: In
+              values:
+                - on-demand
+
+# Critical services with higher resources
+services:
+  api-gateway:
+    replicaCount: 5
+    resources:
+      limits:
+        cpu: 2000m
+        memory: 2Gi
+      requests:
+        cpu: 1000m
+        memory: 1Gi
+    autoscaling:
+      minReplicas: 5
+      maxReplicas: 30
+
+  product-service:
+    replicaCount: 4
+    resources:
+      limits:
+        cpu: 1500m
+        memory: 1.5Gi
+      requests:
+        cpu: 750m
+        memory: 768Mi
+    autoscaling:
+      minReplicas: 4
+      maxReplicas: 20
+
+  order-service:
+    replicaCount: 4
+    resources:
+      limits:
+        cpu: 1500m
+        memory: 1.5Gi
+      requests:
+        cpu: 750m
+        memory: 768Mi
+    autoscaling:
+      minReplicas: 4
+      maxReplicas: 20
+
+  payment-service:
+    replicaCount: 3
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+      requests:
+        cpu: 500m
+        memory: 512Mi
+    autoscaling:
+      minReplicas: 3
+      maxReplicas: 15
+    # Critical: On-Demand만 사용 (중단 불가)
+    spotEnabled: false
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: capacity-type
+                operator: In
+                values:
+                  - on-demand
+    tolerations: []  # Spot toleration 제거
+
+  # Auth Service도 On-Demand만 사용
+  auth-service:
+    spotEnabled: false
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: capacity-type
+                operator: In
+                values:
+                  - on-demand
+    tolerations: []
+
+# Production database configuration
+database:
+  host: doa-market-prod-postgres.abcdefg.ap-northeast-2.rds.amazonaws.com
+  port: 5432
+  existingSecret: db-credentials-prod
+
+# Production Redis
+redis:
+  host: doa-market-prod-redis.abcdefg.cache.amazonaws.com
+  port: 6379
+  existingSecret: redis-credentials-prod
+
+# Production RabbitMQ (or use AWS MQ)
+rabbitmq:
+  host: doa-market-prod-rabbitmq.mq.ap-northeast-2.amazonaws.com
+  port: 5672
+  existingSecret: rabbitmq-credentials-prod
+
+# Node affinity for production
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: workload-type
+          operator: In
+          values:
+          - application
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+          - key: app
+            operator: In
+            values:
+            - doa-market
+        topologyKey: kubernetes.io/hostname

@@ -1,0 +1,151 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: doa-market-prod
+  region: ap-northeast-2
+  version: "1.28"
+
+# IAM 설정
+iam:
+  withOIDC: true
+  serviceAccounts:
+    - metadata:
+        name: aws-node-termination-handler
+        namespace: kube-system
+      wellKnownPolicies:
+        autoScaler: true
+    - metadata:
+        name: cluster-autoscaler
+        namespace: kube-system
+      wellKnownPolicies:
+        autoScaler: true
+
+# VPC 설정
+vpc:
+  cidr: 10.0.0.0/16
+  nat:
+    gateway: Single  # 비용 절감 (Multi-AZ는 HighlyAvailable)
+
+# Managed Node Groups
+managedNodeGroups:
+  # 1. On-Demand Node Group (중요한 워크로드용)
+  - name: on-demand-stable
+    instanceType: t3.medium
+    desiredCapacity: 2
+    minSize: 2
+    maxSize: 4
+    volumeSize: 20
+    volumeType: gp3
+    privateNetworking: true
+
+    labels:
+      workload-type: stable
+      capacity-type: on-demand
+
+    tags:
+      k8s.io/cluster-autoscaler/enabled: "true"
+      k8s.io/cluster-autoscaler/doa-market-prod: "owned"
+
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+        albIngress: true
+        ebs: true
+        efs: true
+        cloudWatch: true
+
+  # 2. Spot Node Group (일반 워크로드용) - 비용 절감!
+  - name: spot-workers
+    instanceTypes:
+      - t3.medium
+      - t3a.medium    # AMD 기반 (더 저렴)
+      - t3.large
+      - t3a.large
+    spot: true
+    desiredCapacity: 3
+    minSize: 1
+    maxSize: 15
+    volumeSize: 20
+    volumeType: gp3
+    privateNetworking: true
+
+    labels:
+      workload-type: general
+      capacity-type: spot
+
+    taints:
+      - key: spot
+        value: "true"
+        effect: NoSchedule  # Spot tolerations 있는 Pod만 스케줄
+
+    tags:
+      k8s.io/cluster-autoscaler/enabled: "true"
+      k8s.io/cluster-autoscaler/doa-market-prod: "owned"
+      k8s.io/cluster-autoscaler/node-template/label/capacity-type: "spot"
+
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+        albIngress: true
+        ebs: true
+        cloudWatch: true
+
+  # 3. Spot Node Group (고성능) - API Gateway, Product 등
+  - name: spot-compute-optimized
+    instanceTypes:
+      - c5.large
+      - c5a.large
+      - c5n.large
+      - c6i.large
+    spot: true
+    desiredCapacity: 2
+    minSize: 0
+    maxSize: 10
+    volumeSize: 20
+    volumeType: gp3
+    privateNetworking: true
+
+    labels:
+      workload-type: compute-intensive
+      capacity-type: spot
+
+    taints:
+      - key: spot
+        value: "true"
+        effect: NoSchedule
+      - key: compute-intensive
+        value: "true"
+        effect: NoSchedule
+
+    tags:
+      k8s.io/cluster-autoscaler/enabled: "true"
+      k8s.io/cluster-autoscaler/doa-market-prod: "owned"
+
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+        cloudWatch: true
+
+# CloudWatch Logging
+cloudWatch:
+  clusterLogging:
+    enableTypes:
+      - api
+      - audit
+      - authenticator
+      - controllerManager
+      - scheduler
+
+# Addons
+addons:
+  - name: vpc-cni
+    version: latest
+  - name: coredns
+    version: latest
+  - name: kube-proxy
+    version: latest
+  - name: aws-ebs-csi-driver
+    version: latest
+    wellKnownPolicies:
+      ebsCSIController: true
