@@ -1,0 +1,3 @@
+image:
+  repository: 478266318018.dkr.ecr.ap-northeast-2.amazonaws.com/doa-market-user-service
+  tag: 2c3c63a
