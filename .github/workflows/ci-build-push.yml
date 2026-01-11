@@ -162,20 +162,3 @@ jobs:
           git add helm/
           git diff --staged --quiet || git commit -m "chore: update ${{ matrix.service }} image to ${{ steps.meta.outputs.sha_short }}"
           git push
-
-  notify:
-    name: Notify Build Status
-    needs: [detect-changes, build-and-push]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Send Slack notification
-        if: always() && secrets.SLACK_WEBHOOK_URL != ''
-        uses: 8398a7/action-slack@v3
-        with:
-          status: ${{ job.status }}
-          text: |
-            Build ${{ job.status }}
-            Services: ${{ needs.detect-changes.outputs.services }}
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
