@@ -3,7 +3,7 @@
 global:
   environment: production
   domain: doa-market.com
-  registry: <YOUR_ECR_REGISTRY>  # e.g., 123456789012.dkr.ecr.ap-northeast-2.amazonaws.com
+  registry: 478266318018.dkr.ecr.ap-northeast-2.amazonaws.com
 
 # Production resource limits (more generous)
 defaults:
