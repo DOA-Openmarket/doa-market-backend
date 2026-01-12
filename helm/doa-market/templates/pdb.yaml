@@ -1,5 +1,6 @@
 {{- range $serviceName, $service := .Values.services }}
-{{- if and $service.enabled $service.podDisruptionBudget.enabled }}
+{{- $pdb := $service.podDisruptionBudget | default $.Values.defaults.podDisruptionBudget }}
+{{- if and $service.enabled $pdb $pdb.enabled }}
 ---
 apiVersion: policy/v1
 kind: PodDisruptionBudget
@@ -10,10 +11,10 @@ metadata:
     app: {{ $serviceName }}
     {{- include "doa-market.labels" $ | nindent 4 }}
 spec:
-  {{- if $service.podDisruptionBudget.minAvailable }}
-  minAvailable: {{ $service.podDisruptionBudget.minAvailable }}
+  {{- if $pdb.minAvailable }}
+  minAvailable: {{ $pdb.minAvailable }}
   {{- else }}
-  maxUnavailable: {{ $service.podDisruptionBudget.maxUnavailable | default 1 }}
+  maxUnavailable: {{ $pdb.maxUnavailable | default 1 }}
   {{- end }}
   selector:
     matchLabels:

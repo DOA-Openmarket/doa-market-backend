@@ -32,8 +32,8 @@ spec:
         fsGroup: 1000
       containers:
       - name: {{ $serviceName }}
-        image: "{{ $.Values.global.registry }}/doa-market-{{ $serviceName }}:{{ $service.image.tag | default $.Values.defaults.image.tag }}"
-        imagePullPolicy: {{ $service.image.pullPolicy | default $.Values.defaults.image.pullPolicy }}
+        image: "{{ $.Values.global.registry }}/doa-market-{{ $serviceName }}:{{ $service.tag | default $.Values.defaults.image.tag }}"
+        imagePullPolicy: {{ $.Values.defaults.image.pullPolicy }}
         ports:
         - name: http
           containerPort: {{ $service.port }}

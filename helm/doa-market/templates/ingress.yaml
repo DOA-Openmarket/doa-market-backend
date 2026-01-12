@@ -1,5 +1,8 @@
 {{- range $serviceName, $service := .Values.services }}
-{{- if and $service.enabled $service.ingress.enabled }}
+{{- if and $service.enabled $service.ingress }}
+{{- $ingress := $service.ingress }}
+{{- $ingressEnabled := $ingress.enabled | default $.Values.defaults.ingress.enabled }}
+{{- if $ingressEnabled }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -13,14 +16,14 @@ metadata:
     {{- if $.Values.defaults.ingress.annotations }}
     {{- toYaml $.Values.defaults.ingress.annotations | nindent 4 }}
     {{- end }}
-    {{- if $service.ingress.annotations }}
-    {{- toYaml $service.ingress.annotations | nindent 4 }}
+    {{- if $ingress.annotations }}
+    {{- toYaml $ingress.annotations | nindent 4 }}
     {{- end }}
 spec:
-  ingressClassName: {{ $service.ingress.className | default $.Values.defaults.ingress.className }}
-  {{- if $service.ingress.tls }}
+  ingressClassName: {{ $ingress.className | default $.Values.defaults.ingress.className }}
+  {{- if $ingress.tls }}
   tls:
-  {{- range $service.ingress.tls }}
+  {{- range $ingress.tls }}
     - hosts:
       {{- range .hosts }}
         - {{ . | quote }}
@@ -29,7 +32,7 @@ spec:
   {{- end }}
   {{- end }}
   rules:
-  {{- range $service.ingress.hosts }}
+  {{- range $ingress.hosts }}
     - host: {{ .host | quote }}
       http:
         paths:
@@ -40,8 +43,9 @@ spec:
               service:
                 name: {{ $serviceName }}
                 port:
-                  number: {{ $service.service.port | default $.Values.defaults.service.port }}
+                  number: {{ $service.port | default $.Values.defaults.service.port }}
         {{- end }}
   {{- end }}
+{{- end }}
 {{- end }}
 {{- end }}
