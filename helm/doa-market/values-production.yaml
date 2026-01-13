@@ -14,8 +14,8 @@ defaults:
       cpu: 500m
       memory: 512Mi
     requests:
-      cpu: 100m
-      memory: 256Mi
+      cpu: 50m
+      memory: 128Mi
 
   autoscaling:
     enabled: true
@@ -29,8 +29,9 @@ defaults:
     port: 80
 
   # Pod Disruption Budget (고가용성 보장)
+  # Replica 1개일 때는 비활성화
   podDisruptionBudget:
-    enabled: true
+    enabled: false
     maxUnavailable: 1  # 동시에 1개 Pod만 중단 가능
 
   # Spot Instance 설정
@@ -62,16 +63,16 @@ defaults:
 # Critical services with higher resources
 services:
   api-gateway:
-    replicaCount: 2
+    replicaCount: 1
     resources:
       limits:
         cpu: 500m
         memory: 512Mi
       requests:
-        cpu: 150m
-        memory: 256Mi
+        cpu: 50m
+        memory: 128Mi
     autoscaling:
-      minReplicas: 2
+      minReplicas: 1
       maxReplicas: 10
 
   product-service:
@@ -81,8 +82,8 @@ services:
         cpu: 500m
         memory: 512Mi
       requests:
-        cpu: 100m
-        memory: 256Mi
+        cpu: 50m
+        memory: 128Mi
     autoscaling:
       minReplicas: 1
       maxReplicas: 10
@@ -94,8 +95,8 @@ services:
         cpu: 500m
         memory: 512Mi
       requests:
-        cpu: 100m
-        memory: 256Mi
+        cpu: 50m
+        memory: 128Mi
     autoscaling:
       minReplicas: 1
       maxReplicas: 10
@@ -107,8 +108,8 @@ services:
         cpu: 500m
         memory: 512Mi
       requests:
-        cpu: 100m
-        memory: 256Mi
+        cpu: 50m
+        memory: 128Mi
     autoscaling:
       minReplicas: 1
       maxReplicas: 10
