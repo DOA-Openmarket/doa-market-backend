@@ -33,14 +33,14 @@ const logger = winston.createLogger({
 if (environment === 'production') {
   logger.add(
     new winston.transports.File({
-      filename: 'logs/error.log',
+      filename: '/tmp/logs/error.log',
       level: 'error',
       format: winston.format.json(),
     })
   );
   logger.add(
     new winston.transports.File({
-      filename: 'logs/combined.log',
+      filename: '/tmp/logs/combined.log',
       format: winston.format.json(),
     })
   );
