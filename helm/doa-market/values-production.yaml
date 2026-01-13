@@ -140,13 +140,13 @@ services:
 
 # Production database configuration
 database:
-  host: doa-postgres-instance-1.c3e8ci0mgsqi.ap-northeast-2.rds.amazonaws.com
+  host: doa-market-rds.cluster-c3e8ci0mgsqi.ap-northeast-2.rds.amazonaws.com
   port: 5432
   existingSecret: db-credentials-prod
 
-# Production Redis
+# Production Redis (will be updated when ElastiCache is available)
 redis:
-  host: openmarket-dev-redis-001.openmarket-dev-redis.3agi26.apn2.cache.amazonaws.com
+  host: doa-market-redis-001.qehmvd.0001.apn2.cache.amazonaws.com
   port: 6379
   existingSecret: redis-credentials-prod
 
