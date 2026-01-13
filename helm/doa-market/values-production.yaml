@@ -139,19 +139,20 @@ services:
 
 # Production database configuration
 database:
-  host: doa-market-prod-postgres.abcdefg.ap-northeast-2.rds.amazonaws.com
+  host: doa-postgres-instance-1.c3e8ci0mgsqi.ap-northeast-2.rds.amazonaws.com
   port: 5432
   existingSecret: db-credentials-prod
 
 # Production Redis
 redis:
-  host: doa-market-prod-redis.abcdefg.cache.amazonaws.com
+  host: openmarket-dev-redis-001.openmarket-dev-redis.3agi26.apn2.cache.amazonaws.com
   port: 6379
   existingSecret: redis-credentials-prod
 
-# Production RabbitMQ (or use AWS MQ)
+# Production RabbitMQ (disabled - using SNS/SQS instead)
 rabbitmq:
-  host: doa-market-prod-rabbitmq.mq.ap-northeast-2.amazonaws.com
+  enabled: false
+  host: ""
   port: 5672
   existingSecret: rabbitmq-credentials-prod
 
