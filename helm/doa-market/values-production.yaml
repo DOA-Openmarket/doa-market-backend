@@ -144,9 +144,9 @@ database:
   port: 5432
   existingSecret: db-credentials-prod
 
-# Production Redis (will be updated when ElastiCache is available)
+# Production Redis
 redis:
-  host: doa-market-redis-001.qehmvd.0001.apn2.cache.amazonaws.com
+  host: master.doa-market-redis.3agi26.apn2.cache.amazonaws.com
   port: 6379
   existingSecret: redis-credentials-prod
 
