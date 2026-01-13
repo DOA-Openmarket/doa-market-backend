@@ -47,17 +47,17 @@ defaults:
       - weight: 80
         preference:
           matchExpressions:
-            - key: capacity-type
+            - key: eks.amazonaws.com/capacityType
               operator: In
               values:
-                - spot
+                - SPOT
       - weight: 20
         preference:
           matchExpressions:
-            - key: capacity-type
+            - key: eks.amazonaws.com/capacityType
               operator: In
               values:
-                - on-demand
+                - ON_DEMAND
 
 # Critical services with higher resources
 services:
@@ -118,10 +118,10 @@ services:
       requiredDuringSchedulingIgnoredDuringExecution:
         nodeSelectorTerms:
           - matchExpressions:
-              - key: capacity-type
+              - key: eks.amazonaws.com/capacityType
                 operator: In
                 values:
-                  - on-demand
+                  - ON_DEMAND
     tolerations: []  # Spot toleration 제거
 
   # Auth Service도 On-Demand만 사용
@@ -131,10 +131,10 @@ services:
       requiredDuringSchedulingIgnoredDuringExecution:
         nodeSelectorTerms:
           - matchExpressions:
-              - key: capacity-type
+              - key: eks.amazonaws.com/capacityType
                 operator: In
                 values:
-                  - on-demand
+                  - ON_DEMAND
     tolerations: []
 
 # Production database configuration
