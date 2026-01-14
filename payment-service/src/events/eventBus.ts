@@ -16,12 +16,23 @@ export class EventBus {
   private config: EventBusConfig;
   private handlers: Map<EventType, EventHandler[]> = new Map();
   private isConnected = false;
+  private isEnabled = true;
 
   constructor(config: EventBusConfig) {
     this.config = config;
+    // Check if RabbitMQ is disabled via environment variable
+    this.isEnabled = process.env.RABBITMQ_ENABLED !== 'false';
+    if (!this.isEnabled) {
+      console.log('[EventBus] RabbitMQ is disabled, running in standalone mode');
+    }
   }
 
   async connect(): Promise<void> {
+    if (!this.isEnabled) {
+      console.log('[EventBus] Skipping connection (disabled)');
+      return;
+    }
+
     try {
       console.log(`[EventBus] Connecting to RabbitMQ at ${this.config.url}...`);
       this.connection = await amqp.connect(this.config.url);
@@ -34,13 +45,13 @@ export class EventBus {
 
       console.log(`[EventBus] Connected to RabbitMQ exchange: ${this.config.exchange}`);
 
-      // Handle connection errors (only for future errors, not connection errors)
-      this.connection.once('error', (err) => {
+      // Handle connection errors
+      this.connection.on('error', (err) => {
         console.error('[EventBus] Connection error:', err);
         this.isConnected = false;
       });
 
-      this.connection.once('close', () => {
+      this.connection.on('close', () => {
         console.log('[EventBus] Connection closed');
         this.isConnected = false;
         // Attempt reconnection
@@ -51,14 +62,17 @@ export class EventBus {
       this.isConnected = true;
     } catch (error) {
       console.error('[EventBus] Failed to connect:', error);
-      this.isConnected = false;
-      // Retry connection
-      setTimeout(() => this.connect(), 5000);
+      console.log('[EventBus] Set RABBITMQ_ENABLED=false to run without RabbitMQ');
       throw error;
     }
   }
 
   async publish<T extends DomainEvent>(eventType: EventType, data: T['data']): Promise<void> {
+    if (!this.isEnabled) {
+      console.log(`[EventBus] Skipping publish (disabled): ${eventType}`);
+      return;
+    }
+
     if (!this.channel || !this.isConnected) {
       throw new Error('EventBus is not connected');
     }
@@ -94,6 +108,11 @@ export class EventBus {
     eventType: EventType,
     handler: EventHandler<T>
   ): Promise<void> {
+    if (!this.isEnabled) {
+      console.log(`[EventBus] Skipping subscribe (disabled): ${eventType}`);
+      return;
+    }
+
     if (!this.channel || !this.isConnected) {
       throw new Error('EventBus is not connected');
     }

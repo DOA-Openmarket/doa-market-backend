@@ -25,71 +25,89 @@ app.use('/api/v1/search', searchRoutes);
 
 const startServer = async () => {
   try {
-    // Initialize OpenSearch index
-    await createProductsIndex();
-    logger.info('OpenSearch index initialized');
-
-    // Initialize event bus
-    const eventBus = new EventBus(RABBITMQ_URL);
-    await eventBus.connect();
-
-    // Subscribe to product events
-    await eventBus.subscribe<ProductCreatedEvent>(
-      EventType.PRODUCT_CREATED,
-      async (event) => {
-        try {
-          logger.info(`Indexing product: ${event.data.id}`);
-          await indexProduct({
-            id: event.data.id,
-            name: event.data.name,
-            description: event.data.description,
-            price: event.data.price,
-            categoryId: event.data.categoryId,
-            sellerId: event.data.sellerId,
-            stock: event.data.stock,
-            imageUrl: event.data.imageUrl,
-            status: event.data.status,
-            createdAt: event.data.createdAt,
-            updatedAt: event.data.updatedAt,
-          });
-        } catch (error) {
-          logger.error('Failed to index product:', error);
-        }
+    // Initialize OpenSearch index (optional)
+    const opensearchEnabled = process.env.OPENSEARCH_ENABLED !== 'false';
+    if (opensearchEnabled) {
+      try {
+        await createProductsIndex();
+        logger.info('OpenSearch index initialized');
+      } catch (error) {
+        logger.warn('OpenSearch connection failed, running without search functionality:', error);
       }
-    );
+    } else {
+      logger.info('OpenSearch is disabled, running without search functionality');
+    }
 
-    await eventBus.subscribe<ProductUpdatedEvent>(
-      EventType.PRODUCT_UPDATED,
-      async (event) => {
-        try {
-          logger.info(`Updating product index: ${event.data.id}`);
-          await updateProduct(event.data.id, event.data.updates);
-        } catch (error) {
-          logger.error('Failed to update product index:', error);
-        }
-      }
-    );
+    // Initialize event bus (optional)
+    const rabbitmqEnabled = process.env.RABBITMQ_ENABLED !== 'false';
+    if (rabbitmqEnabled) {
+      try {
+        const eventBus = new EventBus(RABBITMQ_URL);
+        await eventBus.connect();
 
-    await eventBus.subscribe<ProductDeletedEvent>(
-      EventType.PRODUCT_DELETED,
-      async (event) => {
-        try {
-          logger.info(`Deleting product from index: ${event.data.id}`);
-          await deleteProduct(event.data.id);
-        } catch (error) {
-          logger.error('Failed to delete product from index:', error);
-        }
+        // Subscribe to product events
+        await eventBus.subscribe<ProductCreatedEvent>(
+          EventType.PRODUCT_CREATED,
+          async (event) => {
+            try {
+              logger.info(`Indexing product: ${event.data.id}`);
+              await indexProduct({
+                id: event.data.id,
+                name: event.data.name,
+                description: event.data.description,
+                price: event.data.price,
+                categoryId: event.data.categoryId,
+                sellerId: event.data.sellerId,
+                stock: event.data.stock,
+                imageUrl: event.data.imageUrl,
+                status: event.data.status,
+                createdAt: event.data.createdAt,
+                updatedAt: event.data.updatedAt,
+              });
+            } catch (error) {
+              logger.error('Failed to index product:', error);
+            }
+          }
+        );
+
+        await eventBus.subscribe<ProductUpdatedEvent>(
+          EventType.PRODUCT_UPDATED,
+          async (event) => {
+            try {
+              logger.info(`Updating product index: ${event.data.id}`);
+              await updateProduct(event.data.id, event.data.updates);
+            } catch (error) {
+              logger.error('Failed to update product index:', error);
+            }
+          }
+        );
+
+        await eventBus.subscribe<ProductDeletedEvent>(
+          EventType.PRODUCT_DELETED,
+          async (event) => {
+            try {
+              logger.info(`Deleting product from index: ${event.data.id}`);
+              await deleteProduct(event.data.id);
+            } catch (error) {
+              logger.error('Failed to delete product from index:', error);
+            }
+          }
+        );
+
+        // Graceful shutdown
+        process.on('SIGTERM', async () => {
+          logger.info('SIGTERM received, shutting down gracefully');
+          await eventBus.disconnect();
+          process.exit(0);
+        });
+      } catch (error) {
+        logger.warn('RabbitMQ connection failed, running without event bus:', error);
       }
-    );
+    } else {
+      logger.info('RabbitMQ is disabled, running without event bus');
+    }
 
     app.listen(PORT, () => logger.info(`Search Service on port ${PORT}`));
-
-    // Graceful shutdown
-    process.on('SIGTERM', async () => {
-      logger.info('SIGTERM received, shutting down gracefully');
-      await eventBus.disconnect();
-      process.exit(0);
-    });
   } catch (error) {
     logger.error('Failed to start server:', error);
     process.exit(1);

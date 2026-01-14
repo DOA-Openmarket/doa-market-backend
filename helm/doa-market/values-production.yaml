@@ -75,6 +75,23 @@ services:
       minReplicas: 1
       maxReplicas: 10
 
+  inventory-service:
+    env:
+      - name: RABBITMQ_ENABLED
+        value: "false"
+
+  payment-service:
+    env:
+      - name: RABBITMQ_ENABLED
+        value: "false"
+
+  search-service:
+    env:
+      - name: RABBITMQ_ENABLED
+        value: "false"
+      - name: OPENSEARCH_ENABLED
+        value: "false"
+
   product-service:
     replicaCount: 1
     resources:
