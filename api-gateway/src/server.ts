@@ -404,9 +404,13 @@ app.use(globalErrorHandler);
 // Initialize server
 async function startServer() {
   try {
-    // Connect to Redis
-    await connectRedis();
-    logger.info("Redis connection established");
+    // Connect to Redis (optional)
+    try {
+      await connectRedis();
+      logger.info("Redis connection established");
+    } catch (error) {
+      logger.warn("Redis connection failed, continuing without cache:", error);
+    }
 
     // Start HTTP server
     const server = app.listen(PORT, () => {
