@@ -1,0 +1,38 @@
+{
+  "name": "doa-market-api-testing",
+  "version": "1.0.0",
+  "description": "API testing and load testing for DOA Market",
+  "scripts": {
+    "test": "newman run DOA-Market-API.postman_collection.json -e DOA-Market-Local.postman_environment.json",
+    "test:prod": "newman run DOA-Market-API.postman_collection.json -e DOA-Market-Production.postman_environment.json",
+    "test:health": "newman run DOA-Market-API.postman_collection.json -e DOA-Market-Local.postman_environment.json --folder 'Health Checks'",
+    "test:auth": "newman run DOA-Market-API.postman_collection.json -e DOA-Market-Local.postman_environment.json --folder 'Authentication'",
+    "test:products": "newman run DOA-Market-API.postman_collection.json -e DOA-Market-Local.postman_environment.json --folder 'Products'",
+    "test:orders": "newman run DOA-Market-API.postman_collection.json -e DOA-Market-Local.postman_environment.json --folder 'Orders'",
+    "load-test": "node load-test.js",
+    "load-test:light": "node load-test.js --iterations 5 --concurrent 5",
+    "load-test:medium": "node load-test.js --iterations 10 --concurrent 20",
+    "load-test:heavy": "node load-test.js --iterations 20 --concurrent 50",
+    "load-test:stress": "node load-test.js --iterations 50 --concurrent 100",
+    "load-test:prod": "node load-test.js --environment production",
+    "load-test:products": "node load-test.js --folder Products --iterations 20 --concurrent 30",
+    "load-test:orders": "node load-test.js --folder Orders --iterations 10 --concurrent 20",
+    "report": "newman run DOA-Market-API.postman_collection.json -e DOA-Market-Local.postman_environment.json -r htmlextra --reporter-htmlextra-export ./reports/test-report.html",
+    "report:prod": "newman run DOA-Market-API.postman_collection.json -e DOA-Market-Production.postman_environment.json -r htmlextra --reporter-htmlextra-export ./reports/prod-test-report.html"
+  },
+  "keywords": [
+    "api",
+    "testing",
+    "postman",
+    "newman",
+    "load-testing"
+  ],
+  "author": "DOA Market Team",
+  "license": "MIT",
+  "dependencies": {
+    "newman": "^6.1.0"
+  },
+  "devDependencies": {
+    "newman-reporter-htmlextra": "^1.23.0"
+  }
+}

@@ -16,13 +16,14 @@ defaults:
     annotations:
       alb.ingress.kubernetes.io/scheme: internet-facing
       alb.ingress.kubernetes.io/target-type: ip
-      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
-      alb.ingress.kubernetes.io/ssl-redirect: '443'
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
       alb.ingress.kubernetes.io/healthcheck-path: /health
       alb.ingress.kubernetes.io/healthcheck-interval-seconds: '30'
       alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '5'
       alb.ingress.kubernetes.io/healthy-threshold-count: '2'
       alb.ingress.kubernetes.io/unhealthy-threshold-count: '2'
+      cert-manager.io/cluster-issuer: ''  # Disable cert-manager for HTTP-only ALB
+      nginx.ingress.kubernetes.io/ssl-redirect: 'false'  # Disable SSL redirect
 
   resources:
     limits:
@@ -78,6 +79,7 @@ defaults:
 # Critical services with higher resources
 services:
   api-gateway:
+    port: 3000  # API Gateway uses port 3000
     replicaCount: 1
     resources:
       limits:
@@ -89,6 +91,14 @@ services:
     autoscaling:
       minReplicas: 1
       maxReplicas: 10
+    ingress:
+      enabled: true
+      hosts:
+        - host: ""  # Empty host = match all
+          paths:
+            - path: /
+              pathType: Prefix
+      tls: []  # Disable TLS for now (HTTP only - accepts any hostname)
 
   inventory-service:
     env:
