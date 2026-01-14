@@ -16,6 +16,14 @@ export async function connectRedis(): Promise<RedisClientType> {
     socket: {
       host: REDIS_HOST,
       port: REDIS_PORT,
+      connectTimeout: 10000,
+      reconnectStrategy: (retries) => {
+        if (retries > 3) {
+          logger.error('Redis max reconnection attempts reached');
+          return new Error('Max reconnection attempts reached');
+        }
+        return Math.min(retries * 100, 3000);
+      },
     },
     password: REDIS_PASSWORD || undefined,
   });
@@ -36,7 +44,18 @@ export async function connectRedis(): Promise<RedisClientType> {
     logger.info('Redis client ready');
   });
 
-  await redisClient.connect();
+  try {
+    await Promise.race([
+      redisClient.connect(),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Redis connection timeout after 10s')), 10000)
+      )
+    ]);
+    logger.info('Redis connection established');
+  } catch (error) {
+    logger.error('Failed to connect to Redis:', error);
+    throw error;
+  }
 
   return redisClient;
 }
