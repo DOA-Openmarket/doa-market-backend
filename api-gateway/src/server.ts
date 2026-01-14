@@ -80,6 +80,11 @@ app.use(express.json());
 // Apply general rate limiting to all routes
 app.use(generalLimiter);
 
+// Simple health check for Kubernetes probes
+app.get("/health", (req, res) => {
+  res.json({ status: "ok", service: "api-gateway", timestamp: new Date().toISOString() });
+});
+
 // Health check endpoint (no auth required)
 app.get("/api/v1/health", (req, res) => {
   res.json({
