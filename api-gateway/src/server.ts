@@ -342,11 +342,12 @@ app.use("/api/v1/auth/register", authLimiter);
 app.use("/api/v1/auth/refresh", authLimiter);
 
 // Apply caching to specific routes (before general service proxying)
-app.get("/api/v1/products", cacheProductList());
-app.get("/api/v1/products/:id", cacheProductDetail());
-app.get("/api/v1/categories", cacheCategories());
-app.get("/api/v1/search/products", cacheSearchResults());
-app.get("/api/v1/search/autocomplete", cacheSearchResults());
+// TODO: Re-enable after fixing Redis connection issues
+// app.get("/api/v1/products", cacheProductList());
+// app.get("/api/v1/products/:id", cacheProductDetail());
+// app.get("/api/v1/categories", cacheCategories());
+// app.get("/api/v1/search/products", cacheSearchResults());
+// app.get("/api/v1/search/autocomplete", cacheSearchResults());
 
 // Create proxy middleware for each service
 services.forEach(({ path, target, auth, roles }) => {
