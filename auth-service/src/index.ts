@@ -61,11 +61,10 @@ const startServer = async () => {
     await sequelize.authenticate();
     logger.info('Database connection established successfully');
 
-    // Sync models (in development only)
-    if (process.env.NODE_ENV === 'development') {
-      await sequelize.sync({ alter: true });
-      logger.info('Database models synchronized');
-    }
+    // Sync models
+    // NOTE: In production, prefer migrations instead of alter: true
+    await sequelize.sync({ alter: true });
+    logger.info('Database models synchronized');
 
     // Start server
     app.listen(PORT, () => {
