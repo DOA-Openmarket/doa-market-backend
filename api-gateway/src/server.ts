@@ -77,15 +77,14 @@ app.use(
 );
 app.use(express.json());
 
-// Apply general rate limiting to all routes
-app.use(generalLimiter);
+// Trust proxy - required for ALB/Load Balancer to properly handle X-Forwarded-For headers
+app.set('trust proxy', true);
 
-// Simple health check for Kubernetes probes
+// Health check endpoints MUST be before rate limiter (for Kubernetes probes)
 app.get("/health", (req, res) => {
   res.json({ status: "ok", service: "api-gateway", timestamp: new Date().toISOString() });
 });
 
-// Health check endpoint (no auth required)
 app.get("/api/v1/health", (req, res) => {
   res.json({
     success: true,
@@ -97,6 +96,9 @@ app.get("/api/v1/health", (req, res) => {
     },
   });
 });
+
+// Apply general rate limiting to all routes (after health checks)
+app.use(generalLimiter);
 
 // Root endpoint (no auth required)
 app.get("/", (req, res) => {
