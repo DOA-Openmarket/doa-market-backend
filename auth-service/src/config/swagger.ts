@@ -88,7 +88,10 @@ const options: swaggerJsdoc.Options = {
       { name: 'Auth', description: '인증 관련 API' },
     ],
   },
-  apis: ['./src/routes/*.ts', './src/controllers/*.ts'],
+  // In production, swagger-jsdoc reads from compiled JS files
+  apis: process.env.NODE_ENV === 'production'
+    ? ['./dist/routes/*.js', './dist/controllers/*.js']
+    : ['./src/routes/*.ts', './src/controllers/*.ts'],
 };
 
 export const swaggerSpec = swaggerJsdoc(options);
