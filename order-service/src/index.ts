@@ -46,9 +46,14 @@ const startServer = async () => {
     await sequelize.sync({ alter: true });
     logger.info('Database synchronized');
 
-    // Connect to Event Bus
-    await eventBus.connect();
-    logger.info('Event Bus connected');
+    // Only connect to RabbitMQ if enabled
+    const rabbitmqEnabled = process.env.RABBITMQ_ENABLED !== 'false';
+    if (rabbitmqEnabled) {
+      await eventBus.connect();
+      logger.info('Event Bus connected');
+    } else {
+      logger.info('RabbitMQ is disabled, running without event bus');
+    }
 
     app.listen(PORT, () => logger.info(`Order Service on ${PORT}`));
   } catch (error) {
@@ -60,13 +65,19 @@ const startServer = async () => {
 // Graceful shutdown
 process.on('SIGTERM', async () => {
   logger.info('SIGTERM received, shutting down gracefully');
-  await eventBus.disconnect();
+  const rabbitmqEnabled = process.env.RABBITMQ_ENABLED !== 'false';
+  if (rabbitmqEnabled) {
+    await eventBus.disconnect();
+  }
   process.exit(0);
 });
 
 process.on('SIGINT', async () => {
   logger.info('SIGINT received, shutting down gracefully');
-  await eventBus.disconnect();
+  const rabbitmqEnabled = process.env.RABBITMQ_ENABLED !== 'false';
+  if (rabbitmqEnabled) {
+    await eventBus.disconnect();
+  }
   process.exit(0);
 });
 

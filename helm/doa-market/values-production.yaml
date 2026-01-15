@@ -129,6 +129,9 @@ services:
     autoscaling:
       minReplicas: 1
       maxReplicas: 10
+    env:
+      - name: RABBITMQ_ENABLED
+        value: "false"
 
   order-service:
     replicaCount: 1
@@ -142,6 +145,9 @@ services:
     autoscaling:
       minReplicas: 1
       maxReplicas: 10
+    env:
+      - name: RABBITMQ_ENABLED
+        value: "false"
 
   payment-service:
     replicaCount: 1

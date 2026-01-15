@@ -55,15 +55,24 @@ app.use('/api/v1/categories', categoryRoutes);
 const startServer = async () => {
   try {
     await sequelize.sync({ alter: true });
-    await eventBus.connect();
-    logger.info('Event bus connected');
+
+    // Only connect to RabbitMQ if enabled
+    const rabbitmqEnabled = process.env.RABBITMQ_ENABLED !== 'false';
+    if (rabbitmqEnabled) {
+      await eventBus.connect();
+      logger.info('Event bus connected');
+    } else {
+      logger.info('RabbitMQ is disabled, running without event bus');
+    }
 
     app.listen(PORT, () => logger.info(`Product Service on ${PORT}`));
 
     // Graceful shutdown
     process.on('SIGTERM', async () => {
       logger.info('SIGTERM received, shutting down gracefully');
-      await eventBus.disconnect();
+      if (rabbitmqEnabled) {
+        await eventBus.disconnect();
+      }
       process.exit(0);
     });
   } catch (error) {
