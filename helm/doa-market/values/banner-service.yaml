@@ -1,6 +1,6 @@
 image:
   repository: 478266318018.dkr.ecr.ap-northeast-2.amazonaws.com/doa-market-banner-service
-  tag: 7114918
+  tag: faf9d21
 
 serviceAccount:
   annotations: {}
