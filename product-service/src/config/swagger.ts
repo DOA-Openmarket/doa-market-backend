@@ -19,7 +19,10 @@ const options: swaggerJsdoc.Options = {
       { name: 'Categories', description: '카테고리 관리 API' },
     ],
   },
-  apis: ['./src/routes/*.ts'],
+  // In production, swagger-jsdoc reads from compiled JS files
+  apis: process.env.NODE_ENV === 'production'
+    ? ['./dist/routes/*.js']
+    : ['./src/routes/*.ts'],
 };
 
 export const swaggerSpec = swaggerJsdoc(options);
