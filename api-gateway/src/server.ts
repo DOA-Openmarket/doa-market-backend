@@ -75,7 +75,11 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   })
 );
-app.use(express.json());
+
+// IMPORTANT: Do NOT use express.json() globally - it consumes the request body
+// and prevents http-proxy-middleware from forwarding POST/PUT request bodies.
+// Instead, we'll let the proxy handle body forwarding to backend services.
+// app.use(express.json());
 
 // Trust proxy - required for ALB/Load Balancer to properly handle X-Forwarded-For headers
 app.set('trust proxy', true);
