@@ -154,32 +154,32 @@ const services: ServiceConfig[] = [
   },
 
   // User service - auth optional (checkin can be viewed by anyone)
-  { path: "/api/v1/users", target: "http://user-service:3002", auth: "optional" },
+  { path: "/api/v1/users", target: "http://user-service:3005", auth: "optional" },
   {
     path: "/api/v1/profiles",
-    target: "http://user-service:3002",
+    target: "http://user-service:3005",
     auth: "required",
   },
 
   // Product service - optional auth (public browsing, auth for modifications) + caching
   {
     path: "/api/v1/products",
-    target: "http://product-service:3003",
+    target: "http://product-service:3002",
     auth: "optional",
   },
   {
     path: "/api/v1/categories",
-    target: "http://product-service:3003",
+    target: "http://product-service:3002",
     auth: "optional",
   },
 
   // Order service - auth required
-  { path: "/api/v1/orders", target: "http://localhost:3004", auth: "required" },
+  { path: "/api/v1/orders", target: "http://order-service:3003", auth: "required" },
 
   // Partner order management - seller or admin role
   {
     path: "/api/v1/orders/partner",
-    target: "http://localhost:3004",
+    target: "http://order-service:3003",
     auth: "required",
     roles: ["seller", "admin"],
   },
@@ -187,21 +187,21 @@ const services: ServiceConfig[] = [
   // Payment service - auth required
   {
     path: "/api/v1/payments",
-    target: "http://localhost:3005",
+    target: "http://payment-service:3004",
     auth: "required",
   },
 
   // Shipping service - auth required
   {
     path: "/api/v1/shipping",
-    target: "http://localhost:3006",
+    target: "http://shipping-service:3016",
     auth: "required",
   },
 
   // Seller service - auth required, seller or admin role
   {
     path: "/api/v1/sellers",
-    target: "http://localhost:3007",
+    target: "http://seller-service:3011",
     auth: "required",
     roles: ["seller", "admin"],
   },
@@ -209,7 +209,7 @@ const services: ServiceConfig[] = [
   // Settlement service - auth required, seller or admin role
   {
     path: "/api/v1/settlements",
-    target: "http://localhost:3008",
+    target: "http://settlement-service:3018",
     auth: "required",
     roles: ["seller", "admin"],
   },
@@ -217,66 +217,66 @@ const services: ServiceConfig[] = [
   // Coupon service - optional auth
   {
     path: "/api/v1/coupons",
-    target: "http://localhost:3009",
+    target: "http://coupon-service:3015",
     auth: "optional",
   },
 
   // Inventory service - auth required
   {
     path: "/api/v1/inventory",
-    target: "http://localhost:3010",
+    target: "http://inventory-service:3010",
     auth: "required",
   },
 
   // Notification service - auth required
   {
     path: "/api/v1/notifications",
-    target: "http://localhost:3011",
+    target: "http://notification-service:3008",
     auth: "required",
   },
 
   // Review service - optional auth
   {
     path: "/api/v1/reviews",
-    target: "http://localhost:3012",
+    target: "http://review-service:3007",
     auth: "optional",
   },
 
   // Search service - no auth required (public) + caching
-  { path: "/api/v1/search", target: "http://search-service:3013", auth: "none" },
+  { path: "/api/v1/search", target: "http://search-service:3009", auth: "none" },
 
   // Admin service - auth required, admin role only
   {
     path: "/api/v1/admin",
-    target: "http://localhost:3014",
+    target: "http://admin-service:3012",
     auth: "required",
     roles: ["admin"],
   },
 
   // File service - auth required
-  { path: "/api/v1/files", target: "http://localhost:3015", auth: "required" },
+  { path: "/api/v1/files", target: "http://file-service:3013", auth: "required" },
 
   // Stats service - auth required, admin or seller role
   {
     path: "/api/v1/stats",
-    target: "http://localhost:3016",
+    target: "http://stats-service:3017",
     auth: "required",
     roles: ["admin", "seller"],
   },
 
   // Cart service - auth required
-  { path: "/api/v1/cart", target: "http://localhost:3017", auth: "required" },
+  { path: "/api/v1/cart", target: "http://cart-service:3006", auth: "required" },
 
   // Wishlist service - optional auth (handled by user-service)
-  { path: "/api/v1/wishlist", target: "http://user-service:3002", auth: "optional" },
+  { path: "/api/v1/wishlist", target: "http://user-service:3005", auth: "optional" },
 
   // Banner service - optional auth
-  { path: "/api/v1/banners", target: "http://banner-service:3017", auth: "optional" },
+  { path: "/api/v1/banners", target: "http://banner-service:3014", auth: "optional" },
 
   // Partner order management - seller or admin role
   {
     path: "/api/v1/partner/orders",
-    target: "http://order-service:3004",
+    target: "http://order-service:3003",
     auth: "required",
     roles: ["seller", "admin"],
   },
@@ -284,7 +284,7 @@ const services: ServiceConfig[] = [
   // Partner cancellation management - seller or admin role
   {
     path: "/api/v1/partner/cancellations",
-    target: "http://order-service:3004",
+    target: "http://order-service:3003",
     auth: "required",
     roles: ["seller", "admin"],
   },
@@ -292,7 +292,7 @@ const services: ServiceConfig[] = [
   // Partner return management - seller or admin role
   {
     path: "/api/v1/partner/returns",
-    target: "http://order-service:3004",
+    target: "http://order-service:3003",
     auth: "required",
     roles: ["seller", "admin"],
   },
@@ -300,7 +300,7 @@ const services: ServiceConfig[] = [
   // Partner delivery management - seller or admin role
   {
     path: "/api/v1/partner/deliveries",
-    target: "http://shipping-service:3006",
+    target: "http://shipping-service:3016",
     auth: "required",
     roles: ["seller", "admin"],
   },
@@ -308,7 +308,7 @@ const services: ServiceConfig[] = [
   // Partner settlement management - seller or admin role
   {
     path: "/api/v1/partner/settlements",
-    target: "http://settlement-service:3008",
+    target: "http://settlement-service:3018",
     auth: "required",
     roles: ["seller", "admin"],
   },
@@ -316,7 +316,7 @@ const services: ServiceConfig[] = [
   // Sales service - admin or seller role
   {
     path: "/api/v1/sales",
-    target: "http://stats-service:3016",
+    target: "http://stats-service:3017",
     auth: "required",
     roles: ["admin", "seller"],
   },
@@ -324,14 +324,14 @@ const services: ServiceConfig[] = [
   // Attachments service - auth required
   {
     path: "/api/v1/attachments",
-    target: "http://file-service:3015",
+    target: "http://file-service:3013",
     auth: "required",
   },
 
   // Terms service - optional auth (public access)
   {
     path: "/api/v1/terms",
-    target: "http://admin-service:3014",
+    target: "http://admin-service:3012",
     auth: "optional",
   },
 ];
