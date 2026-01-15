@@ -11,6 +11,7 @@ export const generalLimiter = rateLimit({
   },
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  validate: { trustProxy: false }, // Disable trust proxy validation (we're behind ALB)
 });
 
 // Stricter limiter for auth endpoints
@@ -25,6 +26,7 @@ export const authLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: true, // Don't count successful requests
+  validate: { trustProxy: false }, // Disable trust proxy validation (we're behind ALB)
 });
 
 // Moderate limiter for write operations
@@ -38,4 +40,5 @@ export const writeLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { trustProxy: false }, // Disable trust proxy validation (we're behind ALB)
 });
