@@ -1,0 +1,231 @@
+[0mnewman[0m
+
+[0mDOA Market API[0m
+
+❏ [0mHealth Checks[0m
+↳ [0mAPI Gateway Health[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/health[39m [90m[200 OK, 759B, 43ms][39m
+
+↳ [0mAPI Gateway Health V1[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/health[39m [90m[200 OK, 813B, 8ms][39m
+
+❏ [0mAuthentication[0m
+↳ [0mUser Register[0m
+  [90mPOST[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/auth/register[39m [90m[500 Internal Server Error, 1.32kB, 148ms][39m
+
+↳ [0mUser Login[0m
+  [90mPOST[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/auth/login[39m [90m[500 Internal Server Error, 1.32kB, 43ms][39m
+
+↳ [0mRefresh Token[0m
+  [90mPOST[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/auth/refresh[39m [90m[401 Unauthorized, 1.21kB, 17ms][39m
+
+↳ [0mUser Logout[0m
+  [90mPOST[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/auth/logout[39m [90m[401 Unauthorized, 1.22kB, 14ms][39m
+
+↳ [0mGet Current User[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/auth/me[39m [90m[401 Unauthorized, 1.22kB, 15ms][39m
+
+↳ [0mSend Verification Email[0m
+  [90mPOST[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/auth/send-verification[39m [90m[500 Internal Server Error, 1.33kB, 18ms][39m
+
+↳ [0mVerify Email[0m
+  [90mPOST[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/auth/verify-email[39m [90m[400 Bad Request, 1.2kB, 15ms][39m
+
+↳ [0mSeller Sign Up[0m
+  [90mPOST[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/sellers/sign-up[39m [90m[400 Bad Request, 1.28kB, 16ms][39m
+
+↳ [0mSeller Sign In[0m
+  [90mPOST[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/sellers/sign-in[39m [90m[500 Internal Server Error, 1.33kB, 45ms][39m
+
+❏ [0mUsers[0m
+↳ [0mGet User Stats[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/users/stats[39m [90m[500 Internal Server Error, 1.21kB, 46ms][39m
+
+↳ [0mGet All Users[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/users[39m [90m[200 OK, 1.17kB, 21ms][39m
+
+↳ [0mCreate User[0m
+  [90mPOST[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/users[39m [90m[500 Internal Server Error, 1.23kB, 29ms][39m
+
+↳ [0mGet User by ID[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/users/{{userId}}[39m [90m[500 Internal Server Error, 1.2kB, 18ms][39m
+
+↳ [0mUpdate User[0m
+  [90mPATCH[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/users/{{userId}}[39m [90m[401 Unauthorized, 1.15kB, 129ms][39m
+
+↳ [0mDelete User[0m
+  [90mDELETE[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/users/{{userId}}[39m [90m[401 Unauthorized, 1.15kB, 98ms][39m
+
+❏ [0mProducts[0m
+↳ [0mGet All Products[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/products?page=1&limit=20[39m [90m[200 OK, 1.84kB, 30ms][39m
+
+↳ [0mGet Product by ID[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/products/{{productId}}[39m [90m[500 Internal Server Error, 1.13kB, 21ms][39m
+
+↳ [0mCreate Product[0m
+  [90mPOST[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/products[39m [90m[401 Unauthorized, 1.14kB, 14ms][39m
+
+↳ [0mUpdate Product[0m
+  [90mPUT[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/products/{{productId}}[39m [90m[500 Internal Server Error, 1.13kB, 20ms][39m
+
+↳ [0mDelete Product[0m
+  [90mDELETE[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/products/{{productId}}[39m [90m[500 Internal Server Error, 1.13kB, 16ms][39m
+
+↳ [0mGet Product Reviews[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/products/{{productId}}/reviews[39m [90m[200 OK, 1.27kB, 13ms][39m
+
+❏ [0mCategories[0m
+↳ [0mGet All Categories[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/categories[39m [90m[200 OK, 1.08kB, 21ms][39m
+
+❏ [0mOrders[0m
+↳ [0mGet All Orders[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/orders[39m [90m[401 Unauthorized, 855B, 9ms][39m
+
+↳ [0mGet Order by ID[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/orders/{{orderId}}[39m [90m[401 Unauthorized, 855B, 8ms][39m
+
+↳ [0mCreate Order[0m
+  [90mPOST[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/orders[39m [90m[401 Unauthorized, 855B, 9ms][39m
+
+↳ [0mUpdate Order Status[0m
+  [90mPATCH[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/orders/{{orderId}}/status[39m [90m[401 Unauthorized, 855B, 8ms][39m
+
+↳ [0mCancel Order[0m
+  [90mPOST[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/orders/{{orderId}}/cancel[39m [90m[401 Unauthorized, 855B, 8ms][39m
+
+↳ [0mRequest Return[0m
+  [90mPOST[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/orders/{{orderId}}/return[39m [90m[401 Unauthorized, 855B, 8ms][39m
+
+↳ [0mRequest Exchange[0m
+  [90mPOST[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/orders/{{orderId}}/exchange[39m [90m[401 Unauthorized, 855B, 7ms][39m
+
+↳ [0mGet Saga Status[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/orders/{{orderId}}/saga-status[39m [90m[401 Unauthorized, 855B, 8ms][39m
+
+❏ [0mCart[0m
+↳ [0mGet Cart[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/cart[39m [90m[401 Unauthorized, 855B, 7ms][39m
+
+↳ [0mAdd to Cart[0m
+  [90mPOST[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/cart[39m [90m[401 Unauthorized, 855B, 8ms][39m
+
+↳ [0mUpdate Cart Item[0m
+  [90mPATCH[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/cart/{{cartItemId}}[39m [90m[401 Unauthorized, 855B, 8ms][39m
+
+↳ [0mRemove from Cart[0m
+  [90mDELETE[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/cart/{{cartItemId}}[39m [90m[401 Unauthorized, 855B, 8ms][39m
+
+↳ [0mClear Cart[0m
+  [90mDELETE[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/cart[39m [90m[401 Unauthorized, 855B, 7ms][39m
+
+❏ [0mReviews[0m
+↳ [0mGet All Reviews[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/reviews[39m [90m[200 OK, 1.11kB, 36ms][39m
+
+↳ [0mGet Review by ID[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/reviews/{{reviewId}}[39m [90m[500 Internal Server Error, 1.19kB, 44ms][39m
+
+↳ [0mCreate Review[0m
+  [90mPOST[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/reviews[39m [90m[500 Internal Server Error, 1.19kB, 15ms][39m
+
+↳ [0mUpdate Review[0m
+  [90mPUT[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/reviews/{{reviewId}}[39m [90m[500 Internal Server Error, 1.19kB, 14ms][39m
+
+↳ [0mDelete Review[0m
+  [90mDELETE[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/reviews/{{reviewId}}[39m [90m[500 Internal Server Error, 1.19kB, 20ms][39m
+
+↳ [0mGet Reviews by Product[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/reviews/products/{{productId}}[39m [90m[500 Internal Server Error, 1.19kB, 15ms][39m
+
+↳ [0mGet Reviews by Seller[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/reviews/seller/{{sellerId}}[39m [90m[500 Internal Server Error, 1.17kB, 16ms][39m
+
+❏ [0mBanners[0m
+↳ [0mGet All Banners[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/banners[39m [90m[200 OK, 1.11kB, 44ms][39m
+
+↳ [0mGet Banner by ID[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/banners/{{bannerId}}[39m [90m[500 Internal Server Error, 1.19kB, 69ms][39m
+
+↳ [0mCreate Banner[0m
+  [90mPOST[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/banners[39m [90m[201 Created, 1.45kB, 54ms][39m
+
+↳ [0mUpdate Banner[0m
+  [90mPUT[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/banners/{{bannerId}}[39m [90m[500 Internal Server Error, 1.19kB, 16ms][39m
+
+↳ [0mDelete Banner[0m
+  [90mDELETE[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/banners/{{bannerId}}[39m [90m[500 Internal Server Error, 1.19kB, 15ms][39m
+
+❏ [0mSearch[0m
+↳ [0mSearch Products[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/search/products?q=테스트&page=1&size=20&sortBy=relevance[39m [90m[500 Internal Server Error, 1.15kB, 20ms][39m
+
+↳ [0mAutocomplete[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/search/autocomplete?q=테스트&limit=10[39m [90m[500 Internal Server Error, 1.15kB, 15ms][39m
+
+❏ [0mCoupons[0m
+↳ [0mGet All Coupons[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/coupons[39m [90m[200 OK, 1.12kB, 48ms][39m
+
+↳ [0mGet Coupon by ID[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/coupons/{{couponId}}[39m [90m[500 Internal Server Error, 1.19kB, 38ms][39m
+
+↳ [0mCreate Coupon[0m
+  [90mPOST[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/coupons[39m [90m[500 Internal Server Error, 1.24kB, 19ms][39m
+
+↳ [0mIssue Coupon[0m
+  [90mPOST[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/coupons/{{couponCode}}/issue[39m [90m[404 Not Found, 1.16kB, 16ms][39m
+
+↳ [0mGet Coupons by Seller[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/coupons/seller/{{sellerId}}[39m [90m[500 Internal Server Error, 1.17kB, 188ms][39m
+
+❏ [0mSellers[0m
+↳ [0mGet All Sellers[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/sellers[39m [90m[401 Unauthorized, 855B, 8ms][39m
+
+↳ [0mGet Seller Stats[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/sellers/stats[39m [90m[401 Unauthorized, 855B, 7ms][39m
+
+↳ [0mGet Seller by ID[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/sellers/{{sellerId}}[39m [90m[401 Unauthorized, 855B, 8ms][39m
+
+↳ [0mCreate Seller[0m
+  [90mPOST[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/sellers[39m [90m[401 Unauthorized, 855B, 7ms][39m
+
+↳ [0mUpdate Seller[0m
+  [90mPUT[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/sellers/{{sellerId}}[39m [90m[401 Unauthorized, 855B, 7ms][39m
+
+↳ [0mVerify Seller[0m
+  [90mPATCH[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/sellers/{{sellerId}}/verify[39m [90m[401 Unauthorized, 855B, 7ms][39m
+
+❏ [0mNotifications[0m
+↳ [0mGet All Notifications[0m
+  [90mGET[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/notifications[39m [90m[401 Unauthorized, 855B, 7ms][39m
+
+↳ [0mCreate Notification[0m
+  [90mPOST[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/notifications[39m [90m[401 Unauthorized, 855B, 8ms][39m
+
+↳ [0mSend Notification[0m
+  [90mPOST[39m [90mhttp://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/notifications/{{notificationId}}/send[39m [90m[401 Unauthorized, 855B, 7ms][39m
+
+[90m┌─────────────────────────[39m[90m┬───────────────────[39m[90m┬──────────────────┐[39m
+[90m│[39m                         [90m│[39m          executed [90m│[39m           failed [90m│[39m
+[90m├─────────────────────────[39m[90m┼───────────────────[39m[90m┼──────────────────┤[39m
+[90m│[39m              [32miterations[39m [90m│[39m                 1 [90m│[39m                0 [90m│[39m
+[90m├─────────────────────────[39m[90m┼───────────────────[39m[90m┼──────────────────┤[39m
+[90m│[39m                [32mrequests[39m [90m│[39m                65 [90m│[39m                0 [90m│[39m
+[90m├─────────────────────────[39m[90m┼───────────────────[39m[90m┼──────────────────┤[39m
+[90m│[39m            [32mtest-scripts[39m [90m│[39m                 6 [90m│[39m                0 [90m│[39m
+[90m├─────────────────────────[39m[90m┼───────────────────[39m[90m┼──────────────────┤[39m
+[90m│[39m      [32mprerequest-scripts[39m [90m│[39m                65 [90m│[39m                0 [90m│[39m
+[90m├─────────────────────────[39m[90m┼───────────────────[39m[90m┼──────────────────┤[39m
+[90m│[39m              [32massertions[39m [90m│[39m                 0 [90m│[39m                0 [90m│[39m
+[90m├─────────────────────────┴───────────────────┴──────────────────┤[39m
+[90m│[39m total run duration: 2.4s                                       [90m│[39m
+[90m├────────────────────────────────────────────────────────────────┤[39m
+[90m│[39m total data received: 6.11kB (approx)                           [90m│[39m
+[90m├────────────────────────────────────────────────────────────────┤[39m
+[90m│[39m average response time: 26ms [min: 7ms, max: 188ms, s.d.: 33ms] [90m│[39m
+[90m└────────────────────────────────────────────────────────────────┘[39m

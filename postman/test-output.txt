@@ -1,0 +1,329 @@
+newman
+
+DOA Market API
+
+❏ Health Checks
+↳ API Gateway Health
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/health [200 OK, 759B, 218ms]
+
+↳ API Gateway Health V1
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/health [200 OK, 813B, 10ms]
+
+❏ Authentication
+↳ User Register
+  POST http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/auth/register [errored]
+     ESOCKETTIMEDOUT
+
+↳ User Login
+  POST http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/auth/login [errored]
+     ESOCKETTIMEDOUT
+
+↳ Refresh Token
+  POST http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/auth/refresh [errored]
+     ESOCKETTIMEDOUT
+
+↳ User Logout
+  POST http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/auth/logout [401 Unauthorized, 1.22kB, 58ms]
+
+↳ Get Current User
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/auth/me [401 Unauthorized, 1.22kB, 147ms]
+
+↳ Send Verification Email
+  POST http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/auth/send-verification [errored]
+     ESOCKETTIMEDOUT
+
+↳ Verify Email
+  POST http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/auth/verify-email [errored]
+     ESOCKETTIMEDOUT
+
+↳ Seller Sign Up
+  POST http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/sellers/sign-up [errored]
+     ESOCKETTIMEDOUT
+
+↳ Seller Sign In
+  POST http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/sellers/sign-in [errored]
+     ESOCKETTIMEDOUT
+
+❏ Users
+↳ Get User Stats
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/users/stats [500 Internal Server Error, 1.21kB, 157ms]
+
+↳ Get All Users
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/users [200 OK, 1.17kB, 19ms]
+
+↳ Create User
+  POST http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/users [errored]
+     ESOCKETTIMEDOUT
+
+↳ Get User by ID
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/users/ [200 OK, 1.17kB, 51ms]
+
+↳ Update User
+  PATCH http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/users/ [errored]
+     ESOCKETTIMEDOUT
+
+↳ Delete User
+  DELETE http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/users/ [404 Not Found, 1.14kB, 23ms]
+
+❏ Products
+↳ Get All Products
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/products?page=1&limit=20 [200 OK, 1.08kB, 42ms]
+
+↳ Get Product by ID
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/products/ [200 OK, 1.08kB, 16ms]
+
+↳ Create Product
+  POST http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/products [errored]
+     ESOCKETTIMEDOUT
+
+↳ Update Product
+  PUT http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/products/ [errored]
+     ESOCKETTIMEDOUT
+
+↳ Delete Product
+  DELETE http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/products/ [404 Not Found, 940B, 23ms]
+
+↳ Get Product Reviews
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/products//reviews [500 Internal Server Error, 1.13kB, 76ms]
+
+❏ Categories
+↳ Get All Categories
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/categories [200 OK, 1.08kB, 74ms]
+
+❏ Orders
+↳ Get All Orders
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/orders [401 Unauthorized, 859B, 10ms]
+
+↳ Get Order by ID
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/orders/ [401 Unauthorized, 859B, 9ms]
+
+↳ Create Order
+  POST http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/orders [401 Unauthorized, 859B, 9ms]
+
+↳ Update Order Status
+  PATCH http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/orders//status [401 Unauthorized, 859B, 9ms]
+
+↳ Cancel Order
+  POST http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/orders//cancel [401 Unauthorized, 859B, 9ms]
+
+↳ Request Return
+  POST http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/orders//return [401 Unauthorized, 859B, 9ms]
+
+↳ Request Exchange
+  POST http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/orders//exchange [401 Unauthorized, 859B, 8ms]
+
+↳ Get Saga Status
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/orders//saga-status [401 Unauthorized, 859B, 9ms]
+
+❏ Cart
+↳ Get Cart
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/cart [401 Unauthorized, 859B, 9ms]
+
+↳ Add to Cart
+  POST http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/cart [401 Unauthorized, 859B, 9ms]
+
+↳ Update Cart Item
+  PATCH http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/cart/ [401 Unauthorized, 859B, 7ms]
+
+↳ Remove from Cart
+  DELETE http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/cart/ [401 Unauthorized, 859B, 8ms]
+
+↳ Clear Cart
+  DELETE http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/cart [401 Unauthorized, 859B, 8ms]
+
+❏ Reviews
+↳ Get All Reviews
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/reviews [200 OK, 1.11kB, 40ms]
+
+↳ Get Review by ID
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/reviews/ [200 OK, 1.11kB, 14ms]
+
+↳ Create Review
+  POST http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/reviews [errored]
+     ESOCKETTIMEDOUT
+
+↳ Update Review
+  PUT http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/reviews/ [errored]
+     ESOCKETTIMEDOUT
+
+↳ Delete Review
+  DELETE http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/reviews/ [404 Not Found, 971B, 25ms]
+
+↳ Get Reviews by Product
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/reviews/products/ [500 Internal Server Error, 1.19kB, 112ms]
+
+↳ Get Reviews by Seller
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/reviews/seller/ [500 Internal Server Error, 1.18kB, 134ms]
+
+❏ Banners
+↳ Get All Banners
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/banners [200 OK, 1.11kB, 39ms]
+
+↳ Get Banner by ID
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/banners/ [200 OK, 1.11kB, 17ms]
+
+↳ Create Banner
+  POST http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/banners [errored]
+     ESOCKETTIMEDOUT
+
+↳ Update Banner
+  PUT http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/banners/ [errored]
+     ESOCKETTIMEDOUT
+
+↳ Delete Banner
+  DELETE http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/banners/ [404 Not Found, 971B, 46ms]
+
+❏ Search
+↳ Search Products
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/search/products?q=테스트&page=1&size=20&sortBy=relevance [500 Internal Server Error, 1.15kB, 26ms]
+
+↳ Autocomplete
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/search/autocomplete?q=테스트&limit=10 [500 Internal Server Error, 1.15kB, 23ms]
+
+❏ Coupons
+↳ Get All Coupons
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/coupons [200 OK, 1.12kB, 64ms]
+
+↳ Get Coupon by ID
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/coupons/ [200 OK, 1.12kB, 19ms]
+
+↳ Create Coupon
+  POST http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/coupons [errored]
+     ESOCKETTIMEDOUT
+
+↳ Issue Coupon
+  POST http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/coupons//issue [404 Not Found, 974B, 26ms]
+
+↳ Get Coupons by Seller
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/coupons/seller/ [500 Internal Server Error, 1.18kB, 112ms]
+
+❏ Sellers
+↳ Get All Sellers
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/sellers [401 Unauthorized, 859B, 9ms]
+
+↳ Get Seller Stats
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/sellers/stats [401 Unauthorized, 859B, 9ms]
+
+↳ Get Seller by ID
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/sellers/ [401 Unauthorized, 859B, 9ms]
+
+↳ Create Seller
+  POST http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/sellers [401 Unauthorized, 859B, 9ms]
+
+↳ Update Seller
+  PUT http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/sellers/ [401 Unauthorized, 859B, 9ms]
+
+↳ Verify Seller
+  PATCH http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/sellers//verify [401 Unauthorized, 859B, 9ms]
+
+❏ Notifications
+↳ Get All Notifications
+  GET http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/notifications [401 Unauthorized, 859B, 8ms]
+
+↳ Create Notification
+  POST http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/notifications [401 Unauthorized, 859B, 10ms]
+
+↳ Send Notification
+  POST http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/notifications//send [401 Unauthorized, 859B, 8ms]
+
+┌─────────────────────────┬───────────────────┬──────────────────┐
+│                         │          executed │           failed │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│              iterations │                 1 │                0 │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│                requests │                65 │               16 │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│            test-scripts │                 6 │                0 │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│      prerequest-scripts │                65 │                0 │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│              assertions │                 0 │                0 │
+├─────────────────────────┴───────────────────┴──────────────────┤
+│ total run duration: 4m 2.6s                                    │
+├────────────────────────────────────────────────────────────────┤
+│ total data received: 3.55kB (approx)                           │
+├────────────────────────────────────────────────────────────────┤
+│ average response time: 50ms [min: 7ms, max: 218ms, s.d.: 64ms] │
+└────────────────────────────────────────────────────────────────┘
+
+[31m   # [39m[31m failure [39m[31m detail          [39m
+[90m     [39m[90m         [39m[90m                 [39m
+ 01.  Error                    
+               ESOCKETTIMEDOUT 
+               at request      
+               inside ""       
+[90m     [39m[90m         [39m[90m                 [39m
+ 02.  Error                    
+               ESOCKETTIMEDOUT 
+               at request      
+               inside ""       
+[90m     [39m[90m         [39m[90m                 [39m
+ 03.  Error                    
+               ESOCKETTIMEDOUT 
+               at request      
+               inside ""       
+[90m     [39m[90m         [39m[90m                 [39m
+ 04.  Error                    
+               ESOCKETTIMEDOUT 
+               at request      
+               inside ""       
+[90m     [39m[90m         [39m[90m                 [39m
+ 05.  Error                    
+               ESOCKETTIMEDOUT 
+               at request      
+               inside ""       
+[90m     [39m[90m         [39m[90m                 [39m
+ 06.  Error                    
+               ESOCKETTIMEDOUT 
+               at request      
+               inside ""       
+[90m     [39m[90m         [39m[90m                 [39m
+ 07.  Error                    
+               ESOCKETTIMEDOUT 
+               at request      
+               inside ""       
+[90m     [39m[90m         [39m[90m                 [39m
+ 08.  Error                    
+               ESOCKETTIMEDOUT 
+               at request      
+               inside ""       
+[90m     [39m[90m         [39m[90m                 [39m
+ 09.  Error                    
+               ESOCKETTIMEDOUT 
+               at request      
+               inside ""       
+[90m     [39m[90m         [39m[90m                 [39m
+ 10.  Error                    
+               ESOCKETTIMEDOUT 
+               at request      
+               inside ""       
+[90m     [39m[90m         [39m[90m                 [39m
+ 11.  Error                    
+               ESOCKETTIMEDOUT 
+               at request      
+               inside ""       
+[90m     [39m[90m         [39m[90m                 [39m
+ 12.  Error                    
+               ESOCKETTIMEDOUT 
+               at request      
+               inside ""       
+[90m     [39m[90m         [39m[90m                 [39m
+ 13.  Error                    
+               ESOCKETTIMEDOUT 
+               at request      
+               inside ""       
+[90m     [39m[90m         [39m[90m                 [39m
+ 14.  Error                    
+               ESOCKETTIMEDOUT 
+               at request      
+               inside ""       
+[90m     [39m[90m         [39m[90m                 [39m
+ 15.  Error                    
+               ESOCKETTIMEDOUT 
+               at request      
+               inside ""       
+[90m     [39m[90m         [39m[90m                 [39m
+ 16.  Error                    
+               ESOCKETTIMEDOUT 
+               at request      
+               inside ""       
