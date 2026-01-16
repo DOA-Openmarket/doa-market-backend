@@ -3,9 +3,13 @@
 ## 개요
 이 문서는 DOA Market 백엔드 서비스의 프로덕션 배포 과정에서 발생한 문제들과 해결 방법을 정리한 문서입니다.
 
-**트러블슈팅 기간**: 2026-01-13 ~ 2026-01-14
+**트러블슈팅 기간**: 2026-01-13 ~ 2026-01-16
 **환경**: EKS (Kubernetes), Aurora PostgreSQL, ElastiCache Redis
-**최종 결과**: 19/19 서비스 (100%) 정상 작동
+**최종 결과**:
+- ✅ 19/19 서비스 정상 배포 및 작동
+- ✅ Auth Service 회원가입/로그인 기능 정상화
+- ✅ POST/PUT 타임아웃 완전 해결 (4분 → 2.6초, 99% 성능 개선)
+- ⚠️ Search Service - OpenSearch 인프라 미구축으로 인한 제한적 작동
 
 ---
 
@@ -624,6 +628,267 @@ async function startServer() {
 ```
 
 **관련 커밋**: `8a1963c`, `ff3f3ba`
+
+---
+
+### 4.7 POST/PUT 요청 타임아웃 (Critical)
+
+**증상**
+```
+POST /api/v1/products - 504 Gateway Time-out (15초+)
+PUT /api/v1/products/:id - 504 Gateway Time-out (15초+)
+BadRequestError: request aborted at IncomingMessage.onAborted
+모든 POST/PUT/PATCH 요청이 15초 타임아웃
+평균 응답 시간: 15초+ (타임아웃)
+```
+
+**원인**
+- API Gateway에서 `express.json()` 미들웨어가 request body를 먼저 파싱
+- 미들웨어가 body stream을 소비하여 `http-proxy-middleware`가 빈 body를 백엔드로 전달
+- 백엔드 서비스가 빈 body를 기다리며 무한 대기
+- 클라이언트가 15초 후 타임아웃하고 연결 종료
+- 서버는 "request aborted" 에러 발생
+
+**문제 상세**
+
+1. **Request Flow**
+```
+Client → API Gateway → express.json() [body 소비] → http-proxy-middleware [빈 body 전달] → Backend Service [body 대기]
+                                   ↓
+                            Body가 이미 소비됨
+                            Proxy가 전달할 수 없음
+```
+
+2. **로그 분석**
+```bash
+# Backend Service 로그
+BadRequestError: request aborted
+    at IncomingMessage.onAborted (/app/node_modules/raw-body/index.js:245:10)
+
+# Newman 테스트 결과 (수정 전)
+- POST /api/v1/products - TIMEOUT (15s)
+- PUT /api/v1/products/:id - TIMEOUT (15s)
+- 총 16개 타임아웃 발생
+- 평균 응답 시간: 15초+ (타임아웃)
+```
+
+3. **영향 범위**
+- ❌ 모든 POST 요청 (생성)
+- ❌ 모든 PUT 요청 (전체 수정)
+- ❌ 모든 PATCH 요청 (부분 수정)
+- ✅ GET 요청은 정상 (body가 없음)
+- ✅ DELETE 요청은 정상 (body가 없음)
+
+**해결 방법**
+
+**1. API Gateway 수정** (`api-gateway/src/server.ts`)
+
+```typescript
+// BEFORE - express.json()이 body를 소비함
+app.use(cors({ ... }));
+app.use(express.json());  // ❌ 문제 원인
+
+// AFTER - express.json() 비활성화
+app.use(cors({ ... }));
+
+// IMPORTANT: Do NOT use express.json() globally - it consumes the request body
+// and prevents http-proxy-middleware from forwarding POST/PUT request bodies.
+// Instead, we'll let the proxy handle body forwarding to backend services.
+// app.use(express.json());  // ✅ 주석 처리
+
+// Trust proxy - required for ALB/Load Balancer
+app.set('trust proxy', true);
+```
+
+**설명**:
+- API Gateway는 단순 프록시 역할만 수행
+- Body parsing은 각 백엔드 서비스에서 처리
+- `http-proxy-middleware`가 raw request를 그대로 전달
+
+**2. 배포**
+
+```bash
+# 이미지 빌드 (AMD64 플랫폼)
+docker build --platform linux/amd64 \
+  -t 478266318018.dkr.ecr.ap-northeast-2.amazonaws.com/doa-market-api-gateway:a8e4f11 .
+
+# ECR 푸시
+docker push 478266318018.dkr.ecr.ap-northeast-2.amazonaws.com/doa-market-api-gateway:a8e4f11
+
+# Kubernetes 배포
+kubectl set image deployment/api-gateway \
+  -n doa-market-prod \
+  api-gateway=478266318018.dkr.ecr.ap-northeast-2.amazonaws.com/doa-market-api-gateway:a8e4f11
+
+# 롤아웃 대기
+kubectl rollout status deployment/api-gateway -n doa-market-prod
+```
+
+**3. 검증**
+
+```bash
+# POST 요청 테스트
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "x-user-id: 550e8400-e29b-41d4-a716-446655440000" \
+  -d '{"name":"Test Product","description":"Testing","price":"39.99","categoryId":"550e8400-e29b-41d4-a716-446655440001","stockQuantity":50}' \
+  http://k8s-doamarke-apigatew-xxx.elb.amazonaws.com/api/v1/products
+
+# 응답: 201 Created (64ms) ✅
+```
+
+**결과**
+
+**성능 개선**:
+```
+실행 시간:     4분 2.6초 → 2.4초 (99.0% 개선)
+타임아웃:      16개 → 0개 (100% 해결)
+평균 응답:     15초+ → 26ms (99.8% 개선)
+POST 성공률:   0% → 100%
+```
+
+**Newman 테스트 결과 (수정 후)**:
+```
+✅ POST /api/v1/products - 201 Created (64ms)
+✅ POST /api/v1/banners - 201 Created (54ms)
+✅ POST /api/v1/users - 401 Unauthorized (정상, 인증 필요)
+✅ 총 65개 요청, 0개 타임아웃
+✅ 평균 응답 시간: 26ms [최소: 7ms, 최대: 188ms]
+```
+
+**참고 사항**
+
+1. **Auth Middleware는 정상 작동**
+   - auth middleware는 헤더만 읽으므로 영향 없음
+   - JWT 검증 및 사용자 정보 전달 정상
+
+2. **Backend Services 수정 불필요**
+   - 각 백엔드 서비스는 자체적으로 `express.json()` 사용
+   - body parsing은 최종 목적지에서 처리
+
+3. **관련 서비스**
+   - product-service: route 충돌 수정 추가 필요 (commit: `b674327`)
+   - 기타 서비스: 추가 수정 불필요
+
+**관련 커밋**: `a8e4f11` (API Gateway body forwarding fix), `b674327` (Product Service route fix)
+
+**교훈**
+- API Gateway에서는 body parsing 미들웨어 사용 금지
+- Proxy 역할을 하는 서비스는 raw request를 그대로 전달해야 함
+- Body parsing은 최종 목적지 서비스에서만 수행
+- 타임아웃 문제는 네트워크뿐만 아니라 미들웨어 순서도 원인일 수 있음
+
+---
+
+### 4.8 Authentication Service 500 에러 (Database Sync)
+
+**증상**
+```
+POST /api/v1/auth/register - 500 Internal Server Error
+POST /api/v1/auth/login - 500 Internal Server Error
+relation "users" does not exist
+```
+
+**원인**
+1. **Database Tables 미생성**
+   - Auth service가 프로덕션 환경에서 `sequelize.sync()` 실행 안 함
+   - `NODE_ENV === 'development'` 조건으로 sync 로직이 제한됨
+   - 프로덕션 데이터베이스에 테이블이 생성되지 않음
+
+2. **Dockerfile CMD 문제**
+   - `CMD ["npm", "run", "dev"]` 사용 (tsx watch 모드)
+   - 프로덕션에서는 `npm start` (compiled JS 실행) 사용해야 함
+   - tsx watch는 TypeScript 소스 파일 읽기 시도하지만 EACCES 에러 발생
+
+3. **Swagger 경로 문제**
+   - `apis: ['./src/routes/*.ts']` 설정
+   - 프로덕션에서는 컴파일된 JS 파일(`./dist/routes/*.js`) 읽어야 함
+   - TypeScript 소스 파일 접근 시 permission denied 에러
+
+**해결 방법**
+
+**1. Database Sync 활성화** (`auth-service/src/index.ts`)
+
+```typescript
+// BEFORE - Development 환경에서만 sync
+if (process.env.NODE_ENV === 'development') {
+  await sequelize.sync({ alter: true });
+  logger.info('Database models synchronized');
+}
+
+// AFTER - 모든 환경에서 sync
+// NOTE: In production, prefer migrations instead of alter: true
+await sequelize.sync({ alter: true });
+logger.info('Database models synchronized');
+```
+
+**2. Dockerfile 수정** (`auth-service/Dockerfile`)
+
+```dockerfile
+# BEFORE
+CMD ["npm", "run", "dev"]
+
+# AFTER
+CMD ["npm", "start"]
+```
+
+**3. Swagger 설정 수정** (`auth-service/src/config/swagger.ts`)
+
+```typescript
+// BEFORE
+apis: ['./src/routes/*.ts', './src/controllers/*.ts'],
+
+// AFTER
+apis: process.env.NODE_ENV === 'production'
+  ? ['./dist/routes/*.js', './dist/controllers/*.js']
+  : ['./src/routes/*.ts', './src/controllers/*.ts'],
+```
+
+**4. 배포**
+
+```bash
+# 빌드 및 배포
+cd auth-service
+docker build --platform linux/amd64 \
+  -t 478266318018.dkr.ecr.ap-northeast-2.amazonaws.com/doa-market-auth-service:c7cab93 .
+docker push 478266318018.dkr.ecr.ap-northeast-2.amazonaws.com/doa-market-auth-service:c7cab93
+
+# Kubernetes 배포
+kubectl set image deployment/auth-service -n doa-market-prod \
+  auth-service=478266318018.dkr.ecr.ap-northeast-2.amazonaws.com/doa-market-auth-service:c7cab93
+```
+
+**결과**
+
+```bash
+# 테스트 전
+POST /api/v1/auth/register - 500 Internal Server Error (148ms)
+POST /api/v1/auth/login - 500 Internal Server Error (43ms)
+
+# 테스트 후
+POST /api/v1/auth/register - 201 Created (285ms)
+POST /api/v1/auth/login - 200 OK (237ms)
+POST /api/v1/auth/logout - 200 OK (21ms)
+GET /api/v1/auth/me - 200 OK (16ms)
+```
+
+**적용된 서비스**
+- ✅ auth-service (commit: `61d993d`, `e90cbc6`, `c7cab93`)
+- ✅ product-service (commit: `faf9d21`)
+- ✅ banner-service (commit: `faf9d21`)
+- ⚠️ user-service, review-service, coupon-service (추가 수정 필요, 롤백됨)
+
+**관련 커밋**:
+- `61d993d` - Database sync 활성화
+- `e90cbc6` - Dockerfile CMD 수정
+- `c7cab93` - Swagger 경로 수정
+- `67aee7d` - 전체 서비스 일괄 수정
+
+**주의 사항**
+1. `sequelize.sync({ alter: true })`는 개발/테스트용
+2. 프로덕션에서는 migration 사용 권장
+3. `alter: true`는 스키마 변경 시 데이터 손실 가능성 있음
+4. 장기적으로 Sequelize CLI migration으로 전환 필요
 
 ---
 
