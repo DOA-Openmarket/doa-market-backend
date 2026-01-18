@@ -5,6 +5,12 @@ global:
   registry: 478266318018.dkr.ecr.ap-northeast-2.amazonaws.com
   imagePullPolicy: IfNotPresent
 
+# Monitoring configuration
+monitoring:
+  enabled: true
+  scrapeInterval: 30s
+  scrapeTimeout: 10s
+
 # Default values for all services
 defaults:
   replicaCount: 2

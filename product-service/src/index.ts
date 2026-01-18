@@ -9,6 +9,7 @@ import { sequelize } from './config/database';
 import { logger } from './utils/logger';
 import { swaggerSpec } from './config/swagger';
 import { createEventBus } from './events/eventBus';
+import { createMetricsService } from '@doa-market/common';
 
 dotenv.config();
 
@@ -17,6 +18,12 @@ const PORT = process.env.PORT || 3003;
 
 // Initialize event bus
 export const eventBus = createEventBus('product-service');
+
+// Initialize metrics
+const metrics = createMetricsService('product-service');
+
+// Apply metrics middleware early (before other middleware)
+app.use(metrics.metricsMiddleware());
 
 app.use(helmet());
 app.use(cors({
@@ -45,6 +52,12 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'product-service', timestamp: new Date().toISOString() });
 });
 
+// Metrics endpoint for Prometheus
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', metrics.getContentType());
+  res.end(await metrics.getMetrics());
+});
+
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
   customSiteTitle: 'Product Service API Docs',
 }));
@@ -66,6 +79,19 @@ const startServer = async () => {
     }
 
     app.listen(PORT, () => logger.info(`Product Service on ${PORT}`));
+
+    // Update DB connection pool metrics periodically
+    setInterval(() => {
+      try {
+        if (sequelize.connectionManager && sequelize.connectionManager.pool) {
+          const pool = sequelize.connectionManager.pool;
+          const activeConnections = pool.size - pool.available;
+          metrics.updateDbPoolMetrics('postgres', activeConnections);
+        }
+      } catch (error) {
+        // Silently ignore errors in metrics collection
+      }
+    }, 10000); // Update every 10 seconds
 
     // Graceful shutdown
     process.on('SIGTERM', async () => {

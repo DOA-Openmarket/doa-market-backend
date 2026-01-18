@@ -1,0 +1,207 @@
+# Base monitoring values for kube-prometheus-stack
+kube-prometheus-stack:
+  # Prometheus configuration
+  prometheus:
+    prometheusSpec:
+      # Data retention
+      retention: 15d
+      retentionSize: "45GB"
+
+      # Run on on-demand nodes for stability
+      nodeSelector:
+        eks.amazonaws.com/capacityType: ON_DEMAND
+
+      tolerations:
+        - key: "eks.amazonaws.com/capacityType"
+          operator: "Equal"
+          value: "ON_DEMAND"
+          effect: "NoSchedule"
+
+      # Storage for metrics
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: gp2
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 50Gi
+
+      # Resource allocation
+      resources:
+        requests:
+          cpu: 500m
+          memory: 2Gi
+        limits:
+          cpu: 2000m
+          memory: 4Gi
+
+      # Service monitors selector
+      serviceMonitorSelectorNilUsesHelmValues: false
+      podMonitorSelectorNilUsesHelmValues: false
+
+      # Scrape interval
+      scrapeInterval: 30s
+      evaluationInterval: 30s
+
+      # Additional scrape configs for existing metrics exporters
+      additionalScrapeConfigs:
+        - job_name: 'cluster-autoscaler'
+          kubernetes_sd_configs:
+            - role: pod
+              namespaces:
+                names:
+                  - kube-system
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_pod_label_app]
+              action: keep
+              regex: cluster-autoscaler
+            - source_labels: [__meta_kubernetes_pod_container_port_number]
+              action: keep
+              regex: "8085"
+
+        - job_name: 'aws-node-termination-handler'
+          kubernetes_sd_configs:
+            - role: pod
+              namespaces:
+                names:
+                  - kube-system
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_pod_label_app]
+              action: keep
+              regex: aws-node-termination-handler
+            - source_labels: [__meta_kubernetes_pod_container_port_number]
+              action: keep
+              regex: "9092"
+
+  # Grafana configuration
+  grafana:
+    enabled: true
+
+    # Admin credentials (override in production)
+    adminPassword: changeme
+
+    # Persistence
+    persistence:
+      enabled: true
+      storageClassName: gp2
+      size: 10Gi
+
+    # Node selector
+    nodeSelector:
+      eks.amazonaws.com/capacityType: ON_DEMAND
+
+    tolerations:
+      - key: "eks.amazonaws.com/capacityType"
+        operator: "Equal"
+        value: "ON_DEMAND"
+        effect: "NoSchedule"
+
+    # Resources
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
+
+    # Datasources - use default from kube-prometheus-stack
+    # The chart automatically configures Prometheus datasource
+
+    # Dashboard providers
+    dashboardProviders:
+      dashboardproviders.yaml:
+        apiVersion: 1
+        providers:
+          - name: 'default'
+            orgId: 1
+            folder: 'DOA Market'
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/default
+
+    # Sidecar for dashboards
+    sidecar:
+      dashboards:
+        enabled: true
+        label: grafana_dashboard
+        labelValue: "1"
+        folder: /tmp/dashboards
+        provider:
+          foldersFromFilesStructure: true
+
+  # Alertmanager configuration
+  alertmanager:
+    enabled: true
+
+    alertmanagerSpec:
+      nodeSelector:
+        eks.amazonaws.com/capacityType: ON_DEMAND
+
+      tolerations:
+        - key: "eks.amazonaws.com/capacityType"
+          operator: "Equal"
+          value: "ON_DEMAND"
+          effect: "NoSchedule"
+
+      storage:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: gp2
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 10Gi
+
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: 200m
+          memory: 512Mi
+
+    # Basic config (override in production)
+    config:
+      global:
+        resolve_timeout: 5m
+
+      route:
+        group_by: ['alertname', 'cluster', 'service']
+        group_wait: 10s
+        group_interval: 10s
+        repeat_interval: 12h
+        receiver: 'null'
+
+      receivers:
+        - name: 'null'
+
+  # Node Exporter for infrastructure metrics
+  nodeExporter:
+    enabled: true
+
+  # Kube-state-metrics for Kubernetes object metrics
+  kubeStateMetrics:
+    enabled: true
+
+  # Prometheus Operator
+  prometheusOperator:
+    nodeSelector:
+      eks.amazonaws.com/capacityType: ON_DEMAND
+
+    tolerations:
+      - key: "eks.amazonaws.com/capacityType"
+        operator: "Equal"
+        value: "ON_DEMAND"
+        effect: "NoSchedule"
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 200m
+        memory: 512Mi

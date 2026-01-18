@@ -1,0 +1,95 @@
+# Production environment overrides for monitoring stack
+kube-prometheus-stack:
+  prometheus:
+    ingress:
+      enabled: false  # Internal access only for security
+
+    prometheusSpec:
+      externalUrl: http://prometheus.doa-market-prod.svc.cluster.local:9090
+
+  # Grafana configuration
+  grafana:
+    # Use existing secret for admin password in production
+    admin:
+      existingSecret: grafana-admin-credentials
+      userKey: admin-user
+      passwordKey: admin-password
+
+    # Enable ingress for external access
+    ingress:
+      enabled: true
+      ingressClassName: alb
+      annotations:
+        alb.ingress.kubernetes.io/scheme: internet-facing
+        alb.ingress.kubernetes.io/target-type: ip
+        alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+        alb.ingress.kubernetes.io/healthcheck-path: /api/health
+        alb.ingress.kubernetes.io/group.name: doa-market-monitoring
+      hosts:
+        - grafana.doa-market.internal
+      paths:
+        - /
+
+    # SMTP configuration for email alerts (optional)
+    smtp:
+      enabled: false
+      # Uncomment and configure if email alerts are needed
+      # host: smtp.gmail.com:587
+      # user: alerts@doa-market.com
+      # password: ""
+      # fromAddress: grafana@doa-market.com
+
+  # Alertmanager configuration
+  alertmanager:
+    config:
+      global:
+        resolve_timeout: 5m
+        # Slack webhook URL should be provided via secret
+        # slack_api_url will be injected from secret
+
+      route:
+        group_by: ['alertname', 'cluster', 'service', 'namespace']
+        group_wait: 10s
+        group_interval: 10s
+        repeat_interval: 12h
+        receiver: 'slack-warnings'
+        routes:
+          - match:
+              severity: critical
+            receiver: slack-critical
+            continue: true
+          - match:
+              severity: warning
+            receiver: slack-warnings
+
+      receivers:
+        - name: 'slack-critical'
+          slack_configs:
+            - api_url: 'SLACK_WEBHOOK_URL_PLACEHOLDER'  # Replace via secret or ArgoCD
+              channel: '#doa-market-alerts-critical'
+              title: '\u26a0\ufe0f Critical Alert - {{ .GroupLabels.alertname }}'
+              text: |
+                *Summary:* {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}
+                *Description:* {{ range .Alerts }}{{ .Annotations.description }}{{ end }}
+                *Severity:* {{ .CommonLabels.severity }}
+                *Namespace:* {{ .CommonLabels.namespace }}
+                *Service:* {{ .CommonLabels.service }}
+              send_resolved: true
+
+        - name: 'slack-warnings'
+          slack_configs:
+            - api_url: 'SLACK_WEBHOOK_URL_PLACEHOLDER'  # Replace via secret or ArgoCD
+              channel: '#doa-market-alerts'
+              title: '\u26a0\ufe0f Warning - {{ .GroupLabels.alertname }}'
+              text: |
+                *Summary:* {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}
+                *Description:* {{ range .Alerts }}{{ .Annotations.description }}{{ end }}
+                *Severity:* {{ .CommonLabels.severity }}
+                *Namespace:* {{ .CommonLabels.namespace }}
+              send_resolved: true
+
+    ingress:
+      enabled: false  # Keep Alertmanager internal only
+
+# Additional configuration for production
+# This section is outside kube-prometheus-stack for custom resources

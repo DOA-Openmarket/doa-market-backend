@@ -17,6 +17,7 @@ import wishlistRoutes from './routes/wishlist.routes';
 import { logger } from './utils/logger';
 import { sequelize } from './config/database';
 import { swaggerSpec } from './config/swagger';
+import { createMetricsService } from '@doa-market/common';
 import './models/user.model';
 import './models/address.model';
 import './models/point.model';
@@ -31,6 +32,12 @@ const app = express();
 const PORT = process.env.PORT || 3002;
 const API_PREFIX = process.env.API_PREFIX || '/api/v1';
 
+// Initialize metrics
+const metrics = createMetricsService('user-service');
+
+// Apply metrics middleware early
+app.use(metrics.metricsMiddleware());
+
 app.use(helmet());
 app.use(cors({ origin: process.env.CORS_ORIGIN?.split(',') || '*' }));
 app.use(express.json());
@@ -38,6 +45,12 @@ app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) }
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'user-service', timestamp: new Date().toISOString() });
+});
+
+// Metrics endpoint for Prometheus
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', metrics.getContentType());
+  res.end(await metrics.getMetrics());
 });
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {

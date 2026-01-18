@@ -1,0 +1,149 @@
+{{- $namespace := .Release.Namespace }}
+{{- $release := .Release.Name }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: doa-market-alerts
+  namespace: {{ $namespace }}
+  labels:
+    app: kube-prometheus-stack
+    release: {{ $release }}
+spec:
+  groups:
+    # Infrastructure Alerts
+    - name: infrastructure
+      interval: 30s
+      rules:
+        - alert: HighCPUUsage
+          expr: |
+            (sum(rate(container_cpu_usage_seconds_total{namespace="doa-market-prod",container!=""}[5m])) by (pod, namespace)
+            / sum(container_spec_cpu_quota{namespace="doa-market-prod",container!=""}/container_spec_cpu_period{namespace="doa-market-prod",container!=""}) by (pod, namespace)) > 0.8
+          for: 5m
+          labels:
+            severity: warning
+            namespace: doa-market-prod
+          annotations:
+            summary: |
+              {{`High CPU usage detected on pod {{ $labels.pod }}`}}
+            description: |
+              {{`Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} CPU usage is above 80% (current: {{ $value | humanizePercentage }})`}}
+
+        - alert: HighMemoryUsage
+          expr: |
+            (sum(container_memory_working_set_bytes{namespace="doa-market-prod",container!=""}) by (pod, namespace)
+            / sum(container_spec_memory_limit_bytes{namespace="doa-market-prod",container!=""}) by (pod, namespace)) > 0.8
+          for: 5m
+          labels:
+            severity: warning
+            namespace: doa-market-prod
+          annotations:
+            summary: |
+              {{`High memory usage on pod {{ $labels.pod }}`}}
+            description: |
+              {{`Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} memory usage is above 80% (current: {{ $value | humanizePercentage }})`}}
+
+        - alert: PodCrashLooping
+          expr: |
+            rate(kube_pod_container_status_restarts_total{namespace="doa-market-prod"}[15m]) > 0
+          for: 5m
+          labels:
+            severity: critical
+            namespace: doa-market-prod
+          annotations:
+            summary: |
+              {{`Pod {{ $labels.pod }} is crash looping`}}
+            description: |
+              {{`Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has restarted {{ $value }} times in the last 15 minutes`}}
+
+        - alert: PodNotReady
+          expr: |
+            sum by (namespace, pod) (
+              kube_pod_status_phase{namespace="doa-market-prod", phase=~"Pending|Unknown|Failed"}
+            ) > 0
+          for: 5m
+          labels:
+            severity: critical
+            namespace: doa-market-prod
+          annotations:
+            summary: |
+              {{`Pod {{ $labels.pod }} is not ready`}}
+            description: |
+              {{`Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has been in non-Ready state for more than 5 minutes`}}
+
+        - alert: NodeNotReady
+          expr: kube_node_status_condition{condition="Ready",status="true"} == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: |
+              {{`Node {{ $labels.node }} is not ready`}}
+            description: |
+              {{`Kubernetes node {{ $labels.node }} has been in NotReady state for more than 5 minutes`}}
+
+    # Application Alerts
+    - name: application
+      interval: 30s
+      rules:
+        - alert: HighErrorRate
+          expr: |
+            (sum(rate(http_request_errors_total{namespace="doa-market-prod"}[5m])) by (service, namespace)
+            / sum(rate(http_requests_total{namespace="doa-market-prod"}[5m])) by (service, namespace)) > 0.05
+          for: 5m
+          labels:
+            severity: critical
+            namespace: doa-market-prod
+          annotations:
+            summary: |
+              {{`High error rate on service {{ $labels.service }}`}}
+            description: |
+              {{`Service {{ $labels.service }} error rate is above 5% (current: {{ $value | humanizePercentage }})`}}
+
+        - alert: HighLatency
+          expr: |
+            histogram_quantile(0.95,
+              sum(rate(http_request_duration_seconds_bucket{namespace="doa-market-prod"}[5m])) by (service, le, namespace)
+            ) > 2
+          for: 5m
+          labels:
+            severity: warning
+            namespace: doa-market-prod
+          annotations:
+            summary: |
+              {{`High latency on service {{ $labels.service }}`}}
+            description: |
+              {{`Service {{ $labels.service }} P95 latency is above 2 seconds (current: {{ $value }}s)`}}
+
+        - alert: ServiceDown
+          expr: up{namespace="doa-market-prod"} == 0
+          for: 2m
+          labels:
+            severity: critical
+            namespace: doa-market-prod
+          annotations:
+            summary: |
+              {{`Service {{ $labels.job }} is down`}}
+            description: |
+              {{`Service {{ $labels.job }} in namespace {{ $labels.namespace }} has been down for more than 2 minutes`}}
+
+    # Monitoring Stack Health
+    - name: monitoring-health
+      interval: 60s
+      rules:
+        - alert: PrometheusDown
+          expr: up{job="prometheus"} == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Prometheus is down"
+            description: "Prometheus monitoring system has been down for more than 5 minutes"
+
+        - alert: GrafanaDown
+          expr: up{job="grafana"} == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Grafana is down"
+            description: "Grafana dashboard system has been down for more than 5 minutes"
