@@ -38,60 +38,79 @@ jobs:
             api-gateway:
               - 'api-gateway/**'
               - '_shared/**'
+              - 'packages/common/**'
             auth-service:
               - 'auth-service/**'
               - '_shared/**'
+              - 'packages/common/**'
             product-service:
               - 'product-service/**'
               - '_shared/**'
+              - 'packages/common/**'
             order-service:
               - 'order-service/**'
               - '_shared/**'
+              - 'packages/common/**'
             payment-service:
               - 'payment-service/**'
               - '_shared/**'
+              - 'packages/common/**'
             user-service:
               - 'user-service/**'
               - '_shared/**'
+              - 'packages/common/**'
             cart-service:
               - 'cart-service/**'
               - '_shared/**'
+              - 'packages/common/**'
             review-service:
               - 'review-service/**'
               - '_shared/**'
+              - 'packages/common/**'
             notification-service:
               - 'notification-service/**'
               - '_shared/**'
+              - 'packages/common/**'
             search-service:
               - 'search-service/**'
               - '_shared/**'
+              - 'packages/common/**'
             inventory-service:
               - 'inventory-service/**'
               - '_shared/**'
+              - 'packages/common/**'
             seller-service:
               - 'seller-service/**'
               - '_shared/**'
+              - 'packages/common/**'
             admin-service:
               - 'admin-service/**'
               - '_shared/**'
+              - 'packages/common/**'
             file-service:
               - 'file-service/**'
               - '_shared/**'
+              - 'packages/common/**'
             banner-service:
               - 'banner-service/**'
               - '_shared/**'
+              - 'packages/common/**'
             coupon-service:
               - 'coupon-service/**'
               - '_shared/**'
+              - 'packages/common/**'
             shipping-service:
               - 'shipping-service/**'
               - '_shared/**'
+              - 'packages/common/**'
             stats-service:
               - 'stats-service/**'
               - '_shared/**'
+              - 'packages/common/**'
             settlement-service:
               - 'settlement-service/**'
               - '_shared/**'
+              - 'packages/common/**'
 
       # 실제 변경이 있는 서비스만 추출하여 Matrix로 넘김
       - name: Set output variables
@@ -154,7 +173,7 @@ jobs:
             -t $ECR_REGISTRY/doa-market-${{ matrix.service }}:$IMAGE_TAG \
             -t $ECR_REGISTRY/doa-market-${{ matrix.service }}:latest \
             -t $ECR_REGISTRY/doa-market-${{ matrix.service }}:${{ steps.meta.outputs.branch }} \
-            ${{ matrix.service }}
+            .
 
       - name: Run security scan
         uses: aquasecurity/trivy-action@master
