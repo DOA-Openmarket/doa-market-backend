@@ -3,19 +3,10 @@ FROM node:20-alpine AS builder
 # Set working directory
 WORKDIR /app
 
-# Copy and build common package first
-COPY packages/common ./packages/common
-WORKDIR /app/packages/common
-RUN npm install && npm run build
-
 # Copy service files
 WORKDIR /app/user-service
 COPY user-service/package*.json ./
 RUN npm install
-
-# Copy built common package into node_modules
-RUN mkdir -p node_modules/@doa-market && \
-    cp -r ../packages/common node_modules/@doa-market/
 
 # Copy service source
 COPY user-service/ ./
