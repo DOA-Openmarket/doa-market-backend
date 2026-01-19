@@ -1,6 +1,6 @@
 image:
   repository: 478266318018.dkr.ecr.ap-northeast-2.amazonaws.com/doa-market-order-service
-  tag: 0a70fd9
+  tag: 40ca64b
 
 serviceAccount:
   annotations: {}
