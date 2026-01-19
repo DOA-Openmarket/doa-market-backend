@@ -61,9 +61,9 @@ const startServer = async () => {
     await sequelize.authenticate();
     logger.info('Database connection established successfully');
 
-    // Sync models
-    // NOTE: In production, prefer migrations instead of alter: true
-    await sequelize.sync({ alter: true });
+    // Sync models (create tables if they don't exist, but don't alter existing ones)
+    // NOTE: In production, use migrations instead of sync({ alter: true }) to avoid enum type conflicts
+    await sequelize.sync();
     logger.info('Database models synchronized');
 
     // Start server

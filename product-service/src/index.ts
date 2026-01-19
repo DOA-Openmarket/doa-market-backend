@@ -67,7 +67,8 @@ app.use('/api/v1/categories', categoryRoutes);
 
 const startServer = async () => {
   try {
-    await sequelize.sync({ alter: true });
+    // Sync database models (create tables if they don't exist, but don't alter existing ones)
+    await sequelize.sync();
 
     // Only connect to RabbitMQ if enabled
     const rabbitmqEnabled = process.env.RABBITMQ_ENABLED !== 'false';

@@ -75,8 +75,9 @@ const startServer = async () => {
     await sequelize.authenticate();
     logger.info('Database connected');
 
-    // Sync database models (alter: true to update existing tables)
-    await sequelize.sync({ alter: true });
+    // Sync database models (create tables if they don't exist, but don't alter existing ones)
+    // For production, use migrations instead of sync({ alter: true }) to avoid enum type conflicts
+    await sequelize.sync();
     logger.info('Database synchronized');
 
     app.listen(PORT, () => {

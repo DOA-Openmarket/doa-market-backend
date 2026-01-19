@@ -43,7 +43,8 @@ app.use('/api/v1/partner/returns', partnerReturnRoutes);
 
 const startServer = async () => {
   try {
-    await sequelize.sync({ alter: true });
+    // Sync database models (create tables if they don't exist, but don't alter existing ones)
+    await sequelize.sync();
     logger.info('Database synchronized');
 
     // Only connect to RabbitMQ if enabled
