@@ -9,6 +9,10 @@ global:
 defaults:
   replicaCount: 1
 
+  # Image pull policy (Always for production to ensure latest images)
+  image:
+    pullPolicy: Always
+
   # Ingress configuration for AWS ALB
   ingress:
     enabled: true

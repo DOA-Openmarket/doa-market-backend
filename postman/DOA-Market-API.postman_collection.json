@@ -1,9 +1,9 @@
 {
   "info": {
     "name": "DOA Market API",
-    "description": "Complete API collection for DOA Market backend services deployed on AWS EKS",
+    "description": "Complete API collection for DOA Market backend services deployed on AWS EKS - Updated 2026-01-19 with new user-app APIs",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "version": "1.0.0"
+    "version": "2.0.0"
   },
   "auth": {
     "type": "bearer",
@@ -47,8 +47,12 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/health",
-              "host": ["{{baseUrl}}"],
-              "path": ["health"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
             }
           }
         },
@@ -62,8 +66,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/health",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "health"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "health"
+              ]
             }
           }
         }
@@ -108,8 +118,15 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/register",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "auth", "register"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
             }
           }
         },
@@ -153,8 +170,15 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/login",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "auth", "login"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
             }
           }
         },
@@ -194,8 +218,15 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/refresh",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "auth", "refresh"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "refresh"
+              ]
             }
           }
         },
@@ -206,8 +237,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/logout",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "auth", "logout"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "logout"
+              ]
             }
           }
         },
@@ -218,8 +256,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/me",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "auth", "me"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "me"
+              ]
             }
           }
         },
@@ -239,8 +284,15 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/send-verification",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "auth", "send-verification"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "send-verification"
+              ]
             }
           }
         },
@@ -260,8 +312,15 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/verify-email",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "auth", "verify-email"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "verify-email"
+              ]
             }
           }
         },
@@ -284,8 +343,15 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/sellers/sign-up",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "sellers", "sign-up"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "sellers",
+                "sign-up"
+              ]
             }
           }
         },
@@ -324,8 +390,15 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/sellers/sign-in",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "sellers", "sign-in"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "sellers",
+                "sign-in"
+              ]
             }
           }
         }
@@ -341,8 +414,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/users/stats",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "users", "stats"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "stats"
+              ]
             }
           }
         },
@@ -353,8 +433,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/users",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "users"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users"
+              ]
             }
           }
         },
@@ -374,8 +460,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/users",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "users"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users"
+              ]
             }
           }
         },
@@ -386,8 +478,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/users/{{userId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "users", "{{userId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{userId}}"
+              ]
             }
           }
         },
@@ -407,8 +506,15 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/users/{{userId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "users", "{{userId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{userId}}"
+              ]
             }
           }
         },
@@ -419,9 +525,67 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/users/{{userId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "users", "{{userId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{userId}}"
+              ]
             }
+          }
+        },
+        {
+          "name": "Get User Profile (Alias) ⭐NEW",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/{{userId}}/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{userId}}",
+                "profile"
+              ]
+            },
+            "description": "Alias route for getting user profile (same as GET /users/:userId)"
+          }
+        },
+        {
+          "name": "Update User Profile (Alias) ⭐NEW",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Name\",\n  \"phone\": \"010-1111-2222\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/{{userId}}/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{userId}}",
+                "profile"
+              ]
+            },
+            "description": "Alias route for updating user profile (same as PATCH /users/:userId)"
           }
         }
       ]
@@ -439,8 +603,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/products?page=1&limit=20",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "products"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products"
+              ],
               "query": [
                 {
                   "key": "page",
@@ -464,8 +634,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/products/{{productId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "products", "{{productId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products",
+                "{{productId}}"
+              ]
             }
           }
         },
@@ -500,8 +677,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/products",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "products"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products"
+              ]
             }
           }
         },
@@ -521,8 +704,15 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/products/{{productId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "products", "{{productId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products",
+                "{{productId}}"
+              ]
             }
           }
         },
@@ -533,8 +723,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/products/{{productId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "products", "{{productId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products",
+                "{{productId}}"
+              ]
             }
           }
         },
@@ -548,8 +745,16 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/products/{{productId}}/reviews",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "products", "{{productId}}", "reviews"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products",
+                "{{productId}}",
+                "reviews"
+              ]
             }
           }
         }
@@ -568,8 +773,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/categories",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "categories"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "categories"
+              ]
             }
           }
         }
@@ -585,8 +796,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/orders",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "orders"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders"
+              ]
             }
           }
         },
@@ -597,8 +814,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/orders/{{orderId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "orders", "{{orderId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                "{{orderId}}"
+              ]
             }
           }
         },
@@ -633,8 +857,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/orders",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "orders"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders"
+              ]
             }
           }
         },
@@ -654,8 +884,16 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/orders/{{orderId}}/status",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "orders", "{{orderId}}", "status"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                "{{orderId}}",
+                "status"
+              ]
             }
           }
         },
@@ -675,8 +913,16 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/orders/{{orderId}}/cancel",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "orders", "{{orderId}}", "cancel"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                "{{orderId}}",
+                "cancel"
+              ]
             }
           }
         },
@@ -696,8 +942,16 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/orders/{{orderId}}/return",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "orders", "{{orderId}}", "return"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                "{{orderId}}",
+                "return"
+              ]
             }
           }
         },
@@ -717,8 +971,16 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/orders/{{orderId}}/exchange",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "orders", "{{orderId}}", "exchange"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                "{{orderId}}",
+                "exchange"
+              ]
             }
           }
         },
@@ -729,9 +991,48 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/orders/{{orderId}}/saga-status",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "orders", "{{orderId}}", "saga-status"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                "{{orderId}}",
+                "saga-status"
+              ]
             }
+          }
+        },
+        {
+          "name": "Get User Orders ⭐NEW",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/orders/user/{{userId}}?page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                "user",
+                "{{userId}}"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get all orders for a specific user with pagination"
           }
         }
       ]
@@ -746,8 +1047,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/cart",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "cart"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "cart"
+              ]
             }
           }
         },
@@ -767,8 +1074,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/cart",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "cart"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "cart"
+              ]
             }
           }
         },
@@ -788,8 +1101,15 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/cart/{{cartItemId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "cart", "{{cartItemId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "cart",
+                "{{cartItemId}}"
+              ]
             }
           }
         },
@@ -800,8 +1120,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/cart/{{cartItemId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "cart", "{{cartItemId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "cart",
+                "{{cartItemId}}"
+              ]
             }
           }
         },
@@ -812,8 +1139,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/cart",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "cart"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "cart"
+              ]
             }
           }
         }
@@ -832,8 +1165,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/reviews",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "reviews"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reviews"
+              ]
             }
           }
         },
@@ -847,8 +1186,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/reviews/{{reviewId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "reviews", "{{reviewId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reviews",
+                "{{reviewId}}"
+              ]
             }
           }
         },
@@ -868,8 +1214,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/reviews",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "reviews"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reviews"
+              ]
             }
           }
         },
@@ -889,8 +1241,15 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/reviews/{{reviewId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "reviews", "{{reviewId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reviews",
+                "{{reviewId}}"
+              ]
             }
           }
         },
@@ -901,8 +1260,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/reviews/{{reviewId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "reviews", "{{reviewId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reviews",
+                "{{reviewId}}"
+              ]
             }
           }
         },
@@ -916,8 +1282,16 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/reviews/products/{{productId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "reviews", "products", "{{productId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reviews",
+                "products",
+                "{{productId}}"
+              ]
             }
           }
         },
@@ -931,8 +1305,16 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/reviews/seller/{{sellerId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "reviews", "seller", "{{sellerId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reviews",
+                "seller",
+                "{{sellerId}}"
+              ]
             }
           }
         }
@@ -951,8 +1333,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/banners?ownerType=ADVERTISER",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "banners"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "banners"
+              ],
               "query": [
                 {
                   "key": "ownerType",
@@ -973,8 +1361,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/banners/{{bannerId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "banners", "{{bannerId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "banners",
+                "{{bannerId}}"
+              ]
             }
           }
         },
@@ -994,8 +1389,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/banners",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "banners"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "banners"
+              ]
             }
           }
         },
@@ -1015,8 +1416,15 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/banners/{{bannerId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "banners", "{{bannerId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "banners",
+                "{{bannerId}}"
+              ]
             }
           }
         },
@@ -1027,8 +1435,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/banners/{{bannerId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "banners", "{{bannerId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "banners",
+                "{{bannerId}}"
+              ]
             }
           }
         }
@@ -1047,8 +1462,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/search/products?q=테스트&page=1&size=20&sortBy=relevance",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "search", "products"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "search",
+                "products"
+              ],
               "query": [
                 {
                   "key": "q",
@@ -1095,8 +1517,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/search/autocomplete?q=테스트&limit=10",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "search", "autocomplete"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "search",
+                "autocomplete"
+              ],
               "query": [
                 {
                   "key": "q",
@@ -1108,6 +1537,60 @@
                 }
               ]
             }
+          }
+        },
+        {
+          "name": "Get Popular Keywords ⭐NEW",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/search/popular?limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "search",
+                "popular"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Number of popular keywords to return (default: 10)"
+                }
+              ]
+            },
+            "description": "Get list of popular search keywords ranked by search count"
+          }
+        },
+        {
+          "name": "Get Search History ⭐NEW",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/search/history/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "search",
+                "history",
+                "{{userId}}"
+              ]
+            },
+            "description": "Get search history for a specific user"
           }
         }
       ]
@@ -1125,8 +1608,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/coupons",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "coupons"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "coupons"
+              ]
             }
           }
         },
@@ -1140,8 +1629,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/coupons/{{couponId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "coupons", "{{couponId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "coupons",
+                "{{couponId}}"
+              ]
             }
           }
         },
@@ -1161,8 +1657,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/coupons",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "coupons"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "coupons"
+              ]
             }
           }
         },
@@ -1173,8 +1675,16 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/coupons/{{couponCode}}/issue",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "coupons", "{{couponCode}}", "issue"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "coupons",
+                "{{couponCode}}",
+                "issue"
+              ]
             }
           }
         },
@@ -1188,8 +1698,16 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/coupons/seller/{{sellerId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "coupons", "seller", "{{sellerId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "coupons",
+                "seller",
+                "{{sellerId}}"
+              ]
             }
           }
         }
@@ -1205,8 +1723,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/sellers?status=verified",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "sellers"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "sellers"
+              ],
               "query": [
                 {
                   "key": "status",
@@ -1229,8 +1753,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/sellers/stats",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "sellers", "stats"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "sellers",
+                "stats"
+              ]
             }
           }
         },
@@ -1241,8 +1772,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/sellers/{{sellerId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "sellers", "{{sellerId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "sellers",
+                "{{sellerId}}"
+              ]
             }
           }
         },
@@ -1262,8 +1800,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/sellers",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "sellers"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "sellers"
+              ]
             }
           }
         },
@@ -1283,8 +1827,15 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/sellers/{{sellerId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "sellers", "{{sellerId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "sellers",
+                "{{sellerId}}"
+              ]
             }
           }
         },
@@ -1295,8 +1846,16 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/sellers/{{sellerId}}/verify",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "sellers", "{{sellerId}}", "verify"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "sellers",
+                "{{sellerId}}",
+                "verify"
+              ]
             }
           }
         }
@@ -1312,8 +1871,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/notifications",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "notifications"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications"
+              ]
             }
           }
         },
@@ -1333,8 +1898,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/notifications",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "notifications"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications"
+              ]
             }
           }
         },
@@ -1345,9 +1916,54 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/notifications/{{notificationId}}/send",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "notifications", "{{notificationId}}", "send"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "{{notificationId}}",
+                "send"
+              ]
             }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notices ⭐NEW",
+      "item": [
+        {
+          "name": "Get All Notices (Public)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notices?page=1&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notices"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get all public notices - no authentication required (for user app)"
           }
         }
       ]
