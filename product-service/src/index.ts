@@ -84,8 +84,9 @@ const startServer = async () => {
     // Update DB connection pool metrics periodically
     setInterval(() => {
       try {
-        if (sequelize.connectionManager && sequelize.connectionManager.pool) {
-          const pool = sequelize.connectionManager.pool;
+        const connectionManager = sequelize.connectionManager as any;
+        if (connectionManager && connectionManager.pool) {
+          const pool = connectionManager.pool;
           const activeConnections = pool.size - pool.available;
           metrics.updateDbPoolMetrics('postgres', activeConnections);
         }
