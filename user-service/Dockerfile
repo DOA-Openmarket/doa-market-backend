@@ -13,9 +13,9 @@ WORKDIR /app/user-service
 COPY user-service/package*.json ./
 RUN npm install
 
-# Link the built common package
+# Copy the built common package into node_modules
 RUN mkdir -p node_modules/@doa-market && \
-    ln -s ../../packages/common node_modules/@doa-market/common
+    cp -r /app/packages/common node_modules/@doa-market/
 
 # Copy service source
 COPY user-service/ ./
@@ -28,7 +28,7 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy common package
+# Copy common package for runtime
 COPY --from=builder /app/packages/common /app/packages/common
 
 # Copy built service and dependencies
