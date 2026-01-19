@@ -150,5 +150,56 @@ router.patch('/:id', authenticate, userController.updateUser);
  */
 router.delete('/:id', authenticate, userController.deleteUser);
 
+/**
+ * @swagger
+ * /api/v1/users/{userId}/profile:
+ *   get:
+ *     tags: [Users]
+ *     summary: 사용자 프로필 조회 (alias for /users/:id)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 사용자 ID
+ *     responses:
+ *       200:
+ *         description: 프로필 조회 성공
+ */
+router.get('/:userId/profile', userController.getUser);
+
+/**
+ * @swagger
+ * /api/v1/users/{userId}/profile:
+ *   put:
+ *     tags: [Users]
+ *     summary: 사용자 프로필 수정 (alias for PATCH /users/:id)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: 프로필 수정 성공
+ */
+router.put('/:userId/profile', authenticate, userController.updateUser);
+
 export default router;
 

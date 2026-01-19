@@ -21,6 +21,39 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Get orders by user ID
+router.get('/user/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { page = '1', limit = '20' } = req.query;
+
+    const pageNum = parseInt(page as string, 10);
+    const limitNum = parseInt(limit as string, 10);
+    const offset = (pageNum - 1) * limitNum;
+
+    const { count, rows: orders } = await Order.findAndCountAll({
+      where: { userId },
+      limit: limitNum,
+      offset,
+      order: [['createdAt', 'DESC']],
+    });
+
+    res.json({
+      success: true,
+      data: orders,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total: count,
+        totalPages: Math.ceil(count / limitNum),
+      },
+    });
+  } catch (error: any) {
+    logger.error('Error fetching user orders:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 router.get('/:id', async (req, res) => {
   try {
     const order = await Order.findByPk(req.params.id);

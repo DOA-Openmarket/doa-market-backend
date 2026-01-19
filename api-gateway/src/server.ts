@@ -257,6 +257,13 @@ const services: ServiceConfig[] = [
     roles: ["admin"],
   },
 
+  // Public notices - no auth required (for user app)
+  {
+    path: "/api/v1/notices",
+    target: "http://admin-service:3012",
+    auth: "none",
+  },
+
   // File service - auth required
   { path: "/api/v1/files", target: "http://file-service:3013", auth: "required" },
 
