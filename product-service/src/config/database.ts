@@ -7,5 +7,5 @@ export const sequelize = new Sequelize({
   username: process.env.DB_USER || "postgres",
   password: process.env.DB_PASSWORD || "postgres",
   dialect: "postgres",
-  logging: false,
+  logging: console.log, // Enable logging to debug queries
 });

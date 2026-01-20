@@ -61,7 +61,7 @@ spec:
               name: {{ $.Values.database.existingSecret }}
               key: password
         - name: DB_NAME
-          value: {{ $serviceName | replace "-" "_" }}
+          value: doamarket
         # Redis configuration
         - name: REDIS_HOST
           value: {{ $.Values.redis.host }}
