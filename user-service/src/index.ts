@@ -78,8 +78,9 @@ const startServer = async () => {
     // Sync database models (create tables if they don't exist, but don't alter existing ones)
     // For production, use migrations instead of sync({ alter: true }) to avoid enum type conflicts
     const dbSync = process.env.DB_SYNC === 'true';
-    await sequelize.sync({ alter: dbSync });
-    logger.info(`Database synchronized (alter: ${dbSync})`);
+    const dbForce = process.env.DB_FORCE === 'true';
+    await sequelize.sync({ alter: dbSync, force: dbForce });
+    logger.info(`Database synchronized (alter: ${dbSync}, force: ${dbForce})`);
 
     app.listen(PORT, () => {
       logger.info(`User Service running on port ${PORT}`);

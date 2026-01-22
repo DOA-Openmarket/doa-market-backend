@@ -45,8 +45,9 @@ const startServer = async () => {
   try {
     // Sync database models (create tables if they don't exist, but don't alter existing ones)
     const dbSync = process.env.DB_SYNC === 'true';
-    await sequelize.sync({ alter: dbSync });
-    logger.info(`Database synchronized (alter: ${dbSync})`);
+    const dbForce = process.env.DB_FORCE === 'true';
+    await sequelize.sync({ alter: dbSync, force: dbForce });
+    logger.info(`Database synchronized (alter: ${dbSync}, force: ${dbForce})`);
 
     // Only connect to RabbitMQ if enabled
     const rabbitmqEnabled = process.env.RABBITMQ_ENABLED !== 'false';
