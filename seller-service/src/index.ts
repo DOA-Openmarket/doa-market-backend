@@ -22,7 +22,10 @@ app.get('/health', (req, res) => {
 app.use('/api/v1/sellers', sellerRoutes);
 
 const startServer = async () => {
-  await sequelize.sync({ alter: true });
+  const dbSync = process.env.DB_SYNC === 'true';
+  const dbForce = process.env.DB_FORCE === 'true';
+  await sequelize.sync({ alter: dbSync, force: dbForce });
+  logger.info(`Database synchronized (alter: ${dbSync}, force: ${dbForce})`);
   app.listen(PORT, () => logger.info(`Seller Service on port ${PORT}`));
 };
 
