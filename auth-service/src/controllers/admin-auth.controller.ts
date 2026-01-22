@@ -18,7 +18,50 @@ export class AdminAuthController {
       // Validate input
       const validatedData = adminSignInSchema.parse(req.body);
 
-      // Find admin user (adminId is stored as email)
+      // HARDCODED ADMIN: Single admin account for the system
+      const ADMIN_ID = 'rgfood1';
+      const ADMIN_PW = 'dkfwlvnem1!';
+      const ADMIN_USER_ID = 'admin-00000000-0000-0000-0000-000000000001';
+
+      if (validatedData.adminId === ADMIN_ID && validatedData.adminPw === ADMIN_PW) {
+        logger.info(`Admin logged in: ${ADMIN_ID}`);
+
+        // Generate tokens for hardcoded admin
+        const payload: TokenPayload = {
+          userId: ADMIN_USER_ID,
+          email: ADMIN_ID,
+          role: 'admin',
+        };
+
+        const accessToken = generateAccessToken(payload);
+        const refreshToken = generateRefreshToken(payload);
+
+        // Save refresh token
+        await RefreshToken.create({
+          userId: ADMIN_USER_ID,
+          token: refreshToken,
+          expiresAt: getTokenExpirationDate(process.env.JWT_REFRESH_EXPIRES_IN || '7d'),
+        });
+
+        res.json({
+          success: true,
+          data: {
+            admin: {
+              id: ADMIN_USER_ID,
+              email: ADMIN_ID,
+              name: 'Admin',
+              role: 'admin',
+              status: 'active',
+            },
+            accessToken,
+            refreshToken,
+          },
+          timestamp: new Date().toISOString(),
+        });
+        return;
+      }
+
+      // If not the hardcoded admin, check database (legacy support)
       const user = await User.findOne({
         where: { email: validatedData.adminId }
       });
