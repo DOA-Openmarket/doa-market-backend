@@ -1,8 +1,9 @@
 FROM node:20-alpine
 WORKDIR /app
-COPY package*.json ./
+COPY seller-service/package*.json ./
 RUN npm install
-COPY . .
+COPY seller-service/. .
+RUN npm run build
 EXPOSE 3007
-CMD ["npm", "run", "dev"]
+CMD ["npm", "start"]
 
