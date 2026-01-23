@@ -11,6 +11,8 @@ class User extends Model {
   public role!: string;
   public grade!: string;
   public status!: string;
+  public emailVerified!: boolean;
+  public lastLoginAt?: Date;
   public totalPoints!: number;
   public consecutiveCheckins!: number;
   public lastCheckinDate?: string;
@@ -29,6 +31,8 @@ User.init(
     role: { type: DataTypes.ENUM('admin', 'seller', 'user'), defaultValue: 'user' },
     grade: { type: DataTypes.ENUM('bronze', 'silver', 'gold', 'vip'), defaultValue: 'bronze' },
     status: { type: DataTypes.ENUM('active', 'suspended', 'deleted'), defaultValue: 'active' },
+    emailVerified: { type: DataTypes.BOOLEAN, defaultValue: false, allowNull: true, comment: '이메일 인증 여부' },
+    lastLoginAt: { type: DataTypes.DATE, allowNull: true, comment: '마지막 로그인 시간' },
     totalPoints: { type: DataTypes.INTEGER, defaultValue: 0, comment: '현재 보유 포인트' },
     consecutiveCheckins: { type: DataTypes.INTEGER, defaultValue: 0, comment: '연속 출석일' },
     lastCheckinDate: { type: DataTypes.DATEONLY, allowNull: true, comment: '마지막 출석 날짜' },
