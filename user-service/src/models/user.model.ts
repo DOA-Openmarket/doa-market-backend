@@ -22,7 +22,7 @@ User.init(
   {
     id: { type: DataTypes.UUID, primaryKey: true },
     email: { type: DataTypes.STRING(255), allowNull: false, unique: true },
-    password: { type: DataTypes.STRING(255), allowNull: false, comment: '암호화된 비밀번호' },
+    password: { type: DataTypes.STRING(255), allowNull: true, comment: '암호화된 비밀번호' },
     name: { type: DataTypes.STRING(100), allowNull: false },
     phone: { type: DataTypes.STRING(20) },
     profileImage: { type: DataTypes.TEXT },
