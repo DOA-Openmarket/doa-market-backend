@@ -76,10 +76,9 @@ app.use(
   })
 );
 
-// IMPORTANT: Do NOT use express.json() globally - it consumes the request body
-// and prevents http-proxy-middleware from forwarding POST/PUT request bodies.
-// Instead, we'll let the proxy handle body forwarding to backend services.
-// app.use(express.json());
+// Parse JSON bodies for proper proxying
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Trust proxy - required for ALB/Load Balancer to properly handle X-Forwarded-For headers
 app.set('trust proxy', true);
@@ -367,6 +366,14 @@ services.forEach(({ path, target, auth, roles }) => {
     changeOrigin: true,
     onProxyReq: (proxyReq, req: any) => {
       logger.info(`Proxying ${req.method} ${req.url} to ${target}`);
+
+      // Re-write body for POST/PUT/PATCH requests
+      if (req.body && (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH')) {
+        const bodyData = JSON.stringify(req.body);
+        proxyReq.setHeader('Content-Type', 'application/json');
+        proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+        proxyReq.write(bodyData);
+      }
 
       // Forward user information if authenticated
       if (req.user) {
