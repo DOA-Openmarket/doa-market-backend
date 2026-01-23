@@ -6,7 +6,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import dotenv from "dotenv";
-import { createProxyMiddleware, Options } from "http-proxy-middleware";
+import { createProxyMiddleware, Options, fixRequestBody } from "http-proxy-middleware";
 import logger from "./utils/logger";
 import {
   authMiddleware,
@@ -367,13 +367,8 @@ services.forEach(({ path, target, auth, roles }) => {
     onProxyReq: (proxyReq, req: any) => {
       logger.info(`Proxying ${req.method} ${req.url} to ${target}`);
 
-      // Re-write body for POST/PUT/PATCH requests
-      if (req.body && (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH')) {
-        const bodyData = JSON.stringify(req.body);
-        proxyReq.setHeader('Content-Type', 'application/json');
-        proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
-        proxyReq.write(bodyData);
-      }
+      // Fix request body using http-proxy-middleware helper
+      fixRequestBody(proxyReq, req);
 
       // Forward user information if authenticated
       if (req.user) {
