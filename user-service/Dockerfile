@@ -36,5 +36,9 @@ COPY --from=builder /app/user-service/package*.json ./
 COPY --from=builder /app/user-service/dist ./dist
 COPY --from=builder /app/user-service/node_modules ./node_modules
 
+# Ensure @doa-market/common is available at runtime
+RUN mkdir -p node_modules/@doa-market && \
+    cp -r /app/packages/common node_modules/@doa-market/
+
 EXPOSE 3002
 CMD ["npm", "start"]
