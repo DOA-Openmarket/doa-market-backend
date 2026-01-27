@@ -15,8 +15,8 @@ const sellerSignUpSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters'),
   name: z.string().min(2, 'Name must be at least 2 characters'),
   phone: z.string().optional(),
-  storeName: z.string().min(2, 'Store name must be at least 2 characters'),
-  businessNumber: z.string().min(10, 'Business number is required'),
+  storeName: z.string().min(2, 'Store name must be at least 2 characters').optional(),
+  businessNumber: z.string().min(10, 'Business number is required').optional(),
 });
 
 const sellerSignInSchema = z.object({
@@ -65,27 +65,31 @@ export class SellerAuthController {
         throw new AppError('Failed to create seller user', 500);
       }
 
-      // Create seller record via seller-service
-      try {
-        await axios.post(`${SELLER_SERVICE_URL}/api/v1/sellers`, {
-          userId: userId,
-          storeName: validatedData.storeName,
-          businessNumber: validatedData.businessNumber,
-          status: 'pending', // Pending verification
-        });
-      } catch (error: any) {
-        // Rollback user creation if seller creation fails
-        await user.destroy();
-
-        if (error.response?.status === 409) {
-          throw new AppError('Business number already registered', 409);
+      // Create seller record via seller-service (optional - if storeName and businessNumber provided)
+      if (validatedData.storeName && validatedData.businessNumber) {
+        try {
+          await axios.post(`${SELLER_SERVICE_URL}/api/v1/sellers`, {
+            userId: userId,
+            storeName: validatedData.storeName,
+            businessNumber: validatedData.businessNumber,
+            status: 'pending', // Pending verification
+          });
+          logger.info(`Seller record created: ${userId}`);
+        } catch (error: any) {
+          // Log error but don't rollback user creation
+          // Seller info can be added later via seller-info page
+          if (error.response?.status === 409) {
+            logger.warn('Business number already registered', { userId, businessNumber: validatedData.businessNumber });
+          } else {
+            logger.error('Failed to create seller record', { error: error.message, userId });
+          }
+          logger.info('User created without seller record - can be completed later');
         }
-
-        logger.error('Failed to create seller record', { error: error.message, userId });
-        throw new AppError('Failed to create seller account', 500);
+      } else {
+        logger.info(`User created without seller record: ${userId} - to be completed later`);
       }
 
-      logger.info(`Seller registered: ${userId}`);
+      logger.info(`Seller user registered: ${userId}`);
 
       // Get user data
       const userData = user.toJSON();
