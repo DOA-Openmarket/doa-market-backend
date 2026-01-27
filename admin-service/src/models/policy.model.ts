@@ -22,7 +22,7 @@ Policy.init(
       primaryKey: true
     },
     type: {
-      type: DataTypes.ENUM('이용약관', '개인정보처리방침', '환불정책', '배송정책', '판매자정책'),
+      type: DataTypes.ENUM('이용약관', '개인정보처리방침', '환불정책', '배송정책', '판매자정책', '마케팅수신동의'),
       allowNull: false,
       comment: '정책 유형'
     },
