@@ -190,6 +190,22 @@ export class SellerAuthController {
         // Continue without seller details
       }
 
+      // Check seller status - only verified sellers can login
+      if (sellerData) {
+        if (sellerData.status === 'pending') {
+          throw new AppError('판매자 승인 대기중입니다. 관리자의 승인을 기다려주세요.', 403);
+        }
+        if (sellerData.status === 'rejected') {
+          throw new AppError('판매자 신청이 거부되었습니다. 관리자에게 문의해주세요.', 403);
+        }
+        if (sellerData.status === 'suspended') {
+          throw new AppError('판매자 계정이 정지되었습니다. 관리자에게 문의해주세요.', 403);
+        }
+      } else {
+        // If seller data not found but user role is seller, reject login
+        throw new AppError('판매자 정보를 찾을 수 없습니다. 판매자 정보를 등록해주세요.', 403);
+      }
+
       // Generate tokens
       const payload: TokenPayload = {
         userId: finalUserId,
