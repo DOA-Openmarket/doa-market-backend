@@ -3,13 +3,12 @@ FROM node:20-alpine AS builder
 # Set working directory
 WORKDIR /app
 
-# Copy service files
-WORKDIR /app/auth-service
-COPY auth-service/package*.json ./
+# Copy package files
+COPY package*.json ./
 RUN npm install
 
-# Copy service source
-COPY auth-service/ ./
+# Copy source
+COPY . ./
 
 # Build service
 RUN npm run build
@@ -20,9 +19,9 @@ FROM node:20-alpine
 WORKDIR /app
 
 # Copy built service and dependencies
-COPY --from=builder /app/auth-service/package*.json ./
-COPY --from=builder /app/auth-service/dist ./dist
-COPY --from=builder /app/auth-service/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
 
 EXPOSE 3001
 CMD ["npm", "start"]

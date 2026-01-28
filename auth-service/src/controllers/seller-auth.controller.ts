@@ -65,28 +65,26 @@ export class SellerAuthController {
         throw new AppError('Failed to create seller user', 500);
       }
 
-      // Create seller record via seller-service (optional - if storeName and businessNumber provided)
-      if (validatedData.storeName && validatedData.businessNumber) {
-        try {
-          await axios.post(`${SELLER_SERVICE_URL}/api/v1/sellers`, {
-            userId: userId,
-            storeName: validatedData.storeName,
-            businessNumber: validatedData.businessNumber,
-            status: 'pending', // Pending verification
-          });
-          logger.info(`Seller record created: ${userId}`);
-        } catch (error: any) {
-          // Log error but don't rollback user creation
-          // Seller info can be added later via seller-info page
-          if (error.response?.status === 409) {
-            logger.warn('Business number already registered', { userId, businessNumber: validatedData.businessNumber });
-          } else {
-            logger.error('Failed to create seller record', { error: error.message, userId });
-          }
-          logger.info('User created without seller record - can be completed later');
+      // Always create seller record (even without storeName/businessNumber)
+      // This ensures seller appears in admin list for approval
+      try {
+        await axios.post(`${SELLER_SERVICE_URL}/api/v1/sellers`, {
+          userId: userId,
+          storeName: validatedData.storeName || '미입력',
+          // Use userId as temporary businessNumber to avoid unique constraint issues
+          businessNumber: validatedData.businessNumber || `TEMP-${userId}`,
+          status: 'pending', // Pending verification
+        });
+        logger.info(`Seller record created: ${userId}`);
+      } catch (error: any) {
+        // If seller record creation fails, log error but continue
+        // This allows user to complete seller info later
+        if (error.response?.status === 409) {
+          logger.warn('Seller already exists or business number already registered', { userId });
+        } else {
+          logger.error('Failed to create seller record', { error: error.message, userId });
         }
-      } else {
-        logger.info(`User created without seller record: ${userId} - to be completed later`);
+        // Don't throw error - allow user creation to succeed
       }
 
       logger.info(`Seller user registered: ${userId}`);
