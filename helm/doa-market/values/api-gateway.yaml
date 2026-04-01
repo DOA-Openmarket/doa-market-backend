@@ -1,6 +1,6 @@
 image:
   repository: 478266318018.dkr.ecr.ap-northeast-2.amazonaws.com/doa-market-api-gateway
-  tag: 706928c
+  tag: 51d277f
 
 serviceAccount:
   annotations: {}
