@@ -179,16 +179,8 @@ services:
 
   # Auth Service도 On-Demand만 사용
   auth-service:
-    spotEnabled: false
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-          - matchExpressions:
-              - key: eks.amazonaws.com/capacityType
-                operator: In
-                values:
-                  - ON_DEMAND
-    tolerations: []
+    spotEnabled: true
+    nodeAffinity: {}
 
 # Production database configuration
 database:
