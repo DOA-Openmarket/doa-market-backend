@@ -72,7 +72,7 @@ export class SellerAuthController {
           userId: userId,
           storeName: validatedData.storeName || '미입력',
           // Use userId as temporary businessNumber to avoid unique constraint issues
-          businessNumber: validatedData.businessNumber || `TEMP-${userId}`,
+          businessNumber: validatedData.businessNumber || `TEMP-${userId.slice(0, 14)}`,
           status: 'pending', // Pending verification
         });
         logger.info(`Seller record created: ${userId}`);
