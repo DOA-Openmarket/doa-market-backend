@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import authController from '../controllers/auth.controller';
+import naverOAuthController from '../controllers/naver-oauth.controller';
+import kakaoOAuthController from '../controllers/kakao-oauth.controller';
 import { authenticate } from '../middleware/auth.middleware';
 import rateLimit from 'express-rate-limit';
 
@@ -236,6 +238,230 @@ router.post('/send-verification', authLimiter, authController.sendVerification);
  *         description: 잘못된 코드 또는 만료됨
  */
 router.post('/verify-email', authController.verifyEmail);
+
+/**
+ * @swagger
+ * /api/v1/auth/reset-password:
+ *   post:
+ *     tags: [Auth]
+ *     summary: 비밀번호 재설정
+ *     description: 인증 코드를 사용하여 비밀번호를 재설정합니다.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - code
+ *               - newPassword
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               code:
+ *                 type: string
+ *                 minLength: 6
+ *                 maxLength: 6
+ *               newPassword:
+ *                 type: string
+ *                 minLength: 8
+ *     responses:
+ *       200:
+ *         description: 비밀번호 재설정 성공
+ *       400:
+ *         description: 잘못된 코드 또는 만료됨
+ */
+router.post('/reset-password', authController.resetPassword);
+
+/**
+ * @swagger
+ * /api/v1/auth/naver:
+ *   get:
+ *     tags: [Auth]
+ *     summary: 네이버 OAuth 인증 URL 가져오기
+ *     description: 네이버 로그인을 위한 OAuth 인증 URL을 반환합니다.
+ *     parameters:
+ *       - in: query
+ *         name: state
+ *         schema:
+ *           type: string
+ *         description: CSRF 방지를 위한 state 값 (선택사항)
+ *     responses:
+ *       200:
+ *         description: 인증 URL 반환 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     authUrl:
+ *                       type: string
+ */
+router.get('/naver', naverOAuthController.getAuthUrl);
+
+/**
+ * @swagger
+ * /api/v1/auth/naver/callback:
+ *   get:
+ *     tags: [Auth]
+ *     summary: 네이버 OAuth 콜백 처리
+ *     description: 네이버 로그인 후 콜백을 처리합니다.
+ *     parameters:
+ *       - in: query
+ *         name: code
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Authorization code
+ *       - in: query
+ *         name: state
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: State 값
+ *     responses:
+ *       200:
+ *         description: 로그인 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthResponse'
+ */
+router.get('/naver/callback', naverOAuthController.handleCallback);
+
+/**
+ * @swagger
+ * /api/v1/auth/naver/login:
+ *   post:
+ *     tags: [Auth]
+ *     summary: 네이버 OAuth 로그인 (모바일용)
+ *     description: 모바일 앱에서 직접 네이버 authorization code로 로그인합니다.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - code
+ *               - state
+ *             properties:
+ *               code:
+ *                 type: string
+ *                 description: Authorization code
+ *               state:
+ *                 type: string
+ *                 description: State 값
+ *     responses:
+ *       200:
+ *         description: 로그인 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthResponse'
+ */
+router.post('/naver/login', naverOAuthController.login);
+
+/**
+ * @swagger
+ * /api/v1/auth/kakao:
+ *   get:
+ *     tags: [Auth]
+ *     summary: 카카오 OAuth 인증 URL 가져오기
+ *     description: 카카오 로그인을 위한 OAuth 인증 URL을 반환합니다.
+ *     parameters:
+ *       - in: query
+ *         name: state
+ *         schema:
+ *           type: string
+ *         description: CSRF 방지를 위한 state 값 (선택사항)
+ *     responses:
+ *       200:
+ *         description: 인증 URL 반환 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     authUrl:
+ *                       type: string
+ */
+router.get('/kakao', kakaoOAuthController.getAuthUrl);
+
+/**
+ * @swagger
+ * /api/v1/auth/kakao/callback:
+ *   get:
+ *     tags: [Auth]
+ *     summary: 카카오 OAuth 콜백 처리
+ *     description: 카카오 로그인 후 콜백을 처리합니다.
+ *     parameters:
+ *       - in: query
+ *         name: code
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Authorization code
+ *       - in: query
+ *         name: state
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: State 값
+ *     responses:
+ *       200:
+ *         description: 로그인 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthResponse'
+ */
+router.get('/kakao/callback', kakaoOAuthController.handleCallback);
+
+/**
+ * @swagger
+ * /api/v1/auth/kakao/login:
+ *   post:
+ *     tags: [Auth]
+ *     summary: 카카오 OAuth 로그인 (모바일용)
+ *     description: 모바일 앱에서 직접 카카오 authorization code로 로그인합니다.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - code
+ *               - state
+ *             properties:
+ *               code:
+ *                 type: string
+ *                 description: Authorization code
+ *               state:
+ *                 type: string
+ *                 description: State 값
+ *     responses:
+ *       200:
+ *         description: 로그인 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthResponse'
+ */
+router.post('/kakao/login', kakaoOAuthController.login);
 
 export default router;
 

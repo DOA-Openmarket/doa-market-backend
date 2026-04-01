@@ -18,7 +18,9 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'file-service', timestamp: new Date().toISOString() });
 });
 
-app.use('/api/v1/files', fileRoutes);
+// attachments 경로로 변경 (API Gateway와 매칭)
+app.use('/api/v1/attachments', fileRoutes);
+app.use('/api/v1/files', fileRoutes); // 하위 호환성 유지
 
 app.listen(PORT, () => logger.info(`File Service on port ${PORT}`));
 export default app;

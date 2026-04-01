@@ -11,15 +11,18 @@ RUN npm install
 # Copy service source
 COPY admin-service/ ./
 
-# Production stage (no build needed for dev mode)
+# Build the service
+RUN npm run build
+
+# Production stage
 FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy service and dependencies
+# Copy built service and dependencies
 COPY --from=builder /app/admin-service/package*.json ./
-COPY --from=builder /app/admin-service ./
+COPY --from=builder /app/admin-service/dist ./dist
 COPY --from=builder /app/admin-service/node_modules ./node_modules
 
-EXPOSE 3014
-CMD ["npm", "run", "dev"]
+EXPOSE 3012
+CMD ["npm", "start"]

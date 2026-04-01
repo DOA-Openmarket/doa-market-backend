@@ -5,19 +5,229 @@ const router = Router();
 
 router.get('/dashboard', async (req, res) => {
   // Aggregate data from multiple services
-  res.json({ 
-    success: true, 
-    data: { 
-      totalUsers: 0, 
-      totalOrders: 0, 
-      totalRevenue: 0 
-    } 
+  res.json({
+    success: true,
+    data: {
+      totalUsers: 0,
+      totalOrders: 0,
+      totalRevenue: 0
+    }
   });
+});
+
+router.get('/users', async (req, res) => {
+  try {
+    const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://user-service:3005';
+    const { search, page, limit, status } = req.query;
+    const query = new URLSearchParams();
+
+    // Filter for regular users only (not sellers or admins)
+    query.append('role', 'user');
+
+    if (search) query.append('search', search as string);
+    if (page) query.append('page', page as string);
+    if (limit) query.append('limit', limit as string);
+    if (status) query.append('status', status as string);
+
+    const response = await axios.get(`${USER_SERVICE_URL}/api/v1/users?${query.toString()}`, {
+      headers: {
+        Authorization: req.headers.authorization
+      }
+    });
+
+    res.json(response.data);
+  } catch (error: any) {
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: { message: error.response?.data?.error?.message || 'Failed to fetch users' }
+    });
+  }
+});
+
+router.get('/sellers', async (req, res) => {
+  try {
+    const SELLER_SERVICE_URL = process.env.SELLER_SERVICE_URL || 'http://seller-service:3011';
+    const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://user-service:3005';
+    const { search, page, limit, status, userId } = req.query;
+    const query = new URLSearchParams();
+
+    if (search) query.append('search', search as string);
+    if (page) query.append('page', page as string);
+    if (limit) query.append('limit', limit as string);
+    if (status) query.append('status', status as string);
+    if (userId) query.append('userId', userId as string);
+
+    // Get sellers from seller-service
+    const sellersResponse = await axios.get(`${SELLER_SERVICE_URL}/api/v1/sellers?${query.toString()}`, {
+      headers: {
+        Authorization: req.headers.authorization
+      }
+    });
+
+    const sellers = sellersResponse.data.data || [];
+
+    // Enrich sellers with user information
+    const enrichedSellers = await Promise.all(
+      sellers.map(async (seller: any) => {
+        try {
+          // Fetch user info for each seller
+          const userResponse = await axios.get(`${USER_SERVICE_URL}/api/v1/users/${seller.userId}`, {
+            headers: {
+              Authorization: req.headers.authorization
+            }
+          });
+
+          const user = userResponse.data.data || {};
+
+          // Combine seller and user data in the format frontend expects
+          return {
+            id: seller.id,
+            userId: seller.userId,
+            name: user.name || '',
+            email: user.email || '',
+            phone: user.phone || '',
+            shop_name: seller.storeName,
+            business_number: seller.businessNumber,
+            status: seller.status,
+            verifiedAt: seller.verifiedAt,
+            createdAt: seller.createdAt,
+            updatedAt: seller.updatedAt,
+          };
+        } catch (error) {
+          console.error(`Failed to fetch user for seller ${seller.id}:`, error);
+          // Return seller data without user info if user fetch fails
+          return {
+            id: seller.id,
+            userId: seller.userId,
+            name: '',
+            email: '',
+            phone: '',
+            shop_name: seller.storeName,
+            business_number: seller.businessNumber,
+            status: seller.status,
+            verifiedAt: seller.verifiedAt,
+            createdAt: seller.createdAt,
+            updatedAt: seller.updatedAt,
+          };
+        }
+      })
+    );
+
+    res.json({
+      success: true,
+      data: enrichedSellers,
+      total: enrichedSellers.length,
+    });
+  } catch (error: any) {
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: { message: error.response?.data?.error?.message || 'Failed to fetch sellers' }
+    });
+  }
+});
+
+router.get('/sellers/:id', async (req, res) => {
+  try {
+    const SELLER_SERVICE_URL = process.env.SELLER_SERVICE_URL || 'http://seller-service:3011';
+    const response = await axios.get(`${SELLER_SERVICE_URL}/api/v1/sellers/${req.params.id}`, {
+      headers: {
+        Authorization: req.headers.authorization
+      }
+    });
+    res.json(response.data);
+  } catch (error: any) {
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: { message: error.response?.data?.error?.message || 'Failed to fetch seller' }
+    });
+  }
+});
+
+router.patch('/sellers/:id/status', async (req, res) => {
+  try {
+    const SELLER_SERVICE_URL = process.env.SELLER_SERVICE_URL || 'http://seller-service:3011';
+    const { status } = req.body;
+
+    // Update seller status (pending, verified, rejected, suspended)
+    const response = await axios.put(`${SELLER_SERVICE_URL}/api/v1/sellers/${req.params.id}`,
+      { status },
+      {
+        headers: {
+          Authorization: req.headers.authorization,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    res.json(response.data);
+  } catch (error: any) {
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: { message: error.response?.data?.error?.message || 'Failed to update seller status' }
+    });
+  }
+});
+
+router.patch('/sellers/:id/verify', async (req, res) => {
+  try {
+    const SELLER_SERVICE_URL = process.env.SELLER_SERVICE_URL || 'http://seller-service:3011';
+    const response = await axios.patch(`${SELLER_SERVICE_URL}/api/v1/sellers/${req.params.id}/verify`, {},
+      {
+        headers: {
+          Authorization: req.headers.authorization
+        }
+      }
+    );
+    res.json(response.data);
+  } catch (error: any) {
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: { message: error.response?.data?.error?.message || 'Failed to verify seller' }
+    });
+  }
+});
+
+router.delete('/sellers/:id', async (req, res) => {
+  try {
+    const SELLER_SERVICE_URL = process.env.SELLER_SERVICE_URL || 'http://seller-service:3011';
+    const response = await axios.delete(`${SELLER_SERVICE_URL}/api/v1/sellers/${req.params.id}`, {
+      headers: {
+        Authorization: req.headers.authorization
+      }
+    });
+    res.json(response.data);
+  } catch (error: any) {
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: { message: error.response?.data?.error?.message || 'Failed to delete seller' }
+    });
+  }
 });
 
 router.post('/users/:id/suspend', async (req, res) => {
   // Call User Service to suspend user
   res.json({ success: true, message: 'User suspended' });
+});
+
+router.delete('/users/:id', async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://user-service:3005';
+
+    // Call User Service to delete user
+    const response = await axios.delete(`${USER_SERVICE_URL}/api/v1/users/${userId}`, {
+      headers: {
+        Authorization: req.headers.authorization
+      }
+    });
+
+    res.json({ success: true, message: 'User deleted successfully' });
+  } catch (error: any) {
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: { message: error.response?.data?.error?.message || 'Failed to delete user' }
+    });
+  }
 });
 
 export default router;

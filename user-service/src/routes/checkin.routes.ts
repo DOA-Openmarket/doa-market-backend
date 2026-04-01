@@ -81,14 +81,14 @@ router.get('/:userId/checkin/status', checkinController.getStatus);
  *           type: string
  *       - in: query
  *         name: year
+ *         description: 연도 (기본값 올해)
  *         schema:
  *           type: integer
- *         description: 연도 (기본값: 올해)
  *       - in: query
  *         name: month
+ *         description: 월 (1-12 기본값 이번 달)
  *         schema:
  *           type: integer
- *         description: 월 (1-12, 기본값: 이번 달)
  *     responses:
  *       200:
  *         description: 출석 달력 조회 성공

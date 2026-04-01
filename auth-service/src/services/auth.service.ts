@@ -5,6 +5,7 @@ import { generateAccessToken, generateRefreshToken, verifyRefreshToken, getToken
 import { AppError } from '../utils/app-error';
 import { logger } from '../utils/logger';
 import { Op } from 'sequelize';
+import emailService from './email.service';
 
 export interface RegisterDto {
   email: string;
@@ -235,6 +236,12 @@ export class AuthService {
   }
 
   async sendVerificationCode(email: string): Promise<void> {
+    // Check if email already exists
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+      throw new AppError('Email already registered', 409);
+    }
+
     // Generate 6-digit code
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -258,16 +265,21 @@ export class AuthService {
       verified: false,
     });
 
-    // TODO: Send email via notification service or nodemailer
-    // For now, just log the code (in production, this should be removed)
+    // Log the code for development
     logger.info(`Verification code for ${email}: ${code}`);
 
-    // In production, send email:
-    // await sendEmail({
-    //   to: email,
-    //   subject: 'Email Verification Code',
-    //   text: `Your verification code is: ${code}`,
-    // });
+    // Send email via SES
+    try {
+      await emailService.sendVerificationEmail(email, code);
+      logger.info(`Verification email sent successfully to ${email}`);
+    } catch (error: any) {
+      logger.error('Failed to send verification email', { email, error: error.message });
+      // Don't throw error to avoid breaking the flow in development
+      // In production, you might want to throw this error
+      if (process.env.NODE_ENV === 'production') {
+        throw new AppError('Failed to send verification email', 500);
+      }
+    }
   }
 
   async verifyEmailCode(email: string, code: string): Promise<void> {
@@ -298,6 +310,45 @@ export class AuthService {
     );
 
     logger.info(`Email verified: ${email}`);
+  }
+
+  async resetPassword(email: string, code: string, newPassword: string): Promise<void> {
+    // Find verification code
+    const verificationCode = await VerificationCode.findOne({
+      where: {
+        email,
+        code,
+        verified: false,
+        expiresAt: {
+          [Op.gt]: new Date(),
+        },
+      },
+    });
+
+    if (!verificationCode) {
+      throw new AppError('Invalid or expired verification code', 400);
+    }
+
+    // Mark as verified
+    verificationCode.verified = true;
+    await verificationCode.save();
+
+    // Find user
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      throw new AppError('User not found', 404);
+    }
+
+    // Hash new password
+    const bcrypt = require('bcryptjs');
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update password
+    user.password = hashedPassword;
+    await user.save();
+
+    logger.info(`Password reset for user: ${user.id}`);
   }
 }
 

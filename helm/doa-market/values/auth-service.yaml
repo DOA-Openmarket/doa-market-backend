@@ -1,6 +1,6 @@
 image:
   repository: 478266318018.dkr.ecr.ap-northeast-2.amazonaws.com/doa-market-auth-service
-  tag: 039c1c8
+  tag: naver-oauth
 
 serviceAccount:
   annotations: {}
@@ -8,3 +8,24 @@ serviceAccount:
 service:
   type: ClusterIP
   port: 3001
+
+env:
+  - name: JWT_ACCESS_SECRET
+    value: "doa-market-prod-access-secret-2026-secure-key"
+  - name: JWT_REFRESH_SECRET
+    value: "doa-market-prod-refresh-secret-2026-secure-key"
+  - name: JWT_ACCESS_EXPIRES_IN
+    value: "15m"
+  - name: JWT_REFRESH_EXPIRES_IN
+    value: "7d"
+  - name: NAVER_CLIENT_ID
+    value: "OI6EQBbkUIN6SIYUowKM"
+  - name: NAVER_CLIENT_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: naver-oauth-secrets
+        key: client-secret
+  - name: NAVER_CALLBACK_URL
+    value: "https://api.xn--9m1b13r66n.com/api/v1/auth/naver/callback"
+  - name: DB_SYNC
+    value: "true"

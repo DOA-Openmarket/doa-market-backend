@@ -21,7 +21,7 @@ export class AdminAuthController {
       // HARDCODED ADMIN: Single admin account for the system
       const ADMIN_ID = 'rgfood1';
       const ADMIN_PW = 'dkfwlvnem1!';
-      const ADMIN_USER_ID = 'admin-00000000-0000-0000-0000-000000000001';
+      const ADMIN_USER_ID = '00000000-0000-0000-0000-000000000001'; // Valid UUID format
 
       if (validatedData.adminId === ADMIN_ID && validatedData.adminPw === ADMIN_PW) {
         logger.info(`Admin logged in: ${ADMIN_ID}`);
@@ -150,7 +150,26 @@ export class AdminAuthController {
         throw new AppError('Not an admin account', 403);
       }
 
-      // Get user
+      // HARDCODED ADMIN: Return hardcoded admin data for the special admin user
+      const ADMIN_USER_ID = '00000000-0000-0000-0000-000000000001';
+      if (userId === ADMIN_USER_ID) {
+        res.json({
+          success: true,
+          data: {
+            admin: {
+              id: ADMIN_USER_ID,
+              email: 'rgfood1',
+              name: 'Admin',
+              role: 'admin',
+              status: 'active',
+            },
+          },
+          timestamp: new Date().toISOString(),
+        });
+        return;
+      }
+
+      // Get user from database (for legacy admin users)
       const user = await User.findByPk(userId);
       if (!user) {
         throw new AppError('User not found', 404);

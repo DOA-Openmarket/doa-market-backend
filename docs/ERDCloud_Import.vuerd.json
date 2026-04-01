@@ -1,0 +1,66 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dineug/erd-editor/main/json-schema/schema.json",
+  "version": "3.0.0",
+  "settings": {
+    "width": 2000,
+    "height": 2000,
+    "scrollTop": 0,
+    "scrollLeft": 0,
+    "zoomLevel": 1,
+    "show": 431,
+    "database": "PostgreSQL",
+    "databaseName": "doamarket",
+    "canvasType": "ERD",
+    "language": "GraphQL",
+    "tableNameCase": "pascalCase",
+    "columnNameCase": "camelCase",
+    "bracketType": "none",
+    "relationshipDataTypeSync": true,
+    "relationshipOptimization": false,
+    "columnOrder": [
+      "columnName",
+      "columnDataType",
+      "columnNotNull",
+      "columnUnique",
+      "columnAutoIncrement",
+      "columnDefault",
+      "columnComment"
+    ],
+    "maxWidthComment": -1
+  },
+  "doc": {
+    "tableIds": [],
+    "relationshipIds": [],
+    "indexIds": [],
+    "memoIds": []
+  },
+  "collections": {
+    "tableEntities": {
+      "users": {
+        "id": "users",
+        "name": "users",
+        "comment": "사용자",
+        "columnIds": [],
+        "seqColumnIds": [],
+        "ui": {
+          "x": 100,
+          "y": 100,
+          "zIndex": 1,
+          "widthName": 60,
+          "widthComment": 60,
+          "color": ""
+        },
+        "meta": {
+          "updateAt": 1737443000000,
+          "createAt": 1737443000000
+        }
+      }
+    },
+    "tableColumnEntities": {},
+    "relationshipEntities": {},
+    "indexEntities": {},
+    "indexColumnEntities": {},
+    "memoEntities": {}
+  },
+  "lww": {}
+}

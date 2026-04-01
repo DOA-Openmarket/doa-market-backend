@@ -7,6 +7,9 @@ import adminRoutes from './routes/admin.routes';
 import noticeRoutes from './routes/notice.routes';
 import inquiryRoutes from './routes/inquiry.routes';
 import policyRoutes from './routes/policy.routes';
+import guideRoutes from './routes/guide.routes';
+import faqRoutes from './routes/faq.routes';
+import errorReportRoutes from './routes/error-report.routes';
 import { sequelize } from './config/database';
 import { logger } from './utils/logger';
 import { swaggerSpec } from './config/swagger';
@@ -32,9 +35,15 @@ app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/admin/notices', noticeRoutes);
 app.use('/api/v1/admin/inquiries', inquiryRoutes);
 app.use('/api/v1/admin/policies', policyRoutes);
+app.use('/api/v1/admin/guides', guideRoutes);
+app.use('/api/v1/admin/faqs', faqRoutes);
+app.use('/api/v1/admin/error-reports', errorReportRoutes);
 
 // Public routes (no admin prefix)
 app.use('/api/v1/notices', noticeRoutes); // Public notice access for user app
+app.use('/api/v1/guides', guideRoutes); // Public guide access for user app
+app.use('/api/v1/faqs', faqRoutes); // Public FAQ access for user app
+app.use('/api/v1/terms', policyRoutes); // Public terms/policy access for partner app
 
 const startServer = async () => {
   try {

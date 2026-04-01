@@ -2,12 +2,12 @@ import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../config/database';
 
 class Seller extends Model {
-  public id!: string;
-  public userId!: string;
-  public storeName!: string;
-  public businessNumber!: string;
-  public status!: string;
-  public verifiedAt?: Date;
+  declare id: string;
+  declare userId: string;
+  declare storeName: string;
+  declare businessNumber: string;
+  declare status: string;
+  declare verifiedAt?: Date;
 }
 
 Seller.init(

@@ -96,7 +96,40 @@ router.get('/:id', async (req, res) => {
  */
 router.post('/', async (req, res) => {
   try {
-    const coupon = await Coupon.create(req.body);
+    // Transform frontend data to backend format
+    const frontendData = req.body;
+
+    // Generate unique coupon code if not provided
+    const generateCode = () => {
+      const timestamp = Date.now().toString(36);
+      const random = Math.random().toString(36).substring(2, 8);
+      return `COUPON-${timestamp}-${random}`.toUpperCase();
+    };
+
+    // Map discount_mode to discountType
+    const discountTypeMap: { [key: string]: string } = {
+      'amount': 'fixed',
+      'percent': 'percentage',
+      'percentage': 'percentage',
+      'fixed': 'fixed'
+    };
+
+    const backendData = {
+      code: frontendData.code || generateCode(),
+      name: frontendData.title || frontendData.name || 'Unnamed Coupon',
+      discountType: discountTypeMap[frontendData.discount_mode] || frontendData.discountType || 'fixed',
+      discountValue: Number(frontendData.discount_amount || frontendData.discountValue || 0),
+      minOrderAmount: frontendData.min_order_amount ? Number(frontendData.min_order_amount) : null,
+      maxDiscountAmount: frontendData.discount_max ? Number(frontendData.discount_max) : null,
+      startDate: frontendData.start_date || frontendData.valid_from || frontendData.startDate || new Date(),
+      endDate: frontendData.end_date || frontendData.valid_to || frontendData.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // Default: 30 days from now
+      status: 'active',
+      // Store additional frontend fields in a text field if model supports it
+      issuedBy: frontendData.issued_by || null,
+      totalCount: frontendData.total_count ? Number(frontendData.total_count) : null,
+    };
+
+    const coupon = await Coupon.create(backendData);
     res.status(201).json({ success: true, data: coupon });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });

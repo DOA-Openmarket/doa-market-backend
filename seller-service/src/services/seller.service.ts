@@ -103,9 +103,7 @@ export class SellerService {
 
   async verify(id: string) {
     const seller = await this.findById(id);
-    seller.status = 'verified';
-    seller.verifiedAt = new Date();
-    await seller.save();
+    await seller.update({ status: 'verified', verifiedAt: new Date() });
     return seller;
   }
 

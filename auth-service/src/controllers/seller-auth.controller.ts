@@ -36,7 +36,7 @@ export class SellerAuthController {
         throw new AppError('Email already registered', 409);
       }
 
-      // Hash password
+      // Hash password manually (Model hooks may not work reliably)
       const bcrypt = require('bcryptjs');
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(validatedData.password, salt);
@@ -50,7 +50,7 @@ export class SellerAuthController {
         role: 'seller',
         status: 'active',
         emailVerified: false,
-      });
+      }, { hooks: false }); // Disable hooks to prevent double hashing
 
       // Get user ID
       let userId = user.id || user.getDataValue('id') || (user as any).dataValues?.id;
@@ -132,12 +132,19 @@ export class SellerAuthController {
       // Validate input
       const validatedData = sellerSignInSchema.parse(req.body);
 
+      logger.info('[DEBUG] Attempting to find user', { email: validatedData.email });
+      logger.info('[DEBUG] User model table name:', (User as any).tableName);
+      logger.info('[DEBUG] Sequelize instance:', User.sequelize?.config?.database);
+
       // Find user
       const user = await User.findOne({
         where: { email: validatedData.email }
       });
 
+      logger.info('[DEBUG] User found:', { found: !!user, email: validatedData.email });
+
       if (!user) {
+        logger.warn('[DEBUG] User not found in database', { email: validatedData.email });
         throw new AppError('Invalid credentials', 401);
       }
 
@@ -162,7 +169,16 @@ export class SellerAuthController {
       }
 
       const bcrypt = require('bcryptjs');
+      logger.info('[DEBUG] Password comparison', {
+        email: validatedData.email,
+        inputPasswordLength: validatedData.password.length,
+        storedPasswordLength: storedPassword.length,
+        storedPasswordPrefix: storedPassword.substring(0, 10)
+      });
+
       const isPasswordValid = await bcrypt.compare(validatedData.password, storedPassword);
+      logger.info('[DEBUG] Password validation result', { email: validatedData.email, isValid: isPasswordValid });
+
       if (!isPasswordValid) {
         throw new AppError('Invalid credentials', 401);
       }

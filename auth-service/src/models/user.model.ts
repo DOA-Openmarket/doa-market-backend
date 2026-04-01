@@ -19,17 +19,17 @@ export interface UserAttributes {
 interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'phone' | 'lastLoginAt' | 'createdAt' | 'updatedAt'> {}
 
 class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
-  public id!: string;
-  public email!: string;
-  public password!: string;
-  public name!: string;
-  public phone?: string;
-  public role!: 'admin' | 'seller' | 'user';
-  public status!: 'active' | 'suspended' | 'deleted';
-  public emailVerified!: boolean;
-  public lastLoginAt?: Date;
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  declare id: string;
+  declare email: string;
+  declare password: string;
+  declare name: string;
+  declare phone?: string;
+  declare role: 'admin' | 'seller' | 'user';
+  declare status: 'active' | 'suspended' | 'deleted';
+  declare emailVerified: boolean;
+  declare lastLoginAt?: Date;
+  declare readonly createdAt: Date;
+  declare readonly updatedAt: Date;
 
   // Instance methods
   public async comparePassword(candidatePassword: string): Promise<boolean> {
@@ -107,14 +107,18 @@ User.init(
     hooks: {
       beforeCreate: async (user: User) => {
         if (user.password) {
+          console.log('[User Model] beforeCreate hook: Hashing password for', user.email);
           const salt = await bcrypt.genSalt(10);
           user.password = await bcrypt.hash(user.password, salt);
+          console.log('[User Model] beforeCreate hook: Password hashed successfully');
         }
       },
       beforeUpdate: async (user: User) => {
         if (user.changed('password')) {
+          console.log('[User Model] beforeUpdate hook: Hashing password for', user.email);
           const salt = await bcrypt.genSalt(10);
           user.password = await bcrypt.hash(user.password, salt);
+          console.log('[User Model] beforeUpdate hook: Password hashed successfully');
         }
       },
     },

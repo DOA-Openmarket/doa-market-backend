@@ -1,0 +1,312 @@
+# Network Policies for DOA Market
+# 목적: Pod 간 통신을 제어하여 보안 강화
+
+---
+# 1. API Gateway Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: api-gateway-netpol
+  namespace: doa-market-prod
+spec:
+  podSelector:
+    matchLabels:
+      app: api-gateway
+
+  policyTypes:
+  - Ingress
+  - Egress
+
+  # Ingress: ALB에서만 트래픽 허용
+  ingress:
+  - from:
+    - namespaceSelector: {}  # 모든 namespace (ALB Ingress Controller)
+    ports:
+    - protocol: TCP
+      port: 3000
+
+  # Egress: 백엔드 서비스, DNS, RDS, Redis만 허용
+  egress:
+  # 같은 네임스페이스 내 모든 서비스 허용 (3001-3018 포트)
+  - to:
+    - podSelector: {}
+    ports:
+    - protocol: TCP
+      port: 3001
+    - protocol: TCP
+      port: 3002
+    - protocol: TCP
+      port: 3003
+    - protocol: TCP
+      port: 3004
+    - protocol: TCP
+      port: 3005
+    - protocol: TCP
+      port: 3006
+    - protocol: TCP
+      port: 3007
+    - protocol: TCP
+      port: 3008
+    - protocol: TCP
+      port: 3009
+    - protocol: TCP
+      port: 3010
+    - protocol: TCP
+      port: 3011
+    - protocol: TCP
+      port: 3012
+    - protocol: TCP
+      port: 3013
+    - protocol: TCP
+      port: 3014
+    - protocol: TCP
+      port: 3015
+    - protocol: TCP
+      port: 3016
+    - protocol: TCP
+      port: 3017
+    - protocol: TCP
+      port: 3018
+
+  # DNS 조회 허용
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    - podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+
+  # RDS 연결 허용 (Private Subnet)
+  - to:
+    - podSelector: {}
+    ports:
+    - protocol: TCP
+      port: 5432
+
+  # Redis 연결 허용
+  - to:
+    - podSelector: {}
+    ports:
+    - protocol: TCP
+      port: 6379
+
+  # 외부 HTTPS (AWS APIs, 외부 결제 API 등)
+  - to:
+    - podSelector: {}
+    ports:
+    - protocol: TCP
+      port: 443
+
+---
+# 2. Backend Services Network Policy (공통)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: backend-services-netpol
+  namespace: doa-market-prod
+spec:
+  podSelector:
+    matchExpressions:
+    - key: app
+      operator: In
+      values:
+      - auth-service
+      - user-service
+      - product-service
+      - order-service
+      - payment-service
+      - cart-service
+      - review-service
+      - search-service
+      - inventory-service
+      - seller-service
+      - admin-service
+      - file-service
+      - banner-service
+      - coupon-service
+      - shipping-service
+      - stats-service
+      - settlement-service
+      - notification-service
+
+  policyTypes:
+  - Ingress
+  - Egress
+
+  # Ingress: API Gateway와 같은 네임스페이스 서비스에서만 허용
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: api-gateway
+    ports:
+    - protocol: TCP
+      port: 3001
+    - protocol: TCP
+      port: 3002
+    - protocol: TCP
+      port: 3003
+    - protocol: TCP
+      port: 3004
+    - protocol: TCP
+      port: 3005
+    - protocol: TCP
+      port: 3006
+    - protocol: TCP
+      port: 3007
+    - protocol: TCP
+      port: 3008
+    - protocol: TCP
+      port: 3009
+    - protocol: TCP
+      port: 3010
+    - protocol: TCP
+      port: 3011
+    - protocol: TCP
+      port: 3012
+    - protocol: TCP
+      port: 3013
+    - protocol: TCP
+      port: 3014
+    - protocol: TCP
+      port: 3015
+    - protocol: TCP
+      port: 3016
+    - protocol: TCP
+      port: 3017
+    - protocol: TCP
+      port: 3018
+
+  # Service-to-Service 통신 허용
+  - from:
+    - podSelector: {}
+    ports:
+    - protocol: TCP
+      port: 3001
+    - protocol: TCP
+      port: 3002
+    - protocol: TCP
+      port: 3003
+    - protocol: TCP
+      port: 3004
+    - protocol: TCP
+      port: 3005
+    - protocol: TCP
+      port: 3006
+    - protocol: TCP
+      port: 3007
+    - protocol: TCP
+      port: 3008
+    - protocol: TCP
+      port: 3009
+    - protocol: TCP
+      port: 3010
+    - protocol: TCP
+      port: 3011
+    - protocol: TCP
+      port: 3012
+    - protocol: TCP
+      port: 3013
+    - protocol: TCP
+      port: 3014
+    - protocol: TCP
+      port: 3015
+    - protocol: TCP
+      port: 3016
+    - protocol: TCP
+      port: 3017
+    - protocol: TCP
+      port: 3018
+
+  # Egress
+  egress:
+  # 같은 네임스페이스 서비스 간 통신
+  - to:
+    - podSelector: {}
+    ports:
+    - protocol: TCP
+      port: 3001
+    - protocol: TCP
+      port: 3002
+    - protocol: TCP
+      port: 3003
+    - protocol: TCP
+      port: 3004
+    - protocol: TCP
+      port: 3005
+    - protocol: TCP
+      port: 3006
+    - protocol: TCP
+      port: 3007
+    - protocol: TCP
+      port: 3008
+    - protocol: TCP
+      port: 3009
+    - protocol: TCP
+      port: 3010
+    - protocol: TCP
+      port: 3011
+    - protocol: TCP
+      port: 3012
+    - protocol: TCP
+      port: 3013
+    - protocol: TCP
+      port: 3014
+    - protocol: TCP
+      port: 3015
+    - protocol: TCP
+      port: 3016
+    - protocol: TCP
+      port: 3017
+    - protocol: TCP
+      port: 3018
+
+  # DNS 조회
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: UDP
+      port: 53
+
+  # RDS 연결 (Private Subnet - 외부)
+  - to:
+    - podSelector: {}
+    ports:
+    - protocol: TCP
+      port: 5432
+
+  # Redis 연결
+  - to:
+    - podSelector: {}
+    ports:
+    - protocol: TCP
+      port: 6379
+
+  # 외부 HTTPS (AWS APIs, 결제 API 등)
+  - to:
+    - podSelector: {}
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80
+
+---
+# 3. Default Deny All (주석 처리 - 점진적 적용)
+# 모든 트래픽을 기본적으로 차단하고 명시적 허용만 가능
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: default-deny-all
+#   namespace: doa-market-prod
+# spec:
+#   podSelector: {}
+#   policyTypes:
+#   - Ingress
+#   - Egress

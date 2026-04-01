@@ -5,6 +5,84 @@ const router = Router();
 const upload = multer({ dest: '/tmp/uploads/' });
 
 /**
+ * 임시 첨부파일 업로드 (상품 등록 전)
+ * POST /api/v1/attachments/temp/upload/:id
+ */
+router.post('/temp/upload/:id', upload.array('files', 10), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const files = req.files as Express.Multer.File[];
+
+    if (!files || files.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: '파일이 업로드되지 않았습니다.',
+      });
+    }
+
+    // TODO: AWS S3 upload - temp folder
+    const uploadedFiles = files.map(file => ({
+      id: `file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      url: `https://d2bcmyux3fqi2z.cloudfront.net/temp/${id}/${file.filename}`,
+      name: file.originalname,
+      size: file.size,
+      type: file.mimetype,
+      uploadedAt: new Date().toISOString(),
+    }));
+
+    res.json({
+      success: true,
+      files: uploadedFiles,
+      message: '임시 파일이 업로드되었습니다.',
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * 에디터 첨부파일 업로드
+ * POST /api/v1/attachments/editor/upload/:id
+ */
+router.post('/editor/upload/:id', upload.array('files', 10), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const files = req.files as Express.Multer.File[];
+
+    if (!files || files.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: '파일이 업로드되지 않았습니다.',
+      });
+    }
+
+    // TODO: AWS S3 upload - editor folder
+    const uploadedFiles = files.map(file => ({
+      id: `file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      url: `https://d2bcmyux3fqi2z.cloudfront.net/editor/${id}/${file.filename}`,
+      name: file.originalname,
+      size: file.size,
+      type: file.mimetype,
+      uploadedAt: new Date().toISOString(),
+    }));
+
+    res.json({
+      success: true,
+      files: uploadedFiles,
+      message: '에디터 파일이 업로드되었습니다.',
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+/**
  * 타입별 첨부파일 업로드
  * POST /api/v1/attachments/upload/:type/:id
  * type: product, banner, seller, notice, guide, inquiry, error_report, review
@@ -24,7 +102,7 @@ router.post('/upload/:type/:id', upload.array('files', 10), async (req, res) => 
     // TODO: AWS S3 upload
     const uploadedFiles = files.map(file => ({
       id: `file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      url: `https://example.com/uploads/${file.filename}`,
+      url: `https://d2bcmyux3fqi2z.cloudfront.net/${type}/${id}/${file.filename}`,
       name: file.originalname,
       size: file.size,
       type: file.mimetype,
@@ -33,9 +111,7 @@ router.post('/upload/:type/:id', upload.array('files', 10), async (req, res) => 
 
     res.json({
       success: true,
-      data: {
-        files: uploadedFiles,
-      },
+      files: uploadedFiles,
       message: '파일이 업로드되었습니다.',
     });
   } catch (error: any) {

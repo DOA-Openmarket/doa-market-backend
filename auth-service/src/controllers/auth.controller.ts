@@ -30,6 +30,12 @@ const verifyEmailSchema = z.object({
   code: z.string().length(6, 'Code must be 6 digits'),
 });
 
+const resetPasswordSchema = z.object({
+  email: z.string().email('Invalid email'),
+  code: z.string().length(6, 'Code must be 6 digits'),
+  newPassword: z.string().min(8, 'Password must be at least 8 characters'),
+});
+
 export class AuthController {
   async register(req: Request, res: Response, next: NextFunction) {
     try {
@@ -163,6 +169,32 @@ export class AuthController {
       res.json({
         success: true,
         message: 'Email verified successfully',
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        next(new AppError(error.errors[0].message, 400));
+      } else {
+        next(error);
+      }
+    }
+  }
+
+  async resetPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      // Validate input
+      const validatedData = resetPasswordSchema.parse(req.body);
+
+      // Reset password
+      await authService.resetPassword(
+        validatedData.email,
+        validatedData.code,
+        validatedData.newPassword
+      );
+
+      res.json({
+        success: true,
+        message: 'Password reset successfully',
         timestamp: new Date().toISOString(),
       });
     } catch (error) {

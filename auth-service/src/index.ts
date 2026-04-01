@@ -12,6 +12,9 @@ import adminAuthRoutes from './routes/admin-auth.routes';
 import { logger } from './utils/logger';
 import { sequelize } from './config/database';
 import { swaggerSpec } from './config/swagger';
+// Import models to ensure they are registered with Sequelize
+import './models/user.model';
+import './models/refresh-token.model';
 
 // Load environment variables
 dotenv.config();
@@ -19,6 +22,9 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 const API_PREFIX = process.env.API_PREFIX || '/api/v1';
+
+// Trust proxy - required for Load Balancer to properly handle X-Forwarded-For headers
+app.set('trust proxy', true);
 
 // Middleware
 app.use(helmet());

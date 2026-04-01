@@ -157,6 +157,7 @@ const services: ServiceConfig[] = [
   },
 
   // User service - auth optional (checkin can be viewed by anyone)
+  // NOTE: DELETE requires admin auth, will be handled separately below
   { path: "/api/v1/users", target: "http://user-service:3005", auth: "optional" },
   {
     path: "/api/v1/profiles",
@@ -409,6 +410,33 @@ services.forEach(({ path, target, auth, roles }) => {
     app.use(path, createProxyMiddleware(proxyOptions));
   }
 });
+
+// Special route: DELETE /api/v1/users/:id requires admin auth
+app.delete(
+  "/api/v1/users/:id",
+  authMiddleware,
+  requireRole("admin"),
+  createProxyMiddleware({
+    target: "http://user-service:3005",
+    changeOrigin: true,
+    onProxyReq: (proxyReq, req: any) => {
+      logger.info(`[ADMIN DELETE] Proxying DELETE ${req.url} to user-service`);
+      if (req.user) {
+        proxyReq.setHeader("x-user-id", req.user.userId);
+        proxyReq.setHeader("x-user-email", req.user.email);
+        proxyReq.setHeader("x-user-role", req.user.role);
+      }
+    },
+    onError: (err, req, res) => {
+      logger.error(`Proxy error for user-service:`, err);
+      res.status(502).json({
+        success: false,
+        error: "Bad Gateway",
+        message: "Service unavailable: user-service",
+      });
+    },
+  })
+);
 
 // 404 handler
 app.use(notFoundHandler);
