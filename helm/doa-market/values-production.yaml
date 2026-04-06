@@ -95,6 +95,9 @@ services:
     autoscaling:
       minReplicas: 1
       maxReplicas: 10
+    env:
+      - name: CORS_ORIGINS
+        value: "https://admin.xn--pm2b831akpj.com,https://d2bcmyux3fqi2z.cloudfront.net,https://xn--pm2b831akpj.com,https://www.xn--pm2b831akpj.com,https://main.d3pzh67s1gjuqb.amplifyapp.com"
     ingress:
       enabled: true
       hosts:
@@ -165,6 +168,13 @@ services:
     autoscaling:
       minReplicas: 1
       maxReplicas: 10
+    env:
+      - name: RABBITMQ_ENABLED
+        value: "false"
+      - name: PAYMENT_CALLBACK_URL
+        value: "http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/payments/callback"
+      - name: FRONTEND_URL
+        value: "https://main.d3pzh67s1gjuqb.amplifyapp.com"
     # Critical: On-Demand만 사용 (중단 불가)
     spotEnabled: false
     nodeAffinity:
