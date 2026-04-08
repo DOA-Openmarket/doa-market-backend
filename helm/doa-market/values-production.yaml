@@ -190,6 +190,7 @@ services:
 
   # Auth Service도 On-Demand만 사용
   auth-service:
+    tag: "8c3d043"
     spotEnabled: true
     nodeAffinity: {}
     env:
