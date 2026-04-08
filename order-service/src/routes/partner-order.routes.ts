@@ -121,6 +121,7 @@ router.get('/', async (req, res) => {
       status: STATUS_TO_UPPER[o.status] || o.status.toUpperCase(),
       totalAmount: parseFloat(o.totalAmount),
       createdAt: o.createdAt,
+      trackingNumber: o.trackingNumber || null,
       shippingAddress: addr,
       customer: {
         name: addr.name || userInfo.name,
@@ -226,6 +227,7 @@ router.get('/:id', async (req, res) => {
         status: STATUS_TO_UPPER[o.status] || o.status.toUpperCase(),
         totalAmount: parseFloat(o.totalAmount),
         createdAt: o.createdAt,
+        trackingNumber: o.trackingNumber || null,
         shippingAddress: addr,
         customer: {
           name: addr.name || userInfo.name,
@@ -258,7 +260,7 @@ router.get('/:id', async (req, res) => {
 router.patch('/:id/status', async (req, res) => {
   try {
     const { id } = req.params;
-    const { status } = req.body;
+    const { status, trackingNumber } = req.body;
 
     const dbStatus = STATUS_TO_LOWER[status] || status.toLowerCase();
 
@@ -268,6 +270,7 @@ router.patch('/:id/status', async (req, res) => {
     }
 
     order.status = dbStatus;
+    if (trackingNumber !== undefined) order.trackingNumber = trackingNumber || null;
     await order.save();
 
     res.json({ success: true, data: order });

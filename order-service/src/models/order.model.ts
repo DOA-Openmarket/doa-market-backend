@@ -11,6 +11,7 @@ class Order extends Model<InferAttributes<Order>, InferCreationAttributes<Order>
   declare totalAmount: number;
   declare paymentStatus: string;
   declare shippingAddress?: any;
+  declare trackingNumber?: string | null;
 }
 
 Order.init(
@@ -30,6 +31,10 @@ Order.init(
     },
     shippingAddress: {
       type: DataTypes.JSONB,
+      allowNull: true,
+    },
+    trackingNumber: {
+      type: DataTypes.STRING(100),
       allowNull: true,
     },
   },

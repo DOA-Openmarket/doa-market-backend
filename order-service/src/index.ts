@@ -51,6 +51,11 @@ const startServer = async () => {
     await sequelize.sync({ alter: dbSync, force: dbForce });
     logger.info(`Database synchronized (alter: ${dbSync}, force: ${dbForce})`);
 
+    // Add trackingNumber column if not exists (idempotent migration)
+    await sequelize.query(`
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS "trackingNumber" VARCHAR(100);
+    `).catch((e) => logger.warn('trackingNumber column migration:', e.message));
+
     // Only connect to RabbitMQ if enabled
     const rabbitmqEnabled = process.env.RABBITMQ_ENABLED !== 'false';
     if (rabbitmqEnabled) {
