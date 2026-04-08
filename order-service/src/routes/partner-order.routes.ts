@@ -114,7 +114,7 @@ router.get('/', async (req, res) => {
     const formatted = orders.map((o: any) => {
       const addr = o.shippingAddress || {};
       // shippingAddress에 수신자 이름/전화가 있으면 우선 사용, 없으면 user-service 정보 사용
-      const userInfo = userMap[o.userId] || { name: '', phone: '' };
+      const userInfo = userMap[o.userId] || { name: '', phone: '', email: '' };
       return {
       id: o.id,
       orderNumber: o.orderNumber,
