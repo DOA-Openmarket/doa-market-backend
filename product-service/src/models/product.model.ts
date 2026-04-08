@@ -24,7 +24,7 @@ Product.init(
     categoryId: { type: DataTypes.UUID, allowNull: false },
     name: { type: DataTypes.STRING(255), allowNull: false },
     slug: { type: DataTypes.STRING(255), unique: true },
-    description: { type: DataTypes.TEXT },
+    description: { type: DataTypes.TEXT('long') },
     price: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
     originalPrice: { type: DataTypes.DECIMAL(10, 2) },
     status: { type: DataTypes.ENUM('draft', 'active', 'inactive', 'out_of_stock'), defaultValue: 'draft' },

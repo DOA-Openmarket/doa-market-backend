@@ -8,3 +8,7 @@ serviceAccount:
 service:
   type: ClusterIP
   port: 3017
+
+env:
+  - name: DB_SYNC
+    value: "true"

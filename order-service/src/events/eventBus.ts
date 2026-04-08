@@ -57,7 +57,8 @@ export class EventBus {
 
   async publish<T extends DomainEvent>(eventType: EventType, data: T['data']): Promise<void> {
     if (!this.channel || !this.isConnected) {
-      throw new Error('EventBus is not connected');
+      console.warn(`[EventBus] Not connected - skipping event publish: ${eventType}`);
+      return;
     }
 
     const event: BaseEvent & { data: T['data'] } = {

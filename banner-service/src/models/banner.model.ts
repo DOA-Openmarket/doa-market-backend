@@ -6,7 +6,7 @@ class Banner extends Model {
   public title!: string;
   public link?: string;
   public imageUrl!: string;
-  public ownerType!: 'ADVERTISER' | 'PARTNER';
+  public ownerType!: 'ADVERTISER' | 'PARTNER' | 'SELLER';
   public ownerId?: string;
   public displayOrder!: number;
   public isActive!: boolean;
@@ -20,8 +20,8 @@ Banner.init(
     title: { type: DataTypes.STRING(200), allowNull: false },
     link: { type: DataTypes.STRING(500) },
     imageUrl: { type: DataTypes.STRING(500), allowNull: false },
-    ownerType: { type: DataTypes.ENUM('ADVERTISER', 'PARTNER'), allowNull: false },
-    ownerId: { type: DataTypes.UUID },
+    ownerType: { type: DataTypes.ENUM('ADVERTISER', 'PARTNER', 'SELLER'), allowNull: false },
+    ownerId: { type: DataTypes.STRING(255) },
     displayOrder: { type: DataTypes.INTEGER, defaultValue: 0 },
     isActive: { type: DataTypes.BOOLEAN, defaultValue: true },
     startDate: { type: DataTypes.DATE },

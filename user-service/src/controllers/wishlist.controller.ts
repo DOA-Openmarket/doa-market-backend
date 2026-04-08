@@ -17,7 +17,7 @@ export const getWishlist = async (req: Request, res: Response) => {
       wishlists.map(async (wishlist) => {
         try {
           const wishlistData = wishlist.toJSON();
-          const productResponse = await axios.get(`${PRODUCT_SERVICE_URL}/products/${wishlistData.productId}`);
+          const productResponse = await axios.get(`${PRODUCT_SERVICE_URL}/products/${wishlistData.productId}`, { timeout: 3000 });
           return {
             ...wishlistData,
             product: productResponse.data.data || productResponse.data

@@ -21,5 +21,7 @@ COPY --from=builder /app/search-service/package*.json ./
 COPY --from=builder /app/search-service ./
 COPY --from=builder /app/search-service/node_modules ./node_modules
 
+RUN chmod -R 755 /app/src
+
 EXPOSE 3009
 CMD ["npm", "run", "dev"]

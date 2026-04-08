@@ -1,23 +1,34 @@
 import rateLimit from 'express-rate-limit';
+import { Request } from 'express';
+
+// ALB 뒤에서 실제 클라이언트 IP를 가져오는 함수
+const getClientIp = (req: Request): string => {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (forwarded) {
+    return (Array.isArray(forwarded) ? forwarded[0] : forwarded).split(',')[0].trim();
+  }
+  return req.socket.remoteAddress || 'unknown';
+};
 
 // General API rate limiter
 export const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  max: 1000,
+  keyGenerator: getClientIp,
   message: {
     success: false,
     error: 'Too Many Requests',
     message: 'Too many requests from this IP, please try again later.',
   },
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  validate: { trustProxy: false }, // Disable trust proxy validation (we're behind ALB)
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
-// Stricter limiter for auth endpoints
+// Auth endpoints limiter (login, register, send-verification 등)
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 auth requests per windowMs
+  max: 100,
+  keyGenerator: getClientIp,
   message: {
     success: false,
     error: 'Too Many Requests',
@@ -25,14 +36,14 @@ export const authLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  skipSuccessfulRequests: true, // Don't count successful requests
-  validate: { trustProxy: false }, // Disable trust proxy validation (we're behind ALB)
+  skipSuccessfulRequests: false,
 });
 
-// Moderate limiter for write operations
+// Write operations limiter
 export const writeLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // Limit each IP to 50 write requests per windowMs
+  max: 500,
+  keyGenerator: getClientIp,
   message: {
     success: false,
     error: 'Too Many Requests',
@@ -40,5 +51,4 @@ export const writeLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  validate: { trustProxy: false }, // Disable trust proxy validation (we're behind ALB)
 });

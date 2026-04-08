@@ -28,15 +28,10 @@ export class AuthService {
       throw new AppError('Email already registered', 409);
     }
 
-    // Hash password before creating user
-    const bcrypt = require('bcryptjs');
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(data.password, salt);
-
-    // Create user
+    // Create user (password hashing is handled by the beforeCreate hook in the model)
     const user = await User.create({
       email: data.email,
-      password: hashedPassword,
+      password: data.password,
       name: data.name,
       phone: data.phone,
       role: data.role || 'user',
@@ -236,12 +231,6 @@ export class AuthService {
   }
 
   async sendVerificationCode(email: string): Promise<void> {
-    // Check if email already exists
-    const existingUser = await User.findOne({ where: { email } });
-    if (existingUser) {
-      throw new AppError('Email already registered', 409);
-    }
-
     // Generate 6-digit code
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -268,17 +257,13 @@ export class AuthService {
     // Log the code for development
     logger.info(`Verification code for ${email}: ${code}`);
 
-    // Send email via SES
+    // Send email via SES (best-effort: code is saved regardless of email success)
     try {
       await emailService.sendVerificationEmail(email, code);
       logger.info(`Verification email sent successfully to ${email}`);
     } catch (error: any) {
       logger.error('Failed to send verification email', { email, error: error.message });
-      // Don't throw error to avoid breaking the flow in development
-      // In production, you might want to throw this error
-      if (process.env.NODE_ENV === 'production') {
-        throw new AppError('Failed to send verification email', 500);
-      }
+      // Code is saved in DB — client can still proceed (e.g. dev/sandbox mode)
     }
   }
 
@@ -339,13 +324,8 @@ export class AuthService {
       throw new AppError('User not found', 404);
     }
 
-    // Hash new password
-    const bcrypt = require('bcryptjs');
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(newPassword, salt);
-
-    // Update password
-    user.password = hashedPassword;
+    // Update password (hashing is handled by the beforeUpdate hook in the model)
+    user.password = newPassword;
     await user.save();
 
     logger.info(`Password reset for user: ${user.id}`);

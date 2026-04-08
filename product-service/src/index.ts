@@ -9,7 +9,7 @@ import { sequelize } from './config/database';
 import { logger } from './utils/logger';
 import { swaggerSpec } from './config/swagger';
 import { createEventBus } from './events/eventBus';
-import { createMetricsService } from '@doa-market/common';
+import { createMetricsService } from './utils/metrics';
 
 dotenv.config();
 

@@ -191,6 +191,14 @@ services:
   auth-service:
     spotEnabled: true
     nodeAffinity: {}
+    env:
+      - name: SELLER_SERVICE_URL
+        value: "http://seller-service:3007"
+
+  admin-service:
+    env:
+      - name: SELLER_SERVICE_URL
+        value: "http://seller-service:3007"
 
 # Production database configuration
 database:

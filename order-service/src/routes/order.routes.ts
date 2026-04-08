@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import Order from '../models/order.model';
+import OrderItem from '../models/order-item.model';
 import { eventBus } from '../index';
 import { EventType } from '../events';
 import { logger } from '../utils/logger';
@@ -33,9 +34,11 @@ router.get('/user/:userId', async (req, res) => {
 
     const { count, rows: orders } = await Order.findAndCountAll({
       where: { userId },
+      include: [{ model: OrderItem, as: 'items' }],
       limit: limitNum,
       offset,
       order: [['createdAt', 'DESC']],
+      distinct: true,
     });
 
     res.json({
@@ -56,7 +59,9 @@ router.get('/user/:userId', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   try {
-    const order = await Order.findByPk(req.params.id);
+    const order = await Order.findByPk(req.params.id, {
+      include: [{ model: OrderItem, as: 'items' }],
+    });
     if (!order) {
       return res.status(404).json({ success: false, error: 'Order not found' });
     }
@@ -86,6 +91,25 @@ router.post('/', async (req, res) => {
     });
 
     logger.info(`Order created: ${order.id}`);
+
+    // Save order items
+    if (items && items.length > 0) {
+      await Promise.all(
+        items.map((item: any) =>
+          OrderItem.create({
+            orderId: order.id,
+            productId: item.productId || uuidv4(),
+            sellerId: item.sellerId || order.sellerId || uuidv4(),
+            productName: item.productName || item.name || '상품',
+            quantity: item.quantity || 1,
+            price: item.price || 0,
+            subtotal: (item.price || 0) * (item.quantity || 1),
+            imageUrl: item.imageUrl || null,
+          })
+        )
+      );
+      logger.info(`Order items saved: ${items.length} items for order ${order.id}`);
+    }
 
     // Publish ORDER_CREATED event
     await eventBus.publish(EventType.ORDER_CREATED, {

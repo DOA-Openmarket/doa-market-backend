@@ -1,5 +1,6 @@
 import Seller from '../models/seller.model';
-import { Op } from 'sequelize';
+import { Op, QueryTypes } from 'sequelize';
+import { sequelize } from '../config/database';
 
 export interface CreateSellerDto {
   userId: string;
@@ -104,6 +105,11 @@ export class SellerService {
   async verify(id: string) {
     const seller = await this.findById(id);
     await seller.update({ status: 'verified', verifiedAt: new Date() });
+    // Update user role to 'seller' in the shared DB
+    await sequelize.query(
+      `UPDATE users SET role = 'seller', "updatedAt" = NOW() WHERE id = :userId`,
+      { replacements: { userId: seller.userId }, type: QueryTypes.UPDATE }
+    );
     return seller;
   }
 

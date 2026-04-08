@@ -1,8 +1,46 @@
 import { Router } from 'express';
 import crypto from 'crypto';
+import axios from 'axios';
 import Payment from '../models/payment.model';
 
+const ORDER_SERVICE_URL = process.env.ORDER_SERVICE_URL || 'http://order-service:3003';
+
 const router = Router();
+
+// 콜백 결과를 웹(popup) / Flutter(WebView) 양쪽에 전달하는 HTML 생성
+function buildCallbackHtml(result: {
+  status: 'success' | 'failed';
+  paymentId?: string;
+  transactionId?: string;
+  message?: string;
+}) {
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3100';
+  const { status, paymentId = '', transactionId = '', message = '' } = result;
+
+  const redirectUrl =
+    status === 'success'
+      ? `${frontendUrl}/payment/complete?status=success&paymentId=${encodeURIComponent(paymentId)}&transactionId=${encodeURIComponent(transactionId)}`
+      : `${frontendUrl}/payment/complete?status=failed&message=${encodeURIComponent(message)}`;
+
+  const resultJson = JSON.stringify({ type: 'PAYMENT_RESULT', ...result });
+
+  return `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>결제 처리 중</title></head>
+<body>
+<p style="text-align:center;margin-top:40px;font-family:sans-serif">결제 처리 중입니다...</p>
+<script>
+(function(){
+  var result = ${resultJson};
+  if (window.opener && !window.opener.closed) {
+    try { window.opener.postMessage(result, '*'); } catch(e){}
+    setTimeout(function(){ window.close(); }, 200);
+  } else {
+    location.replace('${redirectUrl}');
+  }
+})();
+</script>
+</body></html>`;
+}
 
 router.get('/', async (req, res) => {
   const payments = await Payment.findAll();
@@ -26,39 +64,32 @@ router.post('/prepare', async (req, res) => {
       });
     }
 
-    // Generate unique payment ID
     const paymentId = crypto.randomUUID();
-
-    // KG Inicis 연동을 위한 파라미터 생성
-    // 실제 운영시에는 이니시스에서 발급받은 MID, 인증키 등을 사용해야 합니다
     const timestamp = new Date().getTime().toString();
     const mid = process.env.INICIS_MID || 'INIpayTest';
 
-    // Hash 생성 (P_CHKFAKE) - 실제로는 SHA512 hash 필요
-    // 대상: P_AMT + P_OID + P_TIMESTAMP + HashKey
-    // 테스트 환경에서는 간단한 값 사용
-    const hashKey = process.env.INICIS_HASH_KEY || '';
-    const hashData = `${amount}${orderId}${timestamp}${hashKey}`;
-    // 실제로는: crypto.createHash('sha512').update(hashData).digest('base64')
+    // 콜백 URL: 환경 변수로 관리 (배포 환경에 맞게 설정)
+    const callbackUrl =
+      process.env.PAYMENT_CALLBACK_URL ||
+      `http://localhost:3005/api/v1/payments/callback`;
 
     const inicisParams = {
-      P_INI_PAYMENT: 'CARD', // 결제수단 (CARD, VBANK, MOBILE 등)
-      P_MID: mid, // 상점아이디
-      P_OID: orderId, // 주문번호 (Unique)
-      P_AMT: amount.toString(), // 결제금액
-      P_GOODS: productName, // 상품명
-      P_UNAME: '구매자', // 구매자명
-      P_MOBILE: '01012345678', // 구매자 휴대폰
-      P_EMAIL: 'test@test.com', // 구매자 이메일
-      P_NEXT_URL: `http://localhost:3005/api/v1/payments/callback`, // 결과수신 URL
-      P_NOTI_URL: `http://localhost:3005/api/v1/payments/noti`, // 가상계좌 입금통보 URL
-      P_TIMESTAMP: timestamp, // 타임스탬프
-      P_RESERVED: 'centerCd=Y&below1000=Y&vbank_receipt=Y&iosapp=Y&app_scheme=doamarket://', // 추가옵션 (iOS 앱 스키마 포함)
-      P_NOTI: paymentId, // 가맹점 임의 데이터
+      P_INI_PAYMENT: 'CARD',
+      P_MID: mid,
+      P_OID: orderId,
+      P_AMT: amount.toString(),
+      P_GOODS: productName,
+      P_UNAME: req.body.userName || '구매자',
+      P_MOBILE: req.body.userPhone || '01000000000',
+      P_EMAIL: req.body.userEmail || '',
+      P_NEXT_URL: callbackUrl,
+      P_NOTI_URL: callbackUrl.replace('/callback', '/noti'),
+      P_TIMESTAMP: timestamp,
+      P_RESERVED: 'centerCd=Y&below1000=Y&vbank_receipt=Y&iosapp=Y&app_scheme=doamarket://',
+      P_NOTI: paymentId, // paymentId를 P_NOTI에 담아 콜백에서 식별
     };
 
-    // Payment 레코드 생성
-    const payment = await Payment.create({
+    await Payment.create({
       id: paymentId,
       orderId,
       amount,
@@ -66,8 +97,11 @@ router.post('/prepare', async (req, res) => {
       status: 'pending',
     });
 
-    // KG Inicis 모바일 결제 URL (실제 운영시에는 이니시스 정책에 따라 변경)
-    const paymentUrl = 'https://mobile.inicis.com/smart/payment/';
+    // 모바일: https://mobile.inicis.com/smart/payment/ (테스트)
+    // PC 표준: INIStdPay.pay() 에서 직접 처리 (URL 불필요)
+    const paymentUrl = process.env.INICIS_TEST === 'false'
+      ? 'https://mobile.inicis.com/smart/payment/'
+      : 'https://mobile.inicis.com/smart/payment/';
 
     res.json({
       success: true,
@@ -75,6 +109,9 @@ router.post('/prepare', async (req, res) => {
         paymentId,
         paymentUrl,
         inicisParams,
+        // PC 표준결제창용 추가 정보
+        mid,
+        timestamp,
       },
     });
   } catch (error: any) {
@@ -85,11 +122,12 @@ router.post('/prepare', async (req, res) => {
   }
 });
 
-// 결제 완료 처리
+// 결제 완료 처리 (프론트엔드에서 직접 호출)
 router.post('/:id/complete', async (req, res) => {
   try {
     const { id } = req.params;
-    const { pgTransactionId, status } = req.body;
+    const { pgTransactionId, transactionId, status } = req.body;
+    const txId = pgTransactionId || transactionId;
 
     const payment = await Payment.findByPk(id);
     if (!payment) {
@@ -99,17 +137,30 @@ router.post('/:id/complete', async (req, res) => {
       });
     }
 
-    // Update payment status
+    // Normalize status: 'success' → 'completed'
+    const normalizedStatus = (status === 'success' || status === 'completed') ? 'completed' : 'failed';
+
     await payment.update({
-      pgTransactionId,
-      status: status || 'completed',
-      paidAt: new Date(),
+      pgTransactionId: txId,
+      status: normalizedStatus,
+      paidAt: normalizedStatus === 'completed' ? new Date() : null,
     });
 
-    res.json({
-      success: true,
-      data: payment,
-    });
+    if (normalizedStatus === 'completed') {
+    // Notify order service to update order status to 'confirmed'
+    try {
+      await axios.patch(
+        `${ORDER_SERVICE_URL}/api/v1/orders/${payment.orderId}/status`,
+        { status: 'confirmed' },
+        { timeout: 5000 }
+      );
+    } catch (err: any) {
+      // Non-fatal: log but don't fail the payment completion
+      console.warn(`[payment] Failed to update order status for orderId=${payment.orderId}:`, err?.message);
+    }
+    }
+
+    res.json({ success: true, data: payment });
   } catch (error: any) {
     res.status(500).json({
       success: false,
@@ -131,10 +182,7 @@ router.get('/:id', async (req, res) => {
       });
     }
 
-    res.json({
-      success: true,
-      data: payment,
-    });
+    res.json({ success: true, data: payment });
   } catch (error: any) {
     res.status(500).json({
       success: false,
@@ -143,24 +191,46 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// KG Inicis 결제 콜백 처리
+// KG Inicis 결제 콜백 (P_NEXT_URL)
+// - 웹(popup): window.opener.postMessage 후 window.close()
+// - Flutter WebView: FRONTEND_URL/payment/complete?status=... 로 리다이렉트
 router.post('/callback', async (req, res) => {
   try {
-    // 이니시스로부터 받은 결제 결과 처리
-    const { resultCode, resultMsg, tid, orderId } = req.body;
+    const body = req.body;
+
+    // Inicis 파라미터 이름은 버전/결제수단에 따라 다름
+    const resultCode = body.resultCode || body.P_STATUS || body.p_status || '';
+    const resultMsg  = body.resultMsg  || body.P_RMESG1 || body.p_rmesg1 || '결제 실패';
+    const tid        = body.tid        || body.P_TID    || body.p_tid    || '';
+    const paymentId  = body.P_NOTI     || body.p_noti   || '';
 
     if (resultCode === '00') {
-      // 결제 성공
-      // 주문 상태 업데이트 등의 로직 추가 필요
-      res.send('<script>alert("결제가 완료되었습니다."); window.close();</script>');
+      // 결제 성공 → DB 업데이트
+      if (paymentId) {
+        try {
+          const payment = await Payment.findByPk(paymentId);
+          if (payment) {
+            await payment.update({
+              pgTransactionId: tid,
+              status: 'completed',
+              paidAt: new Date(),
+            });
+          }
+        } catch (_) {}
+      }
+
+      res.send(buildCallbackHtml({ status: 'success', paymentId, transactionId: tid }));
     } else {
-      // 결제 실패
-      res.send(`<script>alert("결제 실패: ${resultMsg}"); window.close();</script>`);
+      res.send(buildCallbackHtml({ status: 'failed', paymentId, message: resultMsg }));
     }
   } catch (error: any) {
-    res.status(500).send('<script>alert("결제 처리 중 오류가 발생했습니다."); window.close();</script>');
+    res.send(buildCallbackHtml({ status: 'failed', message: '결제 처리 중 오류가 발생했습니다' }));
   }
 });
 
-export default router;
+// 가상계좌 입금 통보 (추후 구현)
+router.post('/noti', async (req, res) => {
+  res.json({ success: true });
+});
 
+export default router;

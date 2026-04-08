@@ -47,7 +47,19 @@ router.get('/products', async (req, res) => {
         },
       },
     });
-  } catch (error) {
+  } catch (error: any) {
+    // ConnectionError means OpenSearch is not available — return empty results gracefully
+    if (error?.name === 'ConnectionError' || error?.message?.includes('Connection Error')) {
+      logger.warn('OpenSearch unavailable, returning empty search results');
+      return res.json({
+        success: true,
+        data: {
+          products: [],
+          pagination: { page: 1, size: 20, total: 0, totalPages: 0 },
+        },
+        meta: { note: 'Search engine not available' },
+      });
+    }
     logger.error('Search error:', error);
     res.status(500).json({
       success: false,

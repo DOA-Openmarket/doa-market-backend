@@ -1,6 +1,6 @@
 image:
   repository: 478266318018.dkr.ecr.ap-northeast-2.amazonaws.com/doa-market-file-service
-  tag: 07cd1b9
+  tag: 5adbdf1
 
 serviceAccount:
   annotations: {}
@@ -8,3 +8,7 @@ serviceAccount:
 service:
   type: ClusterIP
   port: 3015
+
+env:
+  AWS_REGION: ap-northeast-2
+  S3_BUCKET_NAME: openmarket-bucket

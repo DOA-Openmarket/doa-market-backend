@@ -50,24 +50,23 @@ app.use(
 app.use(
   cors({
     origin: (origin, callback) => {
-      // 개발 환경에서는 모든 localhost 허용
-      if (!origin || process.env.NODE_ENV === "development") {
-        // localhost나 127.0.0.1로 시작하는 모든 origin 허용
-        if (
-          !origin ||
-          origin.startsWith("http://localhost:") ||
-          origin.startsWith("http://127.0.0.1:")
-        ) {
-          return callback(null, true);
-        }
+      // no origin (mobile app, curl 등) 허용
+      if (!origin) return callback(null, true);
+
+      // localhost / 127.0.0.1 는 환경 무관하게 항상 허용
+      if (
+        origin.startsWith("http://localhost:") ||
+        origin.startsWith("http://127.0.0.1:")
+      ) {
+        return callback(null, true);
       }
 
-      // 프로덕션에서는 설정된 origin만 허용
-      const allowedOrigins = process.env.CORS_ORIGINS?.split(",") || [];
-      if (allowedOrigins.includes(origin)) {
+      // 그 외는 CORS_ORIGINS 환경변수에 설정된 origin만 허용
+      const allowedOrigins = (process.env.CORS_ORIGINS || "").split(",").map((o) => o.trim()).filter(Boolean);
+      if (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(null, true); // 개발 환경에서는 모두 허용
+        callback(new Error(`CORS: origin ${origin} not allowed`));
       }
     },
     credentials: true,
@@ -205,7 +204,7 @@ const services: ServiceConfig[] = [
   // Seller service - auth required, seller or admin role
   {
     path: "/api/v1/sellers",
-    target: "http://seller-service:3011",
+    target: "http://seller-service:3007",
     auth: "required",
     roles: ["seller", "admin"],
   },
@@ -265,7 +264,7 @@ const services: ServiceConfig[] = [
   },
 
   // File service - auth required
-  { path: "/api/v1/files", target: "http://file-service:3013", auth: "required" },
+  { path: "/api/v1/files", target: "http://file-service:3015", auth: "required" },
 
   // Stats service - auth required, admin or seller role
   {
@@ -335,7 +334,7 @@ const services: ServiceConfig[] = [
   // Attachments service - auth required
   {
     path: "/api/v1/attachments",
-    target: "http://file-service:3013",
+    target: "http://file-service:3015",
     auth: "required",
   },
 
@@ -351,6 +350,28 @@ const services: ServiceConfig[] = [
 app.use("/api/v1/auth/login", authLimiter);
 app.use("/api/v1/auth/register", authLimiter);
 app.use("/api/v1/auth/refresh", authLimiter);
+
+// Special routes: POST /api/v1/sellers (판매자 신청) & GET /api/v1/sellers (본인 심사 상태 조회)
+// 로그인한 일반 유저(user role)도 허용
+const sellerOpenProxy = createProxyMiddleware({
+  target: "http://seller-service:3007",
+  changeOrigin: true,
+  onProxyReq: (proxyReq, req: any) => {
+    logger.info(`[SELLER OPEN] Proxying ${req.method} ${req.url} to seller-service`);
+    if (req.user) {
+      proxyReq.setHeader("x-user-id", req.user.userId);
+      proxyReq.setHeader("x-user-email", req.user.email);
+      proxyReq.setHeader("x-user-role", req.user.role);
+    }
+    fixRequestBody(proxyReq, req);
+  },
+  onError: (err, req, res) => {
+    logger.error("Proxy error for seller-service:", err);
+    res.status(502).json({ success: false, error: "Bad Gateway", message: "Service unavailable: seller-service" });
+  },
+});
+app.post("/api/v1/sellers", authMiddleware, sellerOpenProxy);
+app.get("/api/v1/sellers", authMiddleware, sellerOpenProxy);
 
 // Apply caching to specific routes (before general service proxying)
 // TODO: Re-enable after fixing Redis connection issues
@@ -368,15 +389,15 @@ services.forEach(({ path, target, auth, roles }) => {
     onProxyReq: (proxyReq, req: any) => {
       logger.info(`Proxying ${req.method} ${req.url} to ${target}`);
 
-      // Fix request body using http-proxy-middleware helper
-      fixRequestBody(proxyReq, req);
-
-      // Forward user information if authenticated
+      // Forward user information BEFORE fixRequestBody to avoid ERR_HTTP_HEADERS_SENT
       if (req.user) {
         proxyReq.setHeader("x-user-id", req.user.userId);
         proxyReq.setHeader("x-user-email", req.user.email);
         proxyReq.setHeader("x-user-role", req.user.role);
       }
+
+      // Fix request body after setting headers
+      fixRequestBody(proxyReq, req);
     },
     onProxyRes: (proxyRes, req, res) => {
       logger.info(`Response from ${target}: ${proxyRes.statusCode}`);

@@ -8,7 +8,9 @@ const router = Router();
 
 router.get('/', async (req, res) => {
   try {
-    const products = await Product.findAll();
+    const { sellerId } = req.query;
+    const where = sellerId ? { sellerId: sellerId as string } : {};
+    const products = await Product.findAll({ where });
     res.json({ success: true, data: products });
   } catch (error) {
     logger.error('Failed to fetch products:', error);
@@ -78,9 +80,46 @@ router.post('/', async (req, res) => {
       });
     }
 
-    // Create product with sellerId from auth
+    const body = req.body;
+
+    // Map frontend form fields → backend model fields
+    const name = body.displayName || body.name;
+    const price = body.prices?.salePrice ?? body.prices?.originalPrice ?? body.price ?? 0;
+    const originalPrice = body.prices?.originalPrice ?? body.originalPrice;
+    // categoryCode is sent as UUID from frontend (resolved from category data)
+    const categoryId = body.categoryCode || body.categoryId;
+    if (!categoryId) {
+      return res.status(400).json({ success: false, message: '카테고리를 선택해주세요.' });
+    }
+    const stockQuantity = body.stockQuantity ?? 0;
+    const description = body.description || '';
+    const thumbnail = Array.isArray(body.images) && body.images.length > 0
+      ? (body.images.find((img: any) => img.isMain)?.url || body.images[0]?.url)
+      : body.thumbnail;
+
+    // Map saleStatus → model status enum
+    const statusMap: Record<string, string> = {
+      ON_SALE: 'active',
+      WAITING: 'draft',
+      SOLD_OUT: 'out_of_stock',
+      HIDDEN: 'inactive',
+      STOP: 'inactive',
+    };
+    const status = statusMap[body.saleStatus] || statusMap[body.displayStatus] || 'draft';
+
+    // Auto-generate slug from name
+    const slug = `${name}-${sellerId.slice(0, 8)}-${Date.now()}`.toLowerCase().replace(/[^a-z0-9-]/g, '-');
+
     const productData = {
-      ...req.body,
+      name,
+      price,
+      originalPrice,
+      categoryId,
+      stockQuantity,
+      description,
+      thumbnail,
+      status,
+      slug,
       sellerId,
     };
 
@@ -126,7 +165,31 @@ router.put('/:id', async (req, res) => {
     }
 
     const oldData = product.toJSON();
-    await product.update(req.body);
+    // sellerId는 변경 불가 — 덮어쓰기 방지
+    const { sellerId: _ignored, ...updateData } = req.body;
+
+    // saleStatus/displayStatus → status 변환 (POST와 동일한 로직)
+    const statusMap: Record<string, string> = {
+      ON_SALE: 'active',
+      WAITING: 'draft',
+      SOLD_OUT: 'out_of_stock',
+      HIDDEN: 'inactive',
+      STOP: 'inactive',
+      PAUSED: 'inactive',
+    };
+    if (updateData.saleStatus || updateData.displayStatus) {
+      updateData.status = statusMap[updateData.saleStatus] || statusMap[updateData.displayStatus] || updateData.status;
+    }
+
+    // images 배열 → thumbnail 매핑 (POST와 동일한 로직)
+    if (Array.isArray(updateData.images) && updateData.images.length > 0) {
+      updateData.thumbnail =
+        updateData.images.find((img: any) => img.isMain)?.url ||
+        updateData.images[0]?.url ||
+        updateData.thumbnail;
+    }
+
+    await product.update(updateData);
 
     // Publish product updated event (only if RabbitMQ is enabled)
     const rabbitmqEnabled = process.env.RABBITMQ_ENABLED !== 'false';

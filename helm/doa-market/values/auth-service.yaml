@@ -1,6 +1,6 @@
 image:
   repository: 478266318018.dkr.ecr.ap-northeast-2.amazonaws.com/doa-market-auth-service
-  tag: naver-oauth
+  tag: 55e8248
 
 serviceAccount:
   annotations: {}
@@ -29,3 +29,5 @@ env:
     value: "https://api.xn--9m1b13r66n.com/api/v1/auth/naver/callback"
   - name: DB_SYNC
     value: "true"
+  - name: SELLER_SERVICE_URL
+    value: "http://seller-service:3007"

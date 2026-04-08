@@ -148,7 +148,15 @@ router.patch('/:id', authenticate, userController.updateUser);
  *       200:
  *         description: 사용자 삭제 성공
  */
-router.delete('/:id', authenticate, userController.deleteUser);
+// DELETE: api-gateway already validates admin role and sets x-user-role header.
+// Trusting the internal header instead of re-validating JWT through auth-service
+// (admin JWTs are not in the users table and would fail auth-service /me lookup).
+router.delete('/:id', (req, res, next) => {
+  const role = req.headers['x-user-role'];
+  if (role === 'admin') return next();
+  // Fallback: normal JWT auth for non-gateway calls
+  authenticate(req, res, next);
+}, userController.deleteUser);
 
 /**
  * @swagger

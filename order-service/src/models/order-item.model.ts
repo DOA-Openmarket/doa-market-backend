@@ -10,6 +10,7 @@ interface OrderItemAttributes {
   quantity: number;
   price: number;
   subtotal: number;
+  imageUrl?: string | null;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -25,6 +26,7 @@ class OrderItem extends Model<OrderItemAttributes, OrderItemCreationAttributes> 
   declare quantity: number;
   declare price: number;
   declare subtotal: number;
+  declare imageUrl: string | null;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
 }
@@ -71,6 +73,10 @@ OrderItem.init(
     subtotal: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
+    },
+    imageUrl: {
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
   },
   {
