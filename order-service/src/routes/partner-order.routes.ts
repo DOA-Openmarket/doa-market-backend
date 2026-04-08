@@ -203,6 +203,21 @@ router.get('/:id', async (req, res) => {
     }
 
     const o = order as any;
+
+    // Fetch customer info from user-service
+    let userInfo: { name: string; phone: string; email: string } = { name: '', phone: '', email: '' };
+    try {
+      const userRes = await axios.get(`${USER_SERVICE_URL}/api/v1/users/${o.userId}`, {
+        headers: { 'x-user-role': 'admin' },
+        timeout: 3000,
+      });
+      const u = userRes.data?.data || {};
+      userInfo = { name: u.name || '', phone: u.phone || '', email: u.email || '' };
+    } catch {
+      logger.warn(`Could not fetch user info for order ${id}`);
+    }
+
+    const addr = o.shippingAddress || {};
     res.json({
       success: true,
       order: {
@@ -211,8 +226,15 @@ router.get('/:id', async (req, res) => {
         status: STATUS_TO_UPPER[o.status] || o.status.toUpperCase(),
         totalAmount: parseFloat(o.totalAmount),
         createdAt: o.createdAt,
-        shippingAddress: o.shippingAddress || '',
-        customer: { name: o.customerName || '', phone: o.customerPhone || '' },
+        shippingAddress: addr,
+        customer: {
+          name: addr.name || userInfo.name,
+          phone: addr.phone || userInfo.phone,
+          email: userInfo.email,
+          address: addr.address || '',
+          detailAddress: addr.detailAddress || '',
+          zipcode: addr.zipcode || '',
+        },
         items: (o.items || []).map((item: any) => ({
           id: item.orderItemId,
           productId: item.productId,
