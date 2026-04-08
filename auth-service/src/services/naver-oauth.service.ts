@@ -50,6 +50,7 @@ export class NaverOAuthService {
       client_id: this.clientId,
       redirect_uri: this.callbackUrl,
       state: stateValue,
+      scope: 'name email mobile',
     });
 
     return `https://nid.naver.com/oauth2.0/authorize?${params.toString()}`;
@@ -164,8 +165,11 @@ export class NaverOAuthService {
     let user = await User.findOne({ where: { email } });
 
     if (user) {
-      // User exists, update last login
+      // User exists, update last login and phone if provided and not already set
       user.lastLoginAt = new Date();
+      if (mobile && !user.phone) {
+        user.phone = mobile;
+      }
       await user.save();
       logger.info(`Existing user logged in with Naver: ${user.id}`);
     } else {
