@@ -141,7 +141,7 @@ services:
         value: "false"
 
   order-service:
-    tag: "a492f17"
+    tag: "tracking-number"
     replicaCount: 1
     resources:
       limits:
