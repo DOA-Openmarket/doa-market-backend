@@ -1,7 +1,8 @@
 import { Router } from 'express';
-import { Op } from 'sequelize';
+import { Op, QueryTypes } from 'sequelize';
 import Order from '../models/order.model';
 import OrderItem from '../models/order-item.model';
+import { sequelize } from '../config/database';
 import { logger } from '../utils/logger';
 
 const router = Router();
@@ -45,8 +46,24 @@ router.get('/', async (req, res) => {
       return res.status(400).json({ success: false, message: 'sellerId required' });
     }
 
-    // order_items에서 sellerId로 orderId 목록 조회
-    const itemWhere: any = { sellerId };
+    // Frontend sends seller record ID (sellers.id), but order_items.sellerId stores userId.
+    // Look up userId from sellers table using the provided seller record ID.
+    let effectiveSellerId = sellerId;
+    try {
+      const sellerRows = await sequelize.query<{ userId: string }>(
+        'SELECT "userId" FROM sellers WHERE id = :id LIMIT 1',
+        { replacements: { id: sellerId }, type: QueryTypes.SELECT }
+      );
+      if (sellerRows.length > 0 && sellerRows[0].userId) {
+        effectiveSellerId = sellerRows[0].userId;
+        logger.info(`Resolved seller record ${sellerId} → userId ${effectiveSellerId}`);
+      }
+    } catch (err) {
+      logger.warn('Could not resolve seller userId, using provided id as-is:', err);
+    }
+
+    // order_items에서 sellerId(userId)로 orderId 목록 조회
+    const itemWhere: any = { sellerId: effectiveSellerId };
     const orderItemRows = await OrderItem.findAll({
       where: itemWhere,
       attributes: ['orderId'],
@@ -66,7 +83,7 @@ router.get('/', async (req, res) => {
 
     const { count, rows: orders } = await Order.findAndCountAll({
       where,
-      include: [{ model: OrderItem, as: 'items', where: { sellerId }, required: false }],
+      include: [{ model: OrderItem, as: 'items', where: { sellerId: effectiveSellerId }, required: false }],
       limit,
       offset: (page - 1) * limit,
       order: [['createdAt', 'DESC']],

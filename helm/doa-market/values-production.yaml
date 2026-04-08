@@ -141,6 +141,7 @@ services:
         value: "false"
 
   order-service:
+    tag: "0333166"
     replicaCount: 1
     resources:
       limits:
