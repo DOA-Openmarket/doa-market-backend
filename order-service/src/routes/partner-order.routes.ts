@@ -104,9 +104,9 @@ router.get('/', async (req, res) => {
             timeout: 3000,
           });
           const u = userRes.data?.data || {};
-          userMap[userId as string] = { name: u.name || '', phone: u.phone || '' };
+          userMap[userId as string] = { name: u.name || '', phone: u.phone || '', email: u.email || '' };
         } catch {
-          userMap[userId as string] = { name: '', phone: '' };
+          userMap[userId as string] = { name: '', phone: '', email: '' };
         }
       })
     );
@@ -125,6 +125,7 @@ router.get('/', async (req, res) => {
       customer: {
         name: addr.name || userInfo.name,
         phone: addr.phone || userInfo.phone,
+        email: (userInfo as any).email || '',
         address: addr.address || '',
         detailAddress: addr.detailAddress || '',
         zipcode: addr.zipcode || '',
