@@ -46,7 +46,7 @@ router.get('/users', async (req, res) => {
 
 router.get('/sellers', async (req, res) => {
   try {
-    const SELLER_SERVICE_URL = process.env.SELLER_SERVICE_URL || 'http://seller-service:3007';
+    const SELLER_SERVICE_URL = process.env.SELLER_SERVICE_URL || 'http://seller-service:3011';
     const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://user-service:3005';
     const { search, page, limit, status, userId } = req.query;
     const query = new URLSearchParams();
@@ -128,7 +128,7 @@ router.get('/sellers', async (req, res) => {
 
 router.get('/sellers/:id', async (req, res) => {
   try {
-    const SELLER_SERVICE_URL = process.env.SELLER_SERVICE_URL || 'http://seller-service:3007';
+    const SELLER_SERVICE_URL = process.env.SELLER_SERVICE_URL || 'http://seller-service:3011';
     const response = await axios.get(`${SELLER_SERVICE_URL}/api/v1/sellers/${req.params.id}`, {
       headers: {
         Authorization: req.headers.authorization
@@ -145,7 +145,7 @@ router.get('/sellers/:id', async (req, res) => {
 
 router.patch('/sellers/:id/status', async (req, res) => {
   try {
-    const SELLER_SERVICE_URL = process.env.SELLER_SERVICE_URL || 'http://seller-service:3007';
+    const SELLER_SERVICE_URL = process.env.SELLER_SERVICE_URL || 'http://seller-service:3011';
     const { status } = req.body;
 
     // Update seller status (pending, verified, rejected, suspended)
@@ -170,7 +170,7 @@ router.patch('/sellers/:id/status', async (req, res) => {
 
 router.patch('/sellers/:id/verify', async (req, res) => {
   try {
-    const SELLER_SERVICE_URL = process.env.SELLER_SERVICE_URL || 'http://seller-service:3007';
+    const SELLER_SERVICE_URL = process.env.SELLER_SERVICE_URL || 'http://seller-service:3011';
     const response = await axios.patch(`${SELLER_SERVICE_URL}/api/v1/sellers/${req.params.id}/verify`, {},
       {
         headers: {
@@ -189,7 +189,7 @@ router.patch('/sellers/:id/verify', async (req, res) => {
 
 router.delete('/sellers/:id', async (req, res) => {
   try {
-    const SELLER_SERVICE_URL = process.env.SELLER_SERVICE_URL || 'http://seller-service:3007';
+    const SELLER_SERVICE_URL = process.env.SELLER_SERVICE_URL || 'http://seller-service:3011';
     const response = await axios.delete(`${SELLER_SERVICE_URL}/api/v1/sellers/${req.params.id}`, {
       headers: {
         Authorization: req.headers.authorization

@@ -204,7 +204,7 @@ const services: ServiceConfig[] = [
   // Seller service - auth required, seller or admin role
   {
     path: "/api/v1/sellers",
-    target: "http://seller-service:3007",
+    target: "http://seller-service:3011",
     auth: "required",
     roles: ["seller", "admin"],
   },
@@ -354,7 +354,7 @@ app.use("/api/v1/auth/refresh", authLimiter);
 // Special routes: POST /api/v1/sellers (판매자 신청) & GET /api/v1/sellers (본인 심사 상태 조회)
 // 로그인한 일반 유저(user role)도 허용
 const sellerOpenProxy = createProxyMiddleware({
-  target: "http://seller-service:3007",
+  target: "http://seller-service:3011",
   changeOrigin: true,
   onProxyReq: (proxyReq, req: any) => {
     logger.info(`[SELLER OPEN] Proxying ${req.method} ${req.url} to seller-service`);
