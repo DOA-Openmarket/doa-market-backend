@@ -95,7 +95,7 @@ router.get('/', async (req, res) => {
 
     // Fetch customer info from user-service (batch by unique userIds)
     const uniqueUserIds = [...new Set(orders.map((o: any) => o.userId))];
-    const userMap: Record<string, { name: string; phone: string }> = {};
+    const userMap: Record<string, { name: string; phone: string; email: string }> = {};
     await Promise.all(
       uniqueUserIds.map(async (userId) => {
         try {
@@ -125,7 +125,7 @@ router.get('/', async (req, res) => {
       customer: {
         name: addr.name || userInfo.name,
         phone: addr.phone || userInfo.phone,
-        email: (userInfo as any).email || '',
+        email: userInfo.email || '',
         address: addr.address || '',
         detailAddress: addr.detailAddress || '',
         zipcode: addr.zipcode || '',
