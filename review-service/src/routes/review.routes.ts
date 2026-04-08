@@ -16,7 +16,14 @@ const router = Router();
  */
 router.get('/', async (req, res) => {
   try {
+    const { userId, orderId, productId } = req.query as Record<string, string>;
+    const where: any = {};
+    if (userId) where.userId = userId;
+    if (orderId) where.orderId = orderId;
+    if (productId) where.productId = productId;
+
     const reviews = await Review.findAll({
+      where,
       order: [['createdAt', 'DESC']],
     });
     res.json({ success: true, data: reviews });
@@ -94,6 +101,14 @@ router.get('/:id', async (req, res) => {
  */
 router.post('/', async (req, res) => {
   try {
+    const { orderId } = req.body;
+    // 동일 주문에 대한 중복 리뷰 방지
+    if (orderId) {
+      const existing = await Review.findOne({ where: { orderId } });
+      if (existing) {
+        return res.status(409).json({ success: false, message: '이미 작성된 리뷰가 있습니다.' });
+      }
+    }
     const review = await Review.create(req.body);
     res.status(201).json({ success: true, data: review });
   } catch (error: any) {
