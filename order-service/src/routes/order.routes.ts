@@ -88,6 +88,7 @@ router.post('/', async (req, res) => {
       orderNumber: `ORD-${Date.now()}`,
       status: 'pending',
       paymentStatus: 'pending',
+      shippingAddress: shippingAddress || null,
     });
 
     logger.info(`Order created: ${order.id}`);

@@ -111,14 +111,24 @@ router.get('/', async (req, res) => {
       })
     );
 
-    const formatted = orders.map((o: any) => ({
+    const formatted = orders.map((o: any) => {
+      const addr = o.shippingAddress || {};
+      // shippingAddress에 수신자 이름/전화가 있으면 우선 사용, 없으면 user-service 정보 사용
+      const userInfo = userMap[o.userId] || { name: '', phone: '' };
+      return {
       id: o.id,
       orderNumber: o.orderNumber,
       status: STATUS_TO_UPPER[o.status] || o.status.toUpperCase(),
       totalAmount: parseFloat(o.totalAmount),
       createdAt: o.createdAt,
-      shippingAddress: o.shippingAddress || '',
-      customer: userMap[o.userId] || { name: '', phone: '' },
+      shippingAddress: addr,
+      customer: {
+        name: addr.name || userInfo.name,
+        phone: addr.phone || userInfo.phone,
+        address: addr.address || '',
+        detailAddress: addr.detailAddress || '',
+        zipcode: addr.zipcode || '',
+      },
       items: (o.items || []).map((item: any) => ({
         id: item.orderItemId,
         productId: item.productId,
@@ -128,7 +138,7 @@ router.get('/', async (req, res) => {
         subtotal: parseFloat(item.subtotal),
         imageUrl: item.imageUrl,
       })),
-    }));
+    };});
 
     res.json({ success: true, orders: formatted, total: count });
   } catch (error: any) {
