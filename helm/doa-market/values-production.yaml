@@ -197,6 +197,9 @@ services:
       - name: SELLER_SERVICE_URL
         value: "http://seller-service:3011"
 
+  review-service:
+    tag: "review-once"
+
   admin-service:
     env:
       - name: SELLER_SERVICE_URL
