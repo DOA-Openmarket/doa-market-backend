@@ -141,7 +141,7 @@ services:
         value: "false"
 
   order-service:
-    tag: "d1f41f8"
+    tag: "a492f17"
     replicaCount: 1
     resources:
       limits:
