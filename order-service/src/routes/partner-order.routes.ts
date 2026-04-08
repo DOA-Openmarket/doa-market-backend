@@ -1,9 +1,12 @@
 import { Router } from 'express';
 import { Op, QueryTypes } from 'sequelize';
+import axios from 'axios';
 import Order from '../models/order.model';
 import OrderItem from '../models/order-item.model';
 import { sequelize } from '../config/database';
 import { logger } from '../utils/logger';
+
+const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://user-service:3005';
 
 const router = Router();
 
@@ -90,6 +93,24 @@ router.get('/', async (req, res) => {
       distinct: true,
     });
 
+    // Fetch customer info from user-service (batch by unique userIds)
+    const uniqueUserIds = [...new Set(orders.map((o: any) => o.userId))];
+    const userMap: Record<string, { name: string; phone: string }> = {};
+    await Promise.all(
+      uniqueUserIds.map(async (userId) => {
+        try {
+          const userRes = await axios.get(`${USER_SERVICE_URL}/api/v1/users/${userId}`, {
+            headers: { 'x-user-role': 'admin' },
+            timeout: 3000,
+          });
+          const u = userRes.data?.data || {};
+          userMap[userId as string] = { name: u.name || '', phone: u.phone || '' };
+        } catch {
+          userMap[userId as string] = { name: '', phone: '' };
+        }
+      })
+    );
+
     const formatted = orders.map((o: any) => ({
       id: o.id,
       orderNumber: o.orderNumber,
@@ -97,7 +118,7 @@ router.get('/', async (req, res) => {
       totalAmount: parseFloat(o.totalAmount),
       createdAt: o.createdAt,
       shippingAddress: o.shippingAddress || '',
-      customer: { name: o.customerName || '', phone: o.customerPhone || '' },
+      customer: userMap[o.userId] || { name: '', phone: '' },
       items: (o.items || []).map((item: any) => ({
         id: item.orderItemId,
         productId: item.productId,
