@@ -1,8 +1,5 @@
 import { Request, Response } from 'express';
 import Wishlist from '../models/wishlist.model';
-import axios from 'axios';
-
-const PRODUCT_SERVICE_URL = process.env.PRODUCT_SERVICE_URL || 'http://product-service:3003/api/v1';
 
 export const getWishlist = async (req: Request, res: Response) => {
   try {
@@ -12,27 +9,7 @@ export const getWishlist = async (req: Request, res: Response) => {
       order: [['createdAt', 'DESC']]
     });
 
-    // Fetch product details for each wishlist item
-    const wishlistWithProducts = await Promise.all(
-      wishlists.map(async (wishlist) => {
-        try {
-          const wishlistData = wishlist.toJSON();
-          const productResponse = await axios.get(`${PRODUCT_SERVICE_URL}/products/${wishlistData.productId}`, { timeout: 3000 });
-          return {
-            ...wishlistData,
-            product: productResponse.data.data || productResponse.data
-          };
-        } catch (error: any) {
-          console.error(`Error fetching product ${wishlist.productId}:`, error.message);
-          return {
-            ...wishlist.toJSON(),
-            product: null
-          };
-        }
-      })
-    );
-
-    res.json({ success: true, data: wishlistWithProducts });
+    res.json({ success: true, data: wishlists.map(w => w.toJSON()) });
   } catch (error) {
     console.error('Get wishlist error:', error);
     res.status(500).json({ error: 'Internal server error' });

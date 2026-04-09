@@ -202,7 +202,7 @@ services:
     tag: "with-username"
 
   user-service:
-    tag: "wishlist-fix"
+    tag: "wishlist-simple"
 
   admin-service:
     env:
