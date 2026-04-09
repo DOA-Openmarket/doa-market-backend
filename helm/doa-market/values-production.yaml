@@ -198,7 +198,7 @@ services:
         value: "http://seller-service:3011"
 
   review-service:
-    tag: "review-once"
+    tag: "with-username"
 
   admin-service:
     env:
