@@ -20,6 +20,7 @@ app.get('/health', (req, res) => {
 });
 
 app.use('/api/v1/settlements', settlementRoutes);
+app.use('/api/v1/partner/settlements', settlementRoutes);
 
 const startServer = async () => {
   await sequelize.sync({ alter: true });

@@ -4,13 +4,14 @@ import { Op } from 'sequelize';
 
 const router = Router();
 
-// 정산 목록 조회 (관리자)
+// 정산 목록 조회 (관리자 / 판매자 - sellerId 쿼리 파라미터 지원)
 router.get('/', async (req, res) => {
   try {
-    const { status, search, startDate, endDate, page = 1, limit = 20 } = req.query;
+    const { status, search, startDate, endDate, page = 1, limit = 20, sellerId } = req.query;
     const offset = (Number(page) - 1) * Number(limit);
-    
+
     const where: any = {};
+    if (sellerId) where.sellerId = sellerId;
     if (status) where.status = status;
     if (startDate && endDate) {
       where.startDate = { [Op.between]: [startDate, endDate] };
@@ -26,6 +27,7 @@ router.get('/', async (req, res) => {
     res.json({
       success: true,
       data: rows,
+      settlements: rows,
       total: count,
       page: Number(page),
       limit: Number(limit),
