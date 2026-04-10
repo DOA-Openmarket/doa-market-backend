@@ -12,24 +12,22 @@ const router = Router();
 
 // DB status → Frontend status
 const STATUS_TO_UPPER: Record<string, string> = {
-  ready: 'READY',
+  processing: 'READY',
   shipped: 'SHIPPED',
   delivered: 'DELIVERED',
-  // aliases
-  processing: 'READY',
 };
 
 // Frontend status → DB status
 const STATUS_TO_LOWER: Record<string, string> = {
-  READY: 'ready',
+  READY: 'processing',
   SHIPPED: 'shipped',
   DELIVERED: 'delivered',
-  PREPARING: 'ready',
+  PREPARING: 'processing',
   IN_TRANSIT: 'shipped',
 };
 
 // Delivery-related DB statuses
-const DELIVERY_STATUSES = ['ready', 'shipped', 'delivered', 'processing'];
+const DELIVERY_STATUSES = ['processing', 'shipped', 'delivered'];
 
 async function resolveSellerUserId(sellerId: string): Promise<string> {
   try {
@@ -174,7 +172,7 @@ router.get('/counts', async (req, res) => {
     }
 
     const rows = await sequelize.query<{ status: string; count: string }>(
-      `SELECT status, COUNT(*) as count FROM orders WHERE id IN (:orderIds) AND status IN ('ready','processing','shipped','delivered') GROUP BY status`,
+      `SELECT status, COUNT(*) as count FROM orders WHERE id IN (:orderIds) AND status IN ('processing','shipped','delivered') GROUP BY status`,
       { replacements: { orderIds }, type: QueryTypes.SELECT }
     );
 
