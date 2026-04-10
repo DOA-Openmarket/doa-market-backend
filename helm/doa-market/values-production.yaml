@@ -83,7 +83,7 @@ defaults:
 # Critical services with higher resources
 services:
   api-gateway:
-    tag: "8f859bf"
+    tag: "cf966ca"
     port: 3000  # API Gateway uses port 3000
     replicaCount: 1
     resources:
@@ -205,7 +205,7 @@ services:
     tag: "with-username"
 
   user-service:
-    tag: "wishlist-simple"
+    tag: "cf966ca"
 
   admin-service:
     env:
