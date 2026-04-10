@@ -190,6 +190,9 @@ services:
     tolerations: []  # Spot toleration 제거
 
   # Auth Service도 On-Demand만 사용
+  settlement-service:
+    tag: "f91668f"
+
   auth-service:
     tag: "8c3d043"
     spotEnabled: true
