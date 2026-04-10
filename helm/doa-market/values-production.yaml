@@ -83,7 +83,7 @@ defaults:
 # Critical services with higher resources
 services:
   api-gateway:
-    tag: "wishlist-route"
+    tag: "8f859bf"
     port: 3000  # API Gateway uses port 3000
     replicaCount: 1
     resources:
@@ -142,7 +142,7 @@ services:
         value: "false"
 
   order-service:
-    tag: "tracking-number"
+    tag: "8f859bf"
     replicaCount: 1
     resources:
       limits:
