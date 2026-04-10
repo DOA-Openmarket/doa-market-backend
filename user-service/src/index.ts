@@ -62,7 +62,8 @@ app.use(`${API_PREFIX}/profiles`, userRoutes); // Alias for users
 app.use(`${API_PREFIX}/users/:userId/addresses`, addressRoutes);
 app.use(`${API_PREFIX}/users`, pointRoutes); // Point routes
 app.use(`${API_PREFIX}/users`, checkinRoutes); // Checkin routes
-app.use(`${API_PREFIX}/users`, inquiryRoutes); // Inquiry routes
+app.use(`${API_PREFIX}/users`, inquiryRoutes); // Inquiry routes (user-scoped)
+app.use(`${API_PREFIX}/inquiries`, inquiryRoutes); // Inquiry routes (seller/admin access)
 app.use(`${API_PREFIX}/users`, reviewRoutes); // Review routes
 app.use(`${API_PREFIX}/notices`, noticeRoutes); // Notice routes (public)
 app.use(`${API_PREFIX}/wishlist`, wishlistRoutes); // Wishlist routes

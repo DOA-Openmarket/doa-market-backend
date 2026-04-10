@@ -32,6 +32,12 @@ const router = Router();
  *       200:
  *         description: 문의 목록 조회 성공
  */
+// 판매자별 문의 목록 조회 (sellerId로 필터) - /inquiries/seller/:sellerId 로 마운트됨
+router.get('/seller/:sellerId', async (req, res) => {
+  // TODO: inquiry 모델에 sellerId 컬럼 추가 후 구현
+  res.json({ success: true, data: [], total: 0, page: 1, limit: 20 });
+});
+
 router.get('/:userId/inquiries', inquiryController.getInquiries);
 
 /**
