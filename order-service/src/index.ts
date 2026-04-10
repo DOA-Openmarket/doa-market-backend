@@ -7,6 +7,7 @@ import orderRoutes from './routes/order.routes';
 import partnerOrderRoutes from './routes/partner-order.routes';
 import partnerCancellationRoutes from './routes/partner-cancellation.routes';
 import partnerReturnRoutes from './routes/partner-return.routes';
+import partnerDeliveryRoutes from './routes/partner-delivery.routes';
 import { sequelize } from './config/database';
 import { logger } from './utils/logger';
 import { swaggerSpec } from './config/swagger';
@@ -42,6 +43,7 @@ app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/partner/orders', partnerOrderRoutes);
 app.use('/api/v1/partner/cancellations', partnerCancellationRoutes);
 app.use('/api/v1/partner/returns', partnerReturnRoutes);
+app.use('/api/v1/partner/deliveries', partnerDeliveryRoutes);
 
 const startServer = async () => {
   try {
