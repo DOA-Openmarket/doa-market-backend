@@ -142,7 +142,7 @@ services:
         value: "false"
 
   order-service:
-    tag: "8f859bf"
+    tag: "cba94ab"
     replicaCount: 1
     resources:
       limits:
