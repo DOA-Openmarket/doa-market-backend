@@ -64,6 +64,11 @@ const startServer = async () => {
       ALTER TABLE orders ADD COLUMN IF NOT EXISTS "trackingNumber" VARCHAR(100);
     `).catch((e) => logger.warn('trackingNumber column migration:', e.message));
 
+    // Add deliveryCompany column if not exists (idempotent migration)
+    await sequelize.query(`
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS "deliveryCompany" VARCHAR(100);
+    `).catch((e) => logger.warn('deliveryCompany column migration:', e.message));
+
     // Only connect to RabbitMQ if enabled
     const rabbitmqEnabled = process.env.RABBITMQ_ENABLED !== 'false';
     if (rabbitmqEnabled) {

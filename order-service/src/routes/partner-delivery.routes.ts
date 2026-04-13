@@ -70,6 +70,7 @@ async function formatOrders(orders: any[], sellerId: string) {
       totalAmount: parseFloat(o.totalAmount),
       createdAt: o.createdAt,
       trackingNumber: o.trackingNumber || null,
+      deliveryCompany: o.deliveryCompany || null,
       shippingAddress: addr,
       customer: {
         name: addr.name || userInfo.name,
@@ -205,9 +206,10 @@ router.patch('/:id/start', async (req, res) => {
 
     order.status = 'shipped';
     if (trackingNumber !== undefined) order.trackingNumber = trackingNumber || null;
+    if (deliveryCompany !== undefined) order.deliveryCompany = deliveryCompany || null;
     await order.save();
 
-    res.json({ success: true, data: { id: order.id, status: 'SHIPPED', trackingNumber: order.trackingNumber } });
+    res.json({ success: true, data: { id: order.id, status: 'SHIPPED', trackingNumber: order.trackingNumber, deliveryCompany: order.deliveryCompany } });
   } catch (error: any) {
     logger.error('Error starting delivery:', error);
     res.status(500).json({ success: false, message: error.message });
@@ -221,17 +223,18 @@ router.patch('/:id/start', async (req, res) => {
 router.patch('/:id/tracking', async (req, res) => {
   try {
     const { id } = req.params;
-    const { trackingNumber } = req.body;
+    const { trackingNumber, deliveryCompany } = req.body;
 
     const order = await Order.findByPk(id);
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
 
-    order.trackingNumber = trackingNumber || null;
+    if (trackingNumber !== undefined) order.trackingNumber = trackingNumber || null;
+    if (deliveryCompany !== undefined) order.deliveryCompany = deliveryCompany || null;
     await order.save();
 
-    res.json({ success: true, data: { id: order.id, trackingNumber: order.trackingNumber } });
+    res.json({ success: true, data: { id: order.id, trackingNumber: order.trackingNumber, deliveryCompany: order.deliveryCompany } });
   } catch (error: any) {
     logger.error('Error updating tracking number:', error);
     res.status(500).json({ success: false, message: error.message });
