@@ -117,7 +117,7 @@ router.get('/', async (req, res) => {
     const orderIds = orderItemRows.map((r: any) => r.orderId);
 
     if (orderIds.length === 0) {
-      return res.json({ success: true, orders: [], total: 0 });
+      return res.json({ success: true, deliveries: [], total: 0 });
     }
 
     const where: any = {
@@ -140,7 +140,7 @@ router.get('/', async (req, res) => {
     });
 
     const formatted = await formatOrders(orders, effectiveSellerId);
-    res.json({ success: true, orders: formatted, total: count });
+    res.json({ success: true, deliveries: formatted, total: count });
   } catch (error: any) {
     logger.error('Error fetching partner deliveries:', error);
     res.status(500).json({ success: false, message: error.message });
