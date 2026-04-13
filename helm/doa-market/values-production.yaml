@@ -147,7 +147,7 @@ services:
         value: "false"
 
   order-service:
-    tag: "9244810"
+    tag: "f72003d"
     replicaCount: 1
     resources:
       limits:
