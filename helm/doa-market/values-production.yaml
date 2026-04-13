@@ -82,6 +82,9 @@ defaults:
 
 # Critical services with higher resources
 services:
+  banner-service:
+    tag: "bd4beb5"
+
   api-gateway:
     tag: "cf966ca"
     port: 3000  # API Gateway uses port 3000
