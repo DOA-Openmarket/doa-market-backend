@@ -102,6 +102,8 @@ services:
     env:
       - name: CORS_ORIGINS
         value: "https://admin.xn--pm2b831akpj.com,https://d2bcmyux3fqi2z.cloudfront.net,https://xn--pm2b831akpj.com,https://www.xn--pm2b831akpj.com,https://main.d3pzh67s1gjuqb.amplifyapp.com"
+      - name: JWT_ACCESS_SECRET
+        value: "doa-market-prod-access-secret-2026-secure-key"
     ingress:
       enabled: true
       hosts:
@@ -198,6 +200,14 @@ services:
     env:
       - name: SELLER_SERVICE_URL
         value: "http://seller-service:3011"
+      - name: JWT_ACCESS_SECRET
+        value: "doa-market-prod-access-secret-2026-secure-key"
+      - name: JWT_REFRESH_SECRET
+        value: "doa-market-prod-refresh-secret-2026-secure-key"
+      - name: JWT_ACCESS_EXPIRES_IN
+        value: "15m"
+      - name: JWT_REFRESH_EXPIRES_IN
+        value: "7d"
 
   review-service:
     tag: "with-username"
