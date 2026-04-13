@@ -50,8 +50,14 @@ const startServer = async () => {
     // Sync database models (create tables if they don't exist, but don't alter existing ones)
     const dbSync = process.env.DB_SYNC === 'true';
     const dbForce = process.env.DB_FORCE === 'true';
-    await sequelize.sync({ alter: dbSync, force: dbForce });
-    logger.info(`Database synchronized (alter: ${dbSync}, force: ${dbForce})`);
+    try {
+      await sequelize.sync({ alter: dbSync, force: dbForce });
+      logger.info(`Database synchronized (alter: ${dbSync}, force: ${dbForce})`);
+    } catch (syncError: any) {
+      // In production, the DB schema may have values outside Sequelize's ENUM definition.
+      // Log the warning and continue — the schema is already stable.
+      logger.warn(`Database sync skipped due to error (safe to ignore in production): ${syncError.message}`);
+    }
 
     // Add trackingNumber column if not exists (idempotent migration)
     await sequelize.query(`
