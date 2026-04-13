@@ -157,6 +157,8 @@ services:
     env:
       - name: RABBITMQ_ENABLED
         value: "false"
+      - name: DB_SYNC
+        value: "false"
 
   payment-service:
     replicaCount: 1
