@@ -179,7 +179,7 @@ services:
       - name: RABBITMQ_ENABLED
         value: "false"
       - name: PAYMENT_CALLBACK_URL
-        value: "http://k8s-doamarke-apigatew-f0b8b750e2-990107643.ap-northeast-2.elb.amazonaws.com/api/v1/payments/callback"
+        value: "http://k8s-doamarke-apigatew-f0b8b750e2-2007534752.ap-northeast-2.elb.amazonaws.com/api/v1/payments/callback"
       - name: FRONTEND_URL
         value: "https://main.d3pzh67s1gjuqb.amplifyapp.com"
     # SPOT 노드에서도 실행 허용 (ON_DEMAND 노드가 없는 환경)
