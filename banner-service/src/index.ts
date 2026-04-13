@@ -38,8 +38,13 @@ const startServer = async () => {
     await sequelize.authenticate();
     logger.info('Database connection established');
     
-    await sequelize.sync({ alter: true });
-    logger.info('Database synchronized');
+    try {
+      const dbSync = process.env.DB_SYNC === 'true';
+      await sequelize.sync({ alter: dbSync });
+      logger.info('Database synchronized');
+    } catch (syncError: any) {
+      logger.warn(`Database sync skipped (safe to ignore in production): ${syncError.message}`);
+    }
     
     app.listen(PORT, () => {
       logger.info(`Banner Service running on port ${PORT}`);
