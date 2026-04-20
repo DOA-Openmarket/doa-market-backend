@@ -4,25 +4,7 @@ import { Op } from 'sequelize';
 
 const router = Router();
 
-/**
- * @swagger
- * /api/v1/coupons:
- *   get:
- *     tags: [Coupons]
- *     summary: 쿠폰 목록 조회
- *     parameters:
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *       - in: query
- *         name: issued_by
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Success
- */
+// GET / - 쿠폰 목록 조회
 router.get('/', async (req, res) => {
   try {
     const { search, issued_by } = req.query;
@@ -50,22 +32,20 @@ router.get('/', async (req, res) => {
   }
 });
 
-/**
- * @swagger
- * /api/v1/coupons/{id}:
- *   get:
- *     tags: [Coupons]
- *     summary: 쿠폰 상세 조회
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Success
- */
+// GET /seller/:sellerId - 판매자별 쿠폰 조회 (/:id 보다 먼저 등록)
+router.get('/seller/:sellerId', async (req, res) => {
+  try {
+    const coupons = await Coupon.findAll({
+      where: { issuedBy: req.params.sellerId },
+      order: [['createdAt', 'DESC']],
+    });
+    res.json({ success: true, data: coupons });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// GET /:id - 쿠폰 상세 조회
 router.get('/:id', async (req, res) => {
   try {
     const coupon = await Coupon.findByPk(req.params.id);
@@ -78,35 +58,17 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-/**
- * @swagger
- * /api/v1/coupons:
- *   post:
- *     tags: [Coupons]
- *     summary: 쿠폰 생성
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *     responses:
- *       201:
- *         description: Created
- */
+// POST / - 쿠폰 생성
 router.post('/', async (req, res) => {
   try {
-    // Transform frontend data to backend format
     const frontendData = req.body;
 
-    // Generate unique coupon code if not provided
     const generateCode = () => {
       const timestamp = Date.now().toString(36);
       const random = Math.random().toString(36).substring(2, 8);
       return `COUPON-${timestamp}-${random}`.toUpperCase();
     };
 
-    // Map discount_mode to discountType
     const discountTypeMap: { [key: string]: string } = {
       'amount': 'fixed',
       'percent': 'percentage',
@@ -122,10 +84,9 @@ router.post('/', async (req, res) => {
       minOrderAmount: frontendData.min_order_amount ? Number(frontendData.min_order_amount) : null,
       maxDiscountAmount: frontendData.discount_max ? Number(frontendData.discount_max) : null,
       startDate: frontendData.start_date || frontendData.valid_from || frontendData.startDate || new Date(),
-      endDate: frontendData.end_date || frontendData.valid_to || frontendData.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // Default: 30 days from now
+      endDate: frontendData.end_date || frontendData.valid_to || frontendData.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
       status: 'active',
-      // Store additional frontend fields in a text field if model supports it
-      issuedBy: frontendData.issued_by || null,
+      issuedBy: frontendData.issued_by || frontendData.issuedBy || null,
       totalCount: frontendData.total_count ? Number(frontendData.total_count) : null,
     };
 
@@ -136,35 +97,13 @@ router.post('/', async (req, res) => {
   }
 });
 
-/**
- * @swagger
- * /api/v1/coupons/{id}:
- *   put:
- *     tags: [Coupons]
- *     summary: 쿠폰 수정
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *     responses:
- *       200:
- *         description: Success
- */
+// PUT /:id - 쿠폰 수정
 router.put('/:id', async (req, res) => {
   try {
     const coupon = await Coupon.findByPk(req.params.id);
     if (!coupon) {
       return res.status(404).json({ success: false, message: '쿠폰을 찾을 수 없습니다.' });
     }
-
     await coupon.update(req.body);
     res.json({ success: true, data: coupon });
   } catch (error: any) {
@@ -172,29 +111,13 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-/**
- * @swagger
- * /api/v1/coupons/{id}:
- *   delete:
- *     tags: [Coupons]
- *     summary: 쿠폰 삭제
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Success
- */
+// DELETE /:id - 쿠폰 삭제
 router.delete('/:id', async (req, res) => {
   try {
     const coupon = await Coupon.findByPk(req.params.id);
     if (!coupon) {
       return res.status(404).json({ success: false, message: '쿠폰을 찾을 수 없습니다.' });
     }
-
     await coupon.destroy();
     res.json({ success: true, message: '쿠폰이 삭제되었습니다.' });
   } catch (error: any) {
@@ -202,50 +125,7 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-/**
- * @swagger
- * /api/v1/coupons/seller/{sellerId}:
- *   get:
- *     tags: [Coupons]
- *     summary: 판매자별 쿠폰 조회
- *     parameters:
- *       - in: path
- *         name: sellerId
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Success
- */
-router.get('/seller/:sellerId', async (req, res) => {
-  try {
-    const coupons = await Coupon.findAll({
-      where: { issuedBy: req.params.sellerId },
-      order: [['createdAt', 'DESC']],
-    });
-    res.json({ success: true, data: coupons });
-  } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-/**
- * @swagger
- * /api/v1/coupons/{code}/issue:
- *   post:
- *     tags: [Coupons]
- *     summary: 쿠폰 발급
- *     parameters:
- *       - in: path
- *         name: code
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Success
- */
+// POST /:code/issue - 쿠폰 발급
 router.post('/:code/issue', async (req, res) => {
   try {
     const coupon = await Coupon.findOne({ where: { code: req.params.code } });
@@ -259,4 +139,3 @@ router.post('/:code/issue', async (req, res) => {
 });
 
 export default router;
-
