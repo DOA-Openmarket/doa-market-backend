@@ -210,7 +210,7 @@ services:
         value: "7d"
 
   review-service:
-    tag: "with-username"
+    tag: "610cb24"
 
   user-service:
     tag: "cf966ca"
