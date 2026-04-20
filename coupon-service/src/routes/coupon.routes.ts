@@ -132,6 +132,8 @@ router.post('/:code/issue', async (req, res) => {
     if (!coupon) {
       return res.status(404).json({ success: false, message: '쿠폰을 찾을 수 없습니다.' });
     }
+    await coupon.increment('usedCount', { by: 1 });
+    await coupon.reload();
     res.json({ success: true, data: coupon, message: 'Coupon issued' });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });

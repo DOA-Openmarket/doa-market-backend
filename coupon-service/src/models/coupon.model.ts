@@ -14,6 +14,7 @@ class Coupon extends Model {
   public status!: string;
   public issuedBy?: string;
   public totalCount?: number;
+  public usedCount!: number;
 }
 
 Coupon.init(
@@ -30,6 +31,7 @@ Coupon.init(
     status: { type: DataTypes.ENUM('active', 'inactive', 'expired'), defaultValue: 'active' },
     issuedBy: { type: DataTypes.UUID, allowNull: true },
     totalCount: { type: DataTypes.INTEGER, allowNull: true },
+    usedCount: { type: DataTypes.INTEGER, defaultValue: 0, allowNull: false },
   },
   { sequelize, tableName: 'coupons' }
 );
