@@ -190,6 +190,9 @@ services:
     tolerations: []
 
   # Auth Service도 On-Demand만 사용
+  coupon-service:
+    tag: "9289058"
+
   settlement-service:
     tag: "f91668f"
 
