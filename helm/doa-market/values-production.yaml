@@ -208,6 +208,15 @@ services:
         value: "15m"
       - name: JWT_REFRESH_EXPIRES_IN
         value: "7d"
+      - name: NAVER_CLIENT_ID
+        value: "OI6EQBbkUIN6SIYUowKM"
+      - name: NAVER_CLIENT_SECRET
+        valueFrom:
+          secretKeyRef:
+            name: naver-oauth-secrets
+            key: client-secret
+      - name: NAVER_CALLBACK_URL
+        value: "https://api.xn--9m1b13r66n.com/api/v1/auth/naver/callback"
 
   review-service:
     tag: "610cb24"
