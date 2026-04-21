@@ -236,8 +236,22 @@ router.get('/products/:productId', async (req, res) => {
  */
 router.get('/seller/:sellerId', async (req, res) => {
   try {
+    const { sellerId } = req.params;
+    // productIds 쿼리로 seller 상품 목록을 전달받아 fallback 조회 지원
+    const productIdsParam = req.query.productIds as string | undefined;
+
+    let where: any = {};
+    if (productIdsParam) {
+      const productIds = productIdsParam.split(',').filter(Boolean);
+      where = productIds.length > 0
+        ? { [Op.or]: [{ sellerId }, { productId: { [Op.in]: productIds } }] }
+        : { sellerId };
+    } else {
+      where = { sellerId };
+    }
+
     const reviews = await Review.findAll({
-      where: { sellerId: req.params.sellerId },
+      where,
       order: [['createdAt', 'DESC']],
     });
     res.json({ success: true, data: reviews });

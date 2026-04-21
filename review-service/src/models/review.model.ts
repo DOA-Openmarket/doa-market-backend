@@ -6,6 +6,7 @@ class Review extends Model {
   public userId!: string;
   public userName!: string;
   public productId!: string;
+  public sellerId!: string;
   public orderId!: string;
   public rating!: number;
   public content!: string;
@@ -19,6 +20,7 @@ Review.init(
     userId: { type: DataTypes.UUID, allowNull: false },
     userName: { type: DataTypes.STRING(100), allowNull: true, defaultValue: '익명' },
     productId: { type: DataTypes.UUID, allowNull: false },
+    sellerId: { type: DataTypes.UUID, allowNull: true },
     orderId: { type: DataTypes.UUID, allowNull: false },
     rating: { type: DataTypes.INTEGER, allowNull: false, validate: { min: 1, max: 5 } },
     content: { type: DataTypes.TEXT, allowNull: false },
