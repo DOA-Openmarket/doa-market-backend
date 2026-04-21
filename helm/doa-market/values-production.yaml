@@ -101,7 +101,7 @@ services:
       maxReplicas: 10
     env:
       - name: CORS_ORIGINS
-        value: "https://admin.xn--pm2b831akpj.com,https://d2bcmyux3fqi2z.cloudfront.net,https://xn--pm2b831akpj.com,https://www.xn--pm2b831akpj.com,https://main.d3pzh67s1gjuqb.amplifyapp.com"
+        value: "https://admin.xn--pm2b831akpj.com,https://partner.xn--pm2b831akpj.com,https://d2bcmyux3fqi2z.cloudfront.net,https://xn--pm2b831akpj.com,https://www.xn--pm2b831akpj.com,https://main.d3pzh67s1gjuqb.amplifyapp.com"
       - name: JWT_ACCESS_SECRET
         value: "doa-market-prod-access-secret-2026-secure-key"
     ingress:
