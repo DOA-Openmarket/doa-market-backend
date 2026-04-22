@@ -1,11 +1,11 @@
 FROM node:20-alpine AS builder
 
-WORKDIR /app
+WORKDIR /app/api-gateway
 
-COPY package*.json ./
+COPY api-gateway/package*.json ./
 RUN npm install
 
-COPY . ./
+COPY api-gateway/ ./
 
 RUN npm run build
 
@@ -13,9 +13,9 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/api-gateway/package*.json ./
+COPY --from=builder /app/api-gateway/dist ./dist
+COPY --from=builder /app/api-gateway/node_modules ./node_modules
 
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
