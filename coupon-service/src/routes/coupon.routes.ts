@@ -59,7 +59,7 @@ router.get('/user/me', async (req, res) => {
       order: [['issuedAt', 'DESC']],
     });
 
-    const couponIds = userCoupons.map((uc: any) => uc.couponId);
+    const couponIds = userCoupons.map((uc: any) => uc.getDataValue('couponId'));
     if (couponIds.length === 0) {
       return res.json({ success: true, data: [] });
     }
