@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import Coupon from '../models/coupon.model';
+import UserCoupon from '../models/user-coupon.model';
 import { Op } from 'sequelize';
 
 const router = Router();
@@ -40,6 +41,43 @@ router.get('/seller/:sellerId', async (req, res) => {
       order: [['createdAt', 'DESC']],
     });
     res.json({ success: true, data: coupons });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// GET /user/me - 내 쿠폰함 조회 (JWT x-user-id 헤더 사용)
+router.get('/user/me', async (req, res) => {
+  try {
+    const userId = req.headers['x-user-id'] as string;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: '로그인이 필요합니다.' });
+    }
+
+    const userCoupons = await UserCoupon.findAll({
+      where: { userId },
+      order: [['issuedAt', 'DESC']],
+    });
+
+    const couponIds = userCoupons.map((uc: any) => uc.couponId);
+    if (couponIds.length === 0) {
+      return res.json({ success: true, data: [] });
+    }
+
+    const coupons = await Coupon.findAll({ where: { id: couponIds } });
+
+    // userCoupon 정보를 coupon에 병합
+    const result = userCoupons.map((uc: any) => {
+      const coupon = coupons.find((c: any) => c.id === uc.couponId);
+      return {
+        ...coupon?.toJSON(),
+        userCouponId: uc.id,
+        issuedAt: uc.issuedAt,
+        usedAt: uc.usedAt,
+      };
+    });
+
+    res.json({ success: true, data: result });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -125,13 +163,26 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// POST /:code/issue - 쿠폰 발급
+// POST /:code/issue - 쿠폰 발급 (user_coupons에 기록)
 router.post('/:code/issue', async (req, res) => {
   try {
+    const userId = req.headers['x-user-id'] as string;
     const coupon = await Coupon.findOne({ where: { code: req.params.code } });
     if (!coupon) {
       return res.status(404).json({ success: false, message: '쿠폰을 찾을 수 없습니다.' });
     }
+
+    // 이미 발급된 쿠폰 중복 방지
+    if (userId) {
+      const existing = await UserCoupon.findOne({
+        where: { userId, couponId: (coupon as any).id },
+      });
+      if (existing) {
+        return res.status(409).json({ success: false, message: '이미 발급된 쿠폰입니다.' });
+      }
+      await UserCoupon.create({ userId, couponId: (coupon as any).id });
+    }
+
     await coupon.increment('usedCount', { by: 1 });
     await coupon.reload();
     res.json({ success: true, data: coupon, message: 'Coupon issued' });

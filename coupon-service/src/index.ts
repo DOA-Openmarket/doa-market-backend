@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import couponRoutes from './routes/coupon.routes';
+import './models/user-coupon.model'; // ensure UserCoupon table is synced
 import { sequelize } from './config/database';
 import { logger } from './utils/logger';
 
