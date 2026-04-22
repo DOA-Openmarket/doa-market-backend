@@ -48,9 +48,20 @@ app.use('/api/v1/terms', policyRoutes); // Public terms/policy access for partne
 
 const startServer = async () => {
   try {
-    // Sync database models (alter to add missing columns)
-    await sequelize.sync({ alter: true });
+    // Sync database models (create tables if not exist)
+    await sequelize.sync();
     logger.info('Database synchronized');
+
+    // Safe migration: add missing columns without alter:true (avoids ENUM breakage)
+    try {
+      await sequelize.query(`
+        ALTER TABLE error_reports ADD COLUMN IF NOT EXISTS type VARCHAR(255) DEFAULT 'error';
+      `);
+      logger.info('Migration: error_reports.type column ensured');
+    } catch (migErr: any) {
+      logger.warn('Migration warning (non-fatal):', migErr.message);
+    }
+
     app.listen(PORT, () => logger.info(`Admin Service on port ${PORT}`));
   } catch (error) {
     logger.error('Failed to start server:', error);
