@@ -191,7 +191,7 @@ services:
 
   # Auth Service도 On-Demand만 사용
   coupon-service:
-    tag: "00c0c1e"
+    tag: "3d20242"
 
   settlement-service:
     tag: "f91668f"
