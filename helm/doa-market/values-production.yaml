@@ -86,7 +86,7 @@ services:
     tag: "bd4beb5"
 
   api-gateway:
-    tag: "cf966ca"
+    tag: "fd15b1c"
     port: 3000  # API Gateway uses port 3000
     replicaCount: 1
     resources:
