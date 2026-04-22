@@ -56,7 +56,8 @@ ErrorReport.init(
     },
     type: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
+      defaultValue: 'error',
     },
     title: {
       type: DataTypes.STRING,
