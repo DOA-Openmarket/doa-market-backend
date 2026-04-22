@@ -163,6 +163,37 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// PATCH /:code/use - 쿠폰 사용 처리 (usedAt 기록)
+router.patch('/:code/use', async (req, res) => {
+  try {
+    const userId = req.headers['x-user-id'] as string;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: '로그인이 필요합니다.' });
+    }
+
+    const coupon = await Coupon.findOne({ where: { code: req.params.code } });
+    if (!coupon) {
+      return res.status(404).json({ success: false, message: '쿠폰을 찾을 수 없습니다.' });
+    }
+
+    const couponId = coupon.getDataValue('id');
+    const userCoupon = await UserCoupon.findOne({ where: { userId, couponId } });
+    if (!userCoupon) {
+      return res.status(404).json({ success: false, message: '발급받지 않은 쿠폰입니다.' });
+    }
+
+    const alreadyUsed = userCoupon.getDataValue('usedAt');
+    if (alreadyUsed) {
+      return res.status(409).json({ success: false, message: '이미 사용된 쿠폰입니다.' });
+    }
+
+    await userCoupon.update({ usedAt: new Date() });
+    res.json({ success: true, message: '쿠폰이 사용되었습니다.' });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // POST /:code/issue - 쿠폰 발급 (user_coupons에 기록)
 router.post('/:code/issue', async (req, res) => {
   try {
