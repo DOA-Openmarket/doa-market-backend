@@ -66,14 +66,14 @@ router.get('/user/me', async (req, res) => {
 
     const coupons = await Coupon.findAll({ where: { id: couponIds } });
 
-    // userCoupon 정보를 coupon에 병합
+    // userCoupon 정보를 coupon에 병합 (getDataValue로 class field shadowing 우회)
     const result = userCoupons.map((uc: any) => {
-      const coupon = coupons.find((c: any) => c.id === uc.couponId);
+      const coupon = coupons.find((c: any) => c.getDataValue('id') === uc.getDataValue('couponId'));
       return {
-        ...coupon?.toJSON(),
-        userCouponId: uc.id,
-        issuedAt: uc.issuedAt,
-        usedAt: uc.usedAt,
+        ...(coupon ? coupon.toJSON() : {}),
+        userCouponId: uc.getDataValue('id'),
+        issuedAt: uc.getDataValue('issuedAt'),
+        usedAt: uc.getDataValue('usedAt'),
       };
     });
 
@@ -167,22 +167,24 @@ router.delete('/:id', async (req, res) => {
 router.post('/:code/issue', async (req, res) => {
   try {
     const userId = req.headers['x-user-id'] as string;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: '로그인이 필요합니다.' });
+    }
+
     const coupon = await Coupon.findOne({ where: { code: req.params.code } });
     if (!coupon) {
       return res.status(404).json({ success: false, message: '쿠폰을 찾을 수 없습니다.' });
     }
 
+    const couponId = coupon.getDataValue('id');
+
     // 이미 발급된 쿠폰 중복 방지
-    if (userId) {
-      const existing = await UserCoupon.findOne({
-        where: { userId, couponId: (coupon as any).id },
-      });
-      if (existing) {
-        return res.status(409).json({ success: false, message: '이미 발급된 쿠폰입니다.' });
-      }
-      await UserCoupon.create({ userId, couponId: (coupon as any).id });
+    const existing = await UserCoupon.findOne({ where: { userId, couponId } });
+    if (existing) {
+      return res.status(409).json({ success: false, message: '이미 발급된 쿠폰입니다.' });
     }
 
+    await UserCoupon.create({ userId, couponId });
     await coupon.increment('usedCount', { by: 1 });
     await coupon.reload();
     res.json({ success: true, data: coupon, message: 'Coupon issued' });
