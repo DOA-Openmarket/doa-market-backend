@@ -48,8 +48,8 @@ app.use('/api/v1/terms', policyRoutes); // Public terms/policy access for partne
 
 const startServer = async () => {
   try {
-    // Sync database models (create tables if they don't exist, but don't alter existing ones)
-    await sequelize.sync();
+    // Sync database models (alter to add missing columns)
+    await sequelize.sync({ alter: true });
     logger.info('Database synchronized');
     app.listen(PORT, () => logger.info(`Admin Service on port ${PORT}`));
   } catch (error) {
