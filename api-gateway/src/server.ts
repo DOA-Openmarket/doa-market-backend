@@ -248,6 +248,14 @@ const services: ServiceConfig[] = [
   // Search service - no auth required (public) + caching
   { path: "/api/v1/search", target: "http://search-service:3009", auth: "none" },
 
+  // Error reports - sellers can submit, admins can manage
+  {
+    path: "/api/v1/error-reports",
+    target: "http://admin-service:3012",
+    auth: "required",
+    roles: ["seller", "admin"],
+  },
+
   // Admin service - auth required, admin role only
   {
     path: "/api/v1/admin",
