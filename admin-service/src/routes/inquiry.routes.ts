@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import Inquiry from '../models/inquiry.model';
+import { sequelize } from '../config/database';
 
 const router = Router();
 
@@ -55,9 +56,35 @@ router.get('/', async (req, res) => {
       ],
     });
 
+    // users 테이블에서 작성자 정보 조회
+    const userIds = [...new Set(rows.map((r: any) => r.getDataValue('userId')).filter(Boolean))];
+    let userMap: Record<string, any> = {};
+    if (userIds.length > 0) {
+      try {
+        const users = await sequelize.query(
+          `SELECT id, user_name, email, phone FROM users WHERE id IN (:userIds)`,
+          { replacements: { userIds }, type: 'SELECT' as any }
+        ) as any[];
+        users.forEach((u: any) => { userMap[u.id] = u; });
+      } catch (e) {
+        // users 테이블 조회 실패 시 무시
+      }
+    }
+
+    const enriched = rows.map((row: any) => {
+      const uid = row.getDataValue('userId');
+      const user = userMap[uid];
+      return {
+        ...row.toJSON(),
+        senderName: user?.user_name || user?.email || uid || '알 수 없음',
+        senderEmail: user?.email || '',
+        senderPhone: user?.phone || '',
+      };
+    });
+
     res.json({
       success: true,
-      data: rows,
+      data: enriched,
       pagination: {
         page,
         limit,
