@@ -18,8 +18,12 @@ router.get('/', async (req, res) => {
       ];
     }
 
-    if (issued_by) {
-      where.issuedBy = issued_by;
+    if (issued_by === 'admin') {
+      where.issuedBy = null; // 관리자 발급: issuedBy가 없음
+    } else if (issued_by === 'partner') {
+      where.issuedBy = { [Op.ne]: null }; // 판매자 발급: issuedBy에 sellerId 있음
+    } else if (issued_by) {
+      where.issuedBy = issued_by; // 특정 판매자 ID로 필터
     }
 
     const { count, rows } = await Coupon.findAndCountAll({

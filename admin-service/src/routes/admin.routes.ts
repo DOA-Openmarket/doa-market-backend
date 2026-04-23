@@ -116,7 +116,8 @@ router.get('/users', async (req, res) => {
 
     if (search) query.append('search', search as string);
     if (page) query.append('page', page as string);
-    if (limit) query.append('limit', limit as string);
+    // Use high limit to return all users (frontend does client-side pagination)
+    query.append('limit', (limit as string) || '1000');
     if (status) query.append('status', status as string);
 
     const response = await axios.get(`${USER_SERVICE_URL}/api/v1/users?${query.toString()}`, {
