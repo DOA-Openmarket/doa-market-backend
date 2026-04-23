@@ -314,6 +314,42 @@ router.post('/users/:id/suspend', async (req, res) => {
   res.json({ success: true, message: 'User suspended' });
 });
 
+// TEMPORARY: One-time user cleanup endpoint
+// Soft-deletes all users except keepEmail
+router.post('/users/cleanup', async (req, res) => {
+  try {
+    const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://user-service:3005';
+    const { keepEmail } = req.body;
+
+    if (!keepEmail) {
+      return res.status(400).json({ success: false, error: { message: 'keepEmail is required' } });
+    }
+
+    // Get all users (no role filter, no limit effectively)
+    const response = await axios.get(`${USER_SERVICE_URL}/api/v1/users?limit=10000`, {
+      headers: { Authorization: req.headers.authorization }
+    });
+
+    const allUsers: any[] = response.data?.data || [];
+    const toDelete = allUsers.filter((u: any) => u.email !== keepEmail);
+
+    const results = await Promise.allSettled(
+      toDelete.map((u: any) =>
+        axios.delete(`${USER_SERVICE_URL}/api/v1/users/${u.id}`, {
+          headers: { Authorization: req.headers.authorization }
+        })
+      )
+    );
+
+    const deleted = results.filter(r => r.status === 'fulfilled').length;
+    const failed = results.filter(r => r.status === 'rejected').length;
+
+    res.json({ success: true, message: `Deleted ${deleted} users, kept: ${keepEmail}`, failed });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: { message: error.message } });
+  }
+});
+
 router.delete('/users/:id', async (req, res) => {
   try {
     const userId = req.params.id;
