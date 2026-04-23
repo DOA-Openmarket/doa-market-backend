@@ -15,7 +15,8 @@ export class UserController {
 
   async getUser(req: Request, res: Response, next: NextFunction) {
     try {
-      const user = await userService.getUserById(req.params.id);
+      const id = req.params.id || req.params.userId;
+      const user = await userService.getUserById(id);
       res.json({ success: true, data: user });
     } catch (error) {
       next(error);
@@ -24,7 +25,8 @@ export class UserController {
 
   async updateUser(req: Request, res: Response, next: NextFunction) {
     try {
-      const user = await userService.updateUser(req.params.id, req.body);
+      const id = req.params.id || req.params.userId;
+      const user = await userService.updateUser(id, req.body);
       res.json({ success: true, data: user });
     } catch (error) {
       next(error);
