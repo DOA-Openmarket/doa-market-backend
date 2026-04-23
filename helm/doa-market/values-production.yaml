@@ -192,7 +192,7 @@ services:
 
   # Auth Service도 On-Demand만 사용
   coupon-service:
-    tag: "8aba418"
+    tag: "e8621d7"
 
   settlement-service:
     tag: "f91668f"
@@ -229,7 +229,7 @@ services:
     tag: "0032795"
 
   admin-service:
-    tag: "0032795"
+    tag: "e8621d7"
     env:
       - name: SELLER_SERVICE_URL
         value: "http://seller-service:3011"
