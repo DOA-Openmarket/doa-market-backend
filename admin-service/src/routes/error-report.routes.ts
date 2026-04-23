@@ -34,7 +34,11 @@ router.get('/', async (req, res) => {
 
     if (status) where.status = status;
     if (type) where.type = type;
-    if (category) where.category = category;
+    if (category) {
+      // Support comma-separated categories: "버그신고,로그인문제,결제오류"
+      const categories = (category as string).split(',').map(c => c.trim()).filter(Boolean);
+      where.category = categories.length === 1 ? categories[0] : { [Op.in]: categories };
+    }
 
     const reports = await ErrorReport.findAll({
       where,
