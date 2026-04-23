@@ -226,10 +226,10 @@ services:
     tag: "ef750a4"
 
   user-service:
-    tag: "5a878ca"
+    tag: "dc3e063"
 
   admin-service:
-    tag: "7a6bd9a"
+    tag: "dc3e063"
     env:
       - name: SELLER_SERVICE_URL
         value: "http://seller-service:3011"
