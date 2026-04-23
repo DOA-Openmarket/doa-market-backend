@@ -86,7 +86,7 @@ services:
     tag: "bd4beb5"
 
   api-gateway:
-    tag: "fd15b1c"
+    tag: "212f0f1"
     port: 3000  # API Gateway uses port 3000
     replicaCount: 1
     resources:
@@ -228,7 +228,7 @@ services:
     tag: "8317e1f"
 
   admin-service:
-    tag: "831d6a1"
+    tag: "212f0f1"
     env:
       - name: SELLER_SERVICE_URL
         value: "http://seller-service:3011"
