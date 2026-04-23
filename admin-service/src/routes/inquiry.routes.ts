@@ -62,7 +62,7 @@ router.get('/', async (req, res) => {
     if (userIds.length > 0) {
       try {
         const users = await sequelize.query(
-          `SELECT id, user_name, email, phone FROM users WHERE id IN (:userIds)`,
+          `SELECT id, name, email, phone FROM users WHERE id IN (:userIds)`,
           { replacements: { userIds }, type: 'SELECT' as any }
         ) as any[];
         users.forEach((u: any) => { userMap[u.id] = u; });
@@ -76,7 +76,7 @@ router.get('/', async (req, res) => {
       const user = userMap[uid];
       return {
         ...row.toJSON(),
-        senderName: user?.user_name || user?.email || uid || '알 수 없음',
+        senderName: user?.name || user?.email || '알 수 없음',
         senderEmail: user?.email || '',
         senderPhone: user?.phone || '',
       };
