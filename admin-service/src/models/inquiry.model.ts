@@ -8,7 +8,7 @@ class Inquiry extends Model {
   public title!: string;
   public content!: string;
   public status!: string;
-  public priority!: string;
+  public imageUrls?: string[];
   public answer?: string;
   public answeredBy?: string;
   public answeredAt?: Date;
@@ -29,8 +29,8 @@ Inquiry.init(
       comment: '문의한 사용자 ID'
     },
     category: {
-      type: DataTypes.ENUM('일반문의', '상품문의', '주문/배송', '결제', '환불/취소', '기타'),
-      defaultValue: '일반문의',
+      type: DataTypes.ENUM('order', 'product', 'delivery', 'payment', 'etc'),
+      defaultValue: 'etc',
       comment: '문의 카테고리'
     },
     title: {
@@ -44,14 +44,14 @@ Inquiry.init(
       comment: '문의 내용'
     },
     status: {
-      type: DataTypes.ENUM('pending', 'in_progress', 'answered', 'closed'),
+      type: DataTypes.ENUM('pending', 'answered'),
       defaultValue: 'pending',
       comment: '문의 상태'
     },
-    priority: {
-      type: DataTypes.ENUM('low', 'medium', 'high', 'urgent'),
-      defaultValue: 'medium',
-      comment: '우선순위'
+    imageUrls: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      comment: '첨부 이미지 URL 배열'
     },
     answer: {
       type: DataTypes.TEXT,
