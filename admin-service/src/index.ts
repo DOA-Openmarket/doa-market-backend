@@ -45,6 +45,7 @@ app.use('/api/v1/inquiries', inquiryRoutes); // Admin frontend uses this path
 app.use('/api/v1/notices', noticeRoutes); // Public notice access for user app
 app.use('/api/v1/guides', guideRoutes); // Public guide access for user app
 app.use('/api/v1/faqs', faqRoutes); // Public FAQ access for user app
+app.use('/api/v1/faq', faqRoutes); // Admin frontend uses this path
 app.use('/api/v1/terms', policyRoutes); // Public terms/policy access for partner app
 
 const startServer = async () => {

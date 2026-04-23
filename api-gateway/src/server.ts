@@ -272,6 +272,13 @@ const services: ServiceConfig[] = [
     roles: ["admin"],
   },
 
+  // FAQ - admin service (admin manages, public reads via /faqs)
+  {
+    path: "/api/v1/faq",
+    target: "http://admin-service:3012",
+    auth: "none",
+  },
+
   // Public notices - no auth required (for user app)
   {
     path: "/api/v1/notices",
