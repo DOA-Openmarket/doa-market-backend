@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { Op } from 'sequelize';
 import ErrorReport from '../models/error-report.model';
 
 const router = Router();
@@ -299,7 +300,7 @@ router.get('/seller/:sellerId/:type', async (req, res) => {
     const reports = await ErrorReport.findAll({
       where: {
         reporterId: sellerId,
-        reporterType: 'SELLER',
+        reporterType: { [Op.iLike]: 'seller' },
         type,
       },
       order: [['createdAt', 'DESC']],
