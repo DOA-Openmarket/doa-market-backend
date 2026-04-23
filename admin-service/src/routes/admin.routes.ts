@@ -375,7 +375,7 @@ router.post('/users/cleanup', async (req, res) => {
     const results = await Promise.allSettled(
       toDelete.map((u: any) =>
         axios.delete(`${USER_SERVICE_URL}/api/v1/users/${u.id}`, {
-          headers: { Authorization: req.headers.authorization }
+          headers: { Authorization: req.headers.authorization, 'x-user-role': 'admin' }
         })
       )
     );
@@ -397,7 +397,8 @@ router.delete('/users/:id', async (req, res) => {
     // Call User Service to delete user
     const response = await axios.delete(`${USER_SERVICE_URL}/api/v1/users/${userId}`, {
       headers: {
-        Authorization: req.headers.authorization
+        Authorization: req.headers.authorization,
+        'x-user-role': 'admin',
       }
     });
 
