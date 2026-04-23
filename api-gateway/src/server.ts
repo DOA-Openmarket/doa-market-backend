@@ -264,6 +264,14 @@ const services: ServiceConfig[] = [
     roles: ["admin"],
   },
 
+  // Inquiries (1:1 문의) - admin service, admin role only
+  {
+    path: "/api/v1/inquiries",
+    target: "http://admin-service:3012",
+    auth: "required",
+    roles: ["admin"],
+  },
+
   // Public notices - no auth required (for user app)
   {
     path: "/api/v1/notices",

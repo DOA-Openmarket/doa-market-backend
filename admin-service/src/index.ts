@@ -39,6 +39,7 @@ app.use('/api/v1/admin/guides', guideRoutes);
 app.use('/api/v1/admin/faqs', faqRoutes);
 app.use('/api/v1/admin/error-reports', errorReportRoutes);
 app.use('/api/v1/error-reports', errorReportRoutes); // Seller-accessible path
+app.use('/api/v1/inquiries', inquiryRoutes); // Admin frontend uses this path
 
 // Public routes (no admin prefix)
 app.use('/api/v1/notices', noticeRoutes); // Public notice access for user app
