@@ -15,7 +15,7 @@ class PointService {
       order: [['createdAt', 'DESC']],
     });
 
-    const currentBalance = latestTransaction?.balance || 0;
+    const currentBalance = latestTransaction?.getDataValue('balance') || 0;
 
     // 적립 예정 포인트 (pending - 현재는 0으로 반환, 실제로는 배송 완료 대기 중인 주문의 적립 예정 포인트)
     const pendingPoints = 0;
@@ -50,7 +50,7 @@ class PointService {
       currentBalance,
       pendingPoints,
       expiringPoints: Math.round(expiringPoints),
-      nextExpiringDate: nextExpiring?.expiresAt || null,
+      nextExpiringDate: nextExpiring?.getDataValue('expiresAt') || null,
     };
   }
 
