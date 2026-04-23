@@ -1,17 +1,106 @@
 import { Router } from 'express';
 import axios from 'axios';
+import Inquiry from '../models/inquiry.model';
 
 const router = Router();
 
 router.get('/dashboard', async (req, res) => {
-  // Aggregate data from multiple services
+  const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://user-service:3005';
+  const SELLER_SERVICE_URL = process.env.SELLER_SERVICE_URL || 'http://seller-service:3011';
+  const ORDER_SERVICE_URL = process.env.ORDER_SERVICE_URL || 'http://order-service:3003';
+  const authHeader = req.headers.authorization;
+
+  let totalUsers = 0;
+  let totalSellers = 0;
+  let totalOrders = 0;
+  let totalSales = 0;
+  let allOrders: any[] = [];
+
+  try {
+    const r = await axios.get(`${USER_SERVICE_URL}/api/v1/users/stats`, {
+      headers: { Authorization: authHeader },
+    });
+    const stats = r.data?.data || r.data;
+    totalUsers = stats?.byRole?.user ?? stats?.totalUsers ?? 0;
+  } catch {}
+
+  try {
+    const r = await axios.get(`${SELLER_SERVICE_URL}/api/v1/sellers?limit=1000`, {
+      headers: { Authorization: authHeader },
+    });
+    totalSellers = (r.data?.data || []).length;
+  } catch {}
+
+  try {
+    const r = await axios.get(`${ORDER_SERVICE_URL}/api/v1/orders`, {
+      headers: { Authorization: authHeader },
+    });
+    allOrders = r.data?.data || [];
+    totalOrders = allOrders.length;
+    totalSales = allOrders.reduce((sum: number, o: any) => sum + parseFloat(o.totalAmount || 0), 0);
+  } catch {}
+
+  let recentInquiries: any[] = [];
+  try {
+    const inquiries = await Inquiry.findAll({ order: [['createdAt', 'DESC']], limit: 10 });
+    recentInquiries = inquiries.map((i) => i.toJSON());
+  } catch {}
+
+  const currentYear = new Date().getFullYear();
+  const lastYear = currentYear - 1;
+
+  const monthlyData = (year: number) =>
+    Array(12).fill(null).map((_, month) => {
+      const monthOrders = allOrders.filter((o: any) => {
+        const d = new Date(o.createdAt);
+        return d.getFullYear() === year && d.getMonth() === month;
+      });
+      return {
+        revenue: monthOrders.reduce((s: number, o: any) => s + parseFloat(o.totalAmount || 0), 0),
+        orders: monthOrders.length,
+      };
+    });
+
+  // Last 6 months order/revenue trends
+  const now = new Date();
+  const trendsOrders = Array(6).fill(0);
+  const trendsRevenue = Array(6).fill(0);
+  for (let i = 5; i >= 0; i--) {
+    const start = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const end = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+    const monthOrders = allOrders.filter((o: any) => {
+      const d = new Date(o.createdAt);
+      return d >= start && d < end;
+    });
+    trendsOrders[5 - i] = monthOrders.length;
+    trendsRevenue[5 - i] = Math.round(
+      monthOrders.reduce((s: number, o: any) => s + parseFloat(o.totalAmount || 0), 0)
+    );
+  }
+
   res.json({
     success: true,
     data: {
-      totalUsers: 0,
-      totalOrders: 0,
-      totalRevenue: 0
-    }
+      totalUsers,
+      totalSellers,
+      totalOrders,
+      totalSales: Math.round(totalSales),
+      trends: {
+        users: [0, 0, 0, 0, 0, 0],
+        sellers: [0, 0, 0, 0, 0, 0],
+        orders: trendsOrders,
+        revenue: trendsRevenue,
+      },
+      recentInquiries,
+      yearlyRevenue: {
+        currentYear,
+        lastYear,
+        thisYearData: monthlyData(currentYear),
+        lastYearData: monthlyData(lastYear),
+      },
+      weeklyRevenue: [],
+      dailyRevenue: [],
+    },
   });
 });
 
