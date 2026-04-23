@@ -1,11 +1,11 @@
 FROM node:20-alpine AS builder
 
-WORKDIR /app
+WORKDIR /app/product-service
 
-COPY package*.json ./
+COPY product-service/package*.json ./
 RUN npm install
 
-COPY . ./
+COPY product-service/ ./
 
 RUN npm run build
 
@@ -13,9 +13,9 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/product-service/package*.json ./
+COPY --from=builder /app/product-service/dist ./dist
+COPY --from=builder /app/product-service/node_modules ./node_modules
 
 EXPOSE 3003
 CMD ["npm", "start"]
