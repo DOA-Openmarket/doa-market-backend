@@ -34,10 +34,10 @@ class CheckinService {
     let isBonus = false;
     let bonusPoints = 0;
 
-    if (user.lastCheckinDate === yesterdayStr) {
+    if (user.getDataValue('lastCheckinDate') === yesterdayStr) {
       // 어제 출석했으면 연속
-      consecutiveDays = (user.consecutiveCheckins || 0) + 1;
-    } else if (user.lastCheckinDate === today) {
+      consecutiveDays = (user.getDataValue('consecutiveCheckins') || 0) + 1;
+    } else if (user.getDataValue('lastCheckinDate') === today) {
       // 오늘 이미 출석 (중복 방지)
       throw new Error('오늘 이미 출석하셨습니다');
     }
@@ -87,7 +87,7 @@ class CheckinService {
       pointsEarned,
       consecutiveDays,
       bonusPoints,
-      totalPoints: (user.totalPoints || 0) + pointsEarned,
+      totalPoints: (user.getDataValue('totalPoints') || 0) + pointsEarned,
       message: isBonus
         ? `🎉 ${consecutiveDays}일 연속 출석! 보너스 ${bonusPoints}P 포함 총 ${pointsEarned}P 적립!`
         : `출석 완료! ${pointsEarned}P 적립`,
@@ -123,7 +123,7 @@ class CheckinService {
     });
 
     // 다음 보너스까지
-    const consecutiveDays = user.consecutiveCheckins || 0;
+    const consecutiveDays = user.getDataValue('consecutiveCheckins') || 0;
     let nextBonusDays = 0;
     let nextBonusPoints = 0;
 
@@ -139,10 +139,10 @@ class CheckinService {
       isCheckedInToday: !!todayCheckin,
       consecutiveDays,
       thisMonthCount,
-      totalPoints: user.totalPoints || 0,
+      totalPoints: user.getDataValue('totalPoints') || 0,
       nextBonusDays,
       nextBonusPoints,
-      lastCheckinDate: user.lastCheckinDate,
+      lastCheckinDate: user.getDataValue('lastCheckinDate'),
     };
   }
 
@@ -202,7 +202,7 @@ class CheckinService {
     });
 
     const user = await User.findByPk(userId);
-    const maxConsecutiveDays = user?.consecutiveCheckins || 0;
+    const maxConsecutiveDays = user?.getDataValue('consecutiveCheckins') || 0;
 
     return {
       totalCheckins,
