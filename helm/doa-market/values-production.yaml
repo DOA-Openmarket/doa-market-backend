@@ -195,7 +195,7 @@ services:
     tag: "e8621d7"
 
   settlement-service:
-    tag: "f91668f"
+    tag: "ed254dd"
 
   auth-service:
     tag: "8c3d043"
