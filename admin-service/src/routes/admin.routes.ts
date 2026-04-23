@@ -108,7 +108,7 @@ router.get('/users', async (req, res) => {
   try {
     const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://user-service:3005';
     const REVIEW_SERVICE_URL = process.env.REVIEW_SERVICE_URL || 'http://review-service:3007';
-    const { search, page, limit, status } = req.query;
+    const { search, page, limit, status, showAll } = req.query;
     const query = new URLSearchParams();
 
     // Filter for regular users only (not sellers or admins)
@@ -119,6 +119,8 @@ router.get('/users', async (req, res) => {
     // Use high limit to return all users (frontend does client-side pagination)
     query.append('limit', (limit as string) || '1000');
     if (status) query.append('status', status as string);
+    // showAll=true bypasses status filter to include deleted users (admin diagnostics)
+    if (showAll === 'true') query.append('showAll', 'true');
 
     const response = await axios.get(`${USER_SERVICE_URL}/api/v1/users?${query.toString()}`, {
       headers: { Authorization: req.headers.authorization }
@@ -312,6 +314,43 @@ router.delete('/sellers/:id', async (req, res) => {
 router.post('/users/:id/suspend', async (req, res) => {
   // Call User Service to suspend user
   res.json({ success: true, message: 'User suspended' });
+});
+
+// Restore a soft-deleted user
+router.post('/users/:id/restore', async (req, res) => {
+  try {
+    const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://user-service:3005';
+    const response = await axios.post(
+      `${USER_SERVICE_URL}/api/v1/users/${req.params.id}/restore`,
+      {},
+      { headers: { Authorization: req.headers.authorization, 'x-user-role': 'admin' } }
+    );
+    res.json(response.data);
+  } catch (error: any) {
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: { message: error.response?.data?.error?.message || 'Failed to restore user' }
+    });
+  }
+});
+
+// Find user by email (bypasses status/role filter — admin diagnostics)
+router.get('/users/by-email', async (req, res) => {
+  try {
+    const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://user-service:3005';
+    const { email } = req.query;
+    if (!email) return res.status(400).json({ success: false, error: { message: 'email required' } });
+    const response = await axios.get(
+      `${USER_SERVICE_URL}/api/v1/users/by-email?email=${encodeURIComponent(email as string)}`,
+      { headers: { Authorization: req.headers.authorization, 'x-user-role': 'admin' } }
+    );
+    res.json(response.data);
+  } catch (error: any) {
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: { message: error.response?.data?.error?.message || 'User not found' }
+    });
+  }
 });
 
 // TEMPORARY: One-time user cleanup endpoint

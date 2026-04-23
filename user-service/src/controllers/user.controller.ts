@@ -59,6 +59,28 @@ export class UserController {
       next(error);
     }
   }
+
+  async restoreUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const user = await userService.restoreUser(req.params.id);
+      res.json({ success: true, data: user });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async findByEmail(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email } = req.query as { email: string };
+      if (!email) {
+        return res.status(400).json({ success: false, message: 'email query param required' });
+      }
+      const user = await userService.findByEmail(email);
+      res.json({ success: true, data: user });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default new UserController();

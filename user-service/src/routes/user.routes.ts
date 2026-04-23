@@ -18,6 +18,13 @@ const router = Router();
  */
 router.get('/stats', userController.getUserStats);
 
+// Find user by email regardless of status (admin diagnostics) — must be before /:id
+router.get('/by-email', (req, res, next) => {
+  const role = req.headers['x-user-role'];
+  if (role === 'admin') return next();
+  authenticate(req, res, next);
+}, userController.findByEmail);
+
 /**
  * @swagger
  * /api/v1/users:
@@ -157,6 +164,13 @@ router.delete('/:id', (req, res, next) => {
   // Fallback: normal JWT auth for non-gateway calls
   authenticate(req, res, next);
 }, userController.deleteUser);
+
+// Restore a soft-deleted user (admin only)
+router.post('/:id/restore', (req, res, next) => {
+  const role = req.headers['x-user-role'];
+  if (role === 'admin') return next();
+  authenticate(req, res, next);
+}, userController.restoreUser);
 
 /**
  * @swagger

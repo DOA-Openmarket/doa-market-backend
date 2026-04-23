@@ -5,10 +5,12 @@ import { AppError } from '../utils/app-error';
 export class UserService {
   async getUsers(page = 1, limit = 20, filters?: any) {
     const offset = (page - 1) * limit;
-    const where: any = {
-      // 기본적으로 탈퇴 유저 제외
-      status: { [Op.ne]: 'deleted' },
-    };
+    const where: any = {};
+
+    // showAll=true bypasses status filter (for admin diagnostics)
+    if (filters?.showAll !== 'true') {
+      where.status = { [Op.ne]: 'deleted' };
+    }
 
     if (filters?.status) where.status = filters.status;
     if (filters?.role) where.role = filters.role;
@@ -63,10 +65,23 @@ export class UserService {
     return user;
   }
 
+  async restoreUser(id: string) {
+    const user = await User.findByPk(id);
+    if (!user) throw new AppError('User not found', 404);
+    await user.update({ status: 'active' });
+    return user;
+  }
+
+  async findByEmail(email: string) {
+    const user = await User.findOne({ where: { email } });
+    if (!user) throw new AppError('User not found', 404);
+    return user;
+  }
+
   async getUserStats() {
-    const totalUsers = await User.count();
+    const totalUsers = await User.count({ where: { status: { [Op.ne]: 'deleted' } } });
     const activeUsers = await User.count({ where: { status: 'active' } });
-    const inactiveUsers = await User.count({ where: { status: 'inactive' } });
+    const inactiveUsers = await User.count({ where: { status: 'suspended' } });
     const deletedUsers = await User.count({ where: { status: 'deleted' } });
 
     return {
