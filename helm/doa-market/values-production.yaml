@@ -228,7 +228,7 @@ services:
     tag: "8317e1f"
 
   admin-service:
-    tag: "d9a0e68"
+    tag: "7d0b108"
     env:
       - name: SELLER_SERVICE_URL
         value: "http://seller-service:3011"
