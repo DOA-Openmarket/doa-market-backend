@@ -229,7 +229,7 @@ services:
     tag: "dc3e063"
 
   admin-service:
-    tag: "dc3e063"
+    tag: "43aa280"
     env:
       - name: SELLER_SERVICE_URL
         value: "http://seller-service:3011"
