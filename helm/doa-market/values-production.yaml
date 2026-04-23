@@ -225,7 +225,7 @@ services:
     tag: "ef750a4"
 
   user-service:
-    tag: "cf966ca"
+    tag: "8317e1f"
 
   admin-service:
     tag: "d9a0e68"
