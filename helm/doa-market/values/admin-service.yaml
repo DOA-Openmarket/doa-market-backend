@@ -1,6 +1,6 @@
 image:
   repository: 478266318018.dkr.ecr.ap-northeast-2.amazonaws.com/doa-market-admin-service
-  tag: df0a7a0
+  tag: 095ccd6
 
 serviceAccount:
   annotations: {}
