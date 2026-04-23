@@ -1,13 +1,24 @@
+import { Op } from 'sequelize';
 import User from '../models/user.model';
 import { AppError } from '../utils/app-error';
 
 export class UserService {
   async getUsers(page = 1, limit = 20, filters?: any) {
     const offset = (page - 1) * limit;
-    const where: any = {};
-    
+    const where: any = {
+      // 기본적으로 탈퇴 유저 제외
+      status: { [Op.ne]: 'deleted' },
+    };
+
     if (filters?.status) where.status = filters.status;
     if (filters?.role) where.role = filters.role;
+    if (filters?.search) {
+      where[Op.or] = [
+        { name: { [Op.iLike]: `%${filters.search}%` } },
+        { email: { [Op.iLike]: `%${filters.search}%` } },
+        { phone: { [Op.iLike]: `%${filters.search}%` } },
+      ];
+    }
 
     const { count, rows } = await User.findAndCountAll({
       where,
@@ -17,7 +28,10 @@ export class UserService {
     });
 
     return {
-      users: rows,
+      users: rows.map((u) => ({
+        ...u.toJSON(),
+        totalPoints: u.getDataValue('totalPoints') ?? 0,
+      })),
       meta: {
         page,
         limit,

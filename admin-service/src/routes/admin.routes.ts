@@ -107,6 +107,7 @@ router.get('/dashboard', async (req, res) => {
 router.get('/users', async (req, res) => {
   try {
     const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://user-service:3005';
+    const REVIEW_SERVICE_URL = process.env.REVIEW_SERVICE_URL || 'http://review-service:3007';
     const { search, page, limit, status } = req.query;
     const query = new URLSearchParams();
 
@@ -119,12 +120,26 @@ router.get('/users', async (req, res) => {
     if (status) query.append('status', status as string);
 
     const response = await axios.get(`${USER_SERVICE_URL}/api/v1/users?${query.toString()}`, {
-      headers: {
-        Authorization: req.headers.authorization
-      }
+      headers: { Authorization: req.headers.authorization }
     });
 
-    res.json(response.data);
+    const users: any[] = response.data?.data || [];
+
+    // Enrich with review counts
+    const enriched = await Promise.all(
+      users.map(async (user: any) => {
+        let review_cnt = 0;
+        try {
+          const rr = await axios.get(`${REVIEW_SERVICE_URL}/api/v1/reviews?userId=${user.id}&limit=1`, {
+            headers: { Authorization: req.headers.authorization },
+          });
+          review_cnt = Array.isArray(rr.data?.data) ? rr.data.data.length : 0;
+        } catch {}
+        return { ...user, review_cnt };
+      })
+    );
+
+    res.json({ ...response.data, data: enriched });
   } catch (error: any) {
     res.status(error.response?.status || 500).json({
       success: false,
