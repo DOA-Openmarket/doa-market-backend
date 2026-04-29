@@ -190,6 +190,14 @@ services:
     nodeAffinity: {}
     tolerations: []
 
+  file-service:
+    tag: "dd25cd6"
+    env:
+      - name: S3_BUCKET_NAME
+        value: "openmarket-dev-user-uploads"
+      - name: AWS_REGION
+        value: "ap-northeast-2"
+
   # Auth Service도 On-Demand만 사용
   coupon-service:
     tag: "e8621d7"

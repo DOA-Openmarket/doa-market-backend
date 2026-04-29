@@ -164,7 +164,7 @@ services:
 
   file-service:
     enabled: true
-    port: 3013
+    port: 3015
     replicaCount: 2
 
   banner-service:
