@@ -136,6 +136,7 @@ router.get('/:id', userController.getUser); // Removed auth for demo
  *         description: 사용자 정보 수정 성공
  */
 router.patch('/:id', authenticate, userController.updateUser);
+router.put('/:id', authenticate, userController.updateUser);
 
 /**
  * @swagger

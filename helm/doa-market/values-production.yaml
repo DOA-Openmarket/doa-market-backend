@@ -236,7 +236,7 @@ services:
     tag: "ef750a4"
 
   user-service:
-    tag: "dc3e063"
+    tag: "6216785"
 
   admin-service:
     tag: "5fcb4f2"
