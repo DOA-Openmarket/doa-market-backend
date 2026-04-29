@@ -1,10 +1,57 @@
 import { Router } from 'express';
+import { QueryTypes } from 'sequelize';
 import Product from '../models/product.model';
+import { sequelize } from '../config/database';
 import { eventBus } from '../index';
 import { EventType } from '../events/types';
 import { logger } from '../utils/logger';
 
 const router = Router();
+
+// 인기 상품: order_items 주문 수 기준 정렬, 주문 없으면 전체 상품 반환
+router.get('/popular', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 20;
+
+    const orderCounts = await sequelize.query<{ productId: string; total_qty: number }>(
+      `SELECT "productId", SUM(quantity) as total_qty
+       FROM order_items
+       GROUP BY "productId"
+       ORDER BY total_qty DESC
+       LIMIT :limit`,
+      { replacements: { limit }, type: QueryTypes.SELECT }
+    );
+
+    let products: Product[];
+
+    if (orderCounts.length > 0) {
+      const orderedIds = orderCounts.map((r) => r.productId);
+      const productMap = new Map<string, Product>();
+      const found = await Product.findAll({
+        where: { id: orderedIds, status: 'active' },
+      });
+      found.forEach((p) => productMap.set(p.id, p));
+      products = orderedIds.map((id) => productMap.get(id)).filter((p): p is Product => !!p);
+      // 주문된 상품이 부족하면 나머지 active 상품으로 채움
+      if (products.length < limit) {
+        const rest = await Product.findAll({
+          where: { status: 'active' },
+          limit: limit - products.length,
+        });
+        const existing = new Set(products.map((p) => p.id));
+        rest.forEach((p) => { if (!existing.has(p.id)) products.push(p); });
+      }
+    } else {
+      // 주문 데이터 없으면 전체 active 상품 반환
+      products = await Product.findAll({ where: { status: 'active' }, limit });
+    }
+
+    res.json({ success: true, data: products });
+  } catch (error) {
+    logger.error('Failed to fetch popular products:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch popular products' });
+  }
+});
 
 router.get('/', async (req, res) => {
   try {

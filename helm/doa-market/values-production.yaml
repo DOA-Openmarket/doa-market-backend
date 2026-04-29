@@ -131,7 +131,7 @@ services:
         value: "false"
 
   product-service:
-    tag: "f59a0d3"
+    tag: "c3f4813"
     replicaCount: 1
     resources:
       limits:
