@@ -203,7 +203,7 @@ services:
     tag: "8d2d7c2"
 
   settlement-service:
-    tag: "ed254dd"
+    tag: "ffc85d7"
 
   auth-service:
     tag: "f97db80"
