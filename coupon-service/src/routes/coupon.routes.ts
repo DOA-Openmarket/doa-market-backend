@@ -128,7 +128,9 @@ router.post('/', async (req, res) => {
       startDate: frontendData.start_date || frontendData.valid_from || frontendData.startDate || new Date(),
       endDate: frontendData.end_date || frontendData.valid_to || frontendData.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
       status: 'active',
-      issuedBy: frontendData.issued_by || frontendData.issuedBy || null,
+      issuedBy: (frontendData.issued_by === 'ADMIN' || frontendData.issued_by === 'admin')
+        ? null
+        : frontendData.issued_by || frontendData.issuedBy || null,
       totalCount: frontendData.total_count ? Number(frontendData.total_count) : null,
     };
 
