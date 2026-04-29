@@ -35,6 +35,12 @@ Notice.init(
       allowNull: false,
       comment: '공지사항 내용'
     },
+    type: {
+      type: DataTypes.ENUM('USER', 'SELLER', 'ALL'),
+      defaultValue: 'ALL',
+      allowNull: false,
+      comment: '공지 대상: 유저/판매자/전체'
+    },
     category: {
       type: DataTypes.ENUM('공지', '이벤트', '업데이트', '점검'),
       defaultValue: '공지',
@@ -77,7 +83,7 @@ Notice.init(
     },
     createdBy: {
       type: DataTypes.UUID,
-      allowNull: false,
+      allowNull: true,
       comment: '작성자 ID'
     },
   },

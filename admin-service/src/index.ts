@@ -64,6 +64,33 @@ const startServer = async () => {
       logger.warn('Migration warning (non-fatal):', migErr.message);
     }
 
+    // Migration: add type column to notices (for USER/SELLER/ALL distinction)
+    try {
+      await sequelize.query(`
+        DO $$
+        BEGIN
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notices' AND column_name='type') THEN
+            CREATE TYPE notice_type_enum AS ENUM ('USER', 'SELLER', 'ALL');
+            ALTER TABLE notices ADD COLUMN "type" notice_type_enum NOT NULL DEFAULT 'ALL';
+          END IF;
+        END
+        $$;
+      `);
+      logger.info('Migration: notices.type column ensured');
+    } catch (migErr: any) {
+      logger.warn('Migration warning (non-fatal):', migErr.message);
+    }
+
+    // Migration: make notices.createdBy nullable
+    try {
+      await sequelize.query(`
+        ALTER TABLE notices ALTER COLUMN "createdBy" DROP NOT NULL;
+      `);
+      logger.info('Migration: notices.createdBy made nullable');
+    } catch (migErr: any) {
+      logger.warn('Migration warning (non-fatal):', migErr.message);
+    }
+
     app.listen(PORT, () => logger.info(`Admin Service on port ${PORT}`));
   } catch (error) {
     logger.error('Failed to start server:', error);
