@@ -198,7 +198,7 @@ services:
     tag: "ed254dd"
 
   auth-service:
-    tag: "8c3d043"
+    tag: "f97db80"
     spotEnabled: true
     nodeAffinity: {}
     env:
@@ -221,6 +221,8 @@ services:
             key: client-secret
       - name: NAVER_CALLBACK_URL
         value: "https://api.xn--9m1b13r66n.com/api/v1/auth/naver/callback"
+      - name: EMAIL_FROM
+        value: "thinkfood111@gmail.com"
 
   review-service:
     tag: "ef750a4"

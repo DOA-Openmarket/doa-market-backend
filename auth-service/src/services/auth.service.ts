@@ -25,6 +25,27 @@ export class AuthService {
     // Check if user already exists
     const existingUser = await User.findOne({ where: { email: data.email } });
     if (existingUser) {
+      // Allow re-registration if the account was deleted (soft-deleted)
+      if (existingUser.get('status') === 'deleted') {
+        await existingUser.update({
+          password: data.password,
+          name: data.name,
+          phone: data.phone,
+          role: data.role || 'user',
+          status: 'active',
+          emailVerified: false,
+        });
+        await existingUser.reload();
+        const userData = existingUser.toJSON() as UserAttributes;
+        const userId = userData.id!;
+        const payload: TokenPayload = { userId, email: userData.email, role: userData.role };
+        const accessToken = generateAccessToken(payload);
+        const refreshToken = generateRefreshToken(payload);
+        const expiresAt = getTokenExpirationDate(process.env.JWT_REFRESH_EXPIRES_IN || '7d');
+        await RefreshToken.create({ userId, token: refreshToken, expiresAt });
+        const { password: _, ...userWithoutPassword } = userData;
+        return { user: userWithoutPassword, accessToken, refreshToken };
+      }
       throw new AppError('Email already registered', 409);
     }
 
