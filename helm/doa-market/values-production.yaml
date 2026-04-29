@@ -200,7 +200,7 @@ services:
 
   # Auth Service도 On-Demand만 사용
   coupon-service:
-    tag: "e8621d7"
+    tag: "8d2d7c2"
 
   settlement-service:
     tag: "ed254dd"
