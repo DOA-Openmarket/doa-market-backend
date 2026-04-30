@@ -64,6 +64,15 @@ const startServer = async () => {
       logger.warn('Migration warning (non-fatal):', migErr.message);
     }
 
+    try {
+      await sequelize.query(`
+        ALTER TABLE error_reports ADD COLUMN IF NOT EXISTS "reporterName" VARCHAR(255);
+      `);
+      logger.info('Migration: error_reports.reporterName column ensured');
+    } catch (migErr: any) {
+      logger.warn('Migration warning (non-fatal):', migErr.message);
+    }
+
     // Migration: add type column to notices (for USER/SELLER/ALL distinction)
     try {
       await sequelize.query(`

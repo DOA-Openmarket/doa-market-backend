@@ -5,6 +5,7 @@ interface ErrorReportAttributes {
   id: string;
   reporterId: string;
   reporterType: string; // USER, SELLER, PARTNER
+  reporterName?: string;
   category: string;
   type: string;
   title: string;
@@ -17,12 +18,13 @@ interface ErrorReportAttributes {
   updatedAt?: Date;
 }
 
-interface ErrorReportCreationAttributes extends Optional<ErrorReportAttributes, 'id' | 'createdAt' | 'updatedAt' | 'answer' | 'answeredBy' | 'answeredAt'> {}
+interface ErrorReportCreationAttributes extends Optional<ErrorReportAttributes, 'id' | 'createdAt' | 'updatedAt' | 'answer' | 'answeredBy' | 'answeredAt' | 'reporterName'> {}
 
 class ErrorReport extends Model<ErrorReportAttributes, ErrorReportCreationAttributes> implements ErrorReportAttributes {
   public id!: string;
   public reporterId!: string;
   public reporterType!: string;
+  public reporterName?: string;
   public category!: string;
   public type!: string;
   public title!: string;
@@ -49,6 +51,10 @@ ErrorReport.init(
     reporterType: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    reporterName: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     category: {
       type: DataTypes.STRING,

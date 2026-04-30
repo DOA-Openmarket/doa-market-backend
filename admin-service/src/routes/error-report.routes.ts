@@ -117,7 +117,19 @@ router.get('/:id', async (req, res) => {
  */
 router.post('/', async (req, res) => {
   try {
-    const report = await ErrorReport.create(req.body);
+    // Support both snake_case (frontend) and camelCase field names
+    const {
+      reporter_id, reporter_type, reporter_name,
+      reporterId, reporterType, reporterName,
+      ...rest
+    } = req.body;
+
+    const report = await ErrorReport.create({
+      ...rest,
+      reporterId: reporter_id || reporterId,
+      reporterType: reporter_type || reporterType,
+      reporterName: reporter_name || reporterName || null,
+    });
     res.status(201).json({ success: true, data: report });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
