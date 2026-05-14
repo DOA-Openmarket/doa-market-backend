@@ -204,7 +204,7 @@ services:
     tag: "8d2d7c2"
 
   settlement-service:
-    tag: "e3aacf0"
+    tag: "264ea4d"
 
   auth-service:
     tag: "f97db80"
