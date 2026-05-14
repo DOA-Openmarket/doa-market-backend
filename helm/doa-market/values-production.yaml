@@ -148,7 +148,7 @@ services:
         value: "false"
 
   order-service:
-    tag: "7886e5e"
+    tag: "e3aacf0"
     replicaCount: 1
     resources:
       limits:
@@ -167,6 +167,7 @@ services:
         value: "false"
 
   payment-service:
+    tag: "e3aacf0"
     replicaCount: 1
     resources:
       limits:
@@ -203,7 +204,7 @@ services:
     tag: "8d2d7c2"
 
   settlement-service:
-    tag: "ffc85d7"
+    tag: "e3aacf0"
 
   auth-service:
     tag: "f97db80"
