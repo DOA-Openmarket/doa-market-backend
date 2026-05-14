@@ -240,7 +240,7 @@ services:
     tag: "6216785"
 
   admin-service:
-    tag: "42d5ac8"
+    tag: "2fe72f7"
     env:
       - name: SELLER_SERVICE_URL
         value: "http://seller-service:3011"
