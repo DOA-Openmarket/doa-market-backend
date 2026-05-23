@@ -231,7 +231,7 @@ services:
       - name: NAVER_CALLBACK_URL
         value: "https://api.xn--9m1b13r66n.com/api/v1/auth/naver/callback"
       - name: EMAIL_FROM
-        value: "noreply@xn--pm2b831akpj.com"
+        value: "플렉존 <noreply@xn--pm2b831akpj.com>"
 
   review-service:
     tag: "ef750a4"
@@ -244,6 +244,8 @@ services:
     env:
       - name: SELLER_SERVICE_URL
         value: "http://seller-service:3011"
+      - name: USER_SERVICE_URL
+        value: "http://user-service:3005"
 
 # Production database configuration
 database:
