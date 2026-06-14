@@ -207,7 +207,7 @@ services:
     tag: "772aef8"
 
   auth-service:
-    tag: "f97db80"
+    tag: "f3fb6cf"
     spotEnabled: true
     nodeAffinity: {}
     env:
@@ -232,6 +232,11 @@ services:
         value: "https://api.xn--9m1b13r66n.com/api/v1/auth/naver/callback"
       - name: EMAIL_FROM
         value: "플렉존 <noreply@xn--pm2b831akpj.com>"
+      - name: RESEND_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: resend-secrets
+            key: api-key
 
   review-service:
     tag: "ef750a4"
