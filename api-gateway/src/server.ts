@@ -264,12 +264,12 @@ const services: ServiceConfig[] = [
     roles: ["admin"],
   },
 
-  // Inquiries (1:1 문의) - admin service, admin role only
+  // Inquiries (1:1 문의) - admin manages, sellers can view their own
   {
     path: "/api/v1/inquiries",
     target: "http://admin-service:3012",
     auth: "required",
-    roles: ["admin"],
+    roles: ["admin", "seller"],
   },
 
   // FAQ - admin service (admin manages, public reads via /faqs)
