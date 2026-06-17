@@ -322,7 +322,7 @@ router.get('/:id/attachments', async (req, res) => {
 router.get('/seller/:sellerId', async (req, res) => {
   try {
     const inquiries = await Inquiry.findAll({
-      where: { senderId: req.params.sellerId, senderType: 'seller' },
+      where: { userId: req.params.sellerId },
       order: [['createdAt', 'DESC']],
     });
     res.json({ success: true, data: inquiries });
@@ -354,11 +354,7 @@ router.get('/seller/:sellerId', async (req, res) => {
 router.get('/seller-to-admin/:sellerId', async (req, res) => {
   try {
     const inquiries = await Inquiry.findAll({
-      where: {
-        senderId: req.params.sellerId,
-        senderType: 'seller',
-        receiverType: 'admin',
-      },
+      where: { userId: req.params.sellerId },
       order: [['createdAt', 'DESC']],
     });
     res.json({ success: true, data: inquiries });
