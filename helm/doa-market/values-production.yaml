@@ -229,7 +229,7 @@ services:
             name: naver-oauth-secrets
             key: client-secret
       - name: NAVER_CALLBACK_URL
-        value: "https://api.xn--9m1b13r66n.com/api/v1/auth/naver/callback"
+        value: "https://api.xn--pm2b831akpj.com/api/v1/auth/naver/callback"
       - name: EMAIL_FROM
         value: "플렉존 <noreply@xn--pm2b831akpj.com>"
       - name: RESEND_API_KEY

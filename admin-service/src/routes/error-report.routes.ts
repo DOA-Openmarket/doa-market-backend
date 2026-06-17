@@ -1,8 +1,32 @@
 import { Router } from 'express';
 import { Op } from 'sequelize';
+import axios from 'axios';
 import ErrorReport from '../models/error-report.model';
 
 const router = Router();
+
+const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://user-service:3005';
+const SELLER_SERVICE_URL = process.env.SELLER_SERVICE_URL || 'http://seller-service:3011';
+
+async function enrichReporterName(report: any, authHeader?: string): Promise<string | null> {
+  try {
+    const headers: any = {};
+    if (authHeader) headers['Authorization'] = authHeader;
+
+    if (String(report.reporterType || '').toLowerCase() === 'seller') {
+      const res = await axios.get(`${SELLER_SERVICE_URL}/api/v1/sellers?userId=${report.reporterId}&limit=1`, { headers });
+      const list = res.data?.data || res.data || [];
+      const seller = Array.isArray(list) ? list[0] : list;
+      return seller?.storeName || seller?.name || null;
+    } else {
+      const res = await axios.get(`${USER_SERVICE_URL}/api/v1/users/${report.reporterId}`, { headers });
+      const user = res.data?.data || res.data;
+      return user?.name || user?.nickname || user?.email || null;
+    }
+  } catch {
+    return null;
+  }
+}
 
 /**
  * @swagger
@@ -45,7 +69,19 @@ router.get('/', async (req, res) => {
       order: [['createdAt', 'DESC']],
     });
 
-    res.json({ success: true, data: reports });
+    // reporterName이 없는 항목에 대해 실시간 enrichment
+    const authHeader = req.headers.authorization;
+    const enriched = await Promise.all(
+      reports.map(async (r) => {
+        const plain = r.toJSON() as any;
+        if (!plain.reporterName && plain.reporterId) {
+          plain.reporterName = await enrichReporterName(plain, authHeader);
+        }
+        return plain;
+      })
+    );
+
+    res.json({ success: true, data: enriched });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
   }

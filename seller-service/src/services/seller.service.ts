@@ -13,6 +13,11 @@ export interface UpdateSellerDto {
   storeName?: string;
   businessNumber?: string;
   status?: string;
+  phone?: string;
+  bankType?: string;
+  bankAccount?: string;
+  depositorName?: string;
+  ceoName?: string;
 }
 
 export class SellerService {
@@ -144,6 +149,22 @@ export class SellerService {
       },
       recentSellers,
     };
+  }
+
+  async findByUserId(userId: string) {
+    const seller = await Seller.findOne({ where: { userId } });
+    if (!seller) throw new Error('Seller not found');
+    return seller;
+  }
+
+  async updateByUserId(userId: string, data: UpdateSellerDto) {
+    const seller = await Seller.findOne({ where: { userId } });
+    if (!seller) throw new Error('Seller not found');
+    const updateData = Object.fromEntries(
+      Object.entries(data).filter(([, v]) => v !== undefined && v !== null && v !== '')
+    );
+    await seller.update(updateData);
+    return seller;
   }
 
   async getAttachments(sellerId: string) {

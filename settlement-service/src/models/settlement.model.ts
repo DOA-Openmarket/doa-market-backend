@@ -7,6 +7,7 @@ class Settlement extends Model {
   public startDate!: Date;
   public endDate!: Date;
   public totalAmount!: number;
+  public refundAmount!: number;
   public feeAmount!: number;
   public netAmount!: number;
   public status!: string;
@@ -19,12 +20,22 @@ Settlement.init(
     startDate: { type: DataTypes.DATE, allowNull: false },
     endDate: { type: DataTypes.DATE, allowNull: false },
     totalAmount: { type: DataTypes.DECIMAL(12, 2), allowNull: false },
+    refundAmount: { type: DataTypes.DECIMAL(12, 2), allowNull: false, defaultValue: 0 },
     feeAmount: { type: DataTypes.DECIMAL(12, 2), allowNull: false },
     netAmount: { type: DataTypes.DECIMAL(12, 2), allowNull: false },
-    status: { type: DataTypes.ENUM('pending', 'calculated', 'paid', 'failed'), defaultValue: 'pending' },
+    status: { type: DataTypes.ENUM('pending', 'calculated', 'paid', 'failed', 'on_hold'), defaultValue: 'pending' },
   },
-  { sequelize, tableName: 'settlements' }
+  {
+    sequelize,
+    tableName: 'settlements',
+    indexes: [
+      {
+        unique: true,
+        fields: ['sellerId', 'startDate', 'endDate'],
+        name: 'settlements_seller_period_unique',
+      },
+    ],
+  }
 );
 
 export default Settlement;
-

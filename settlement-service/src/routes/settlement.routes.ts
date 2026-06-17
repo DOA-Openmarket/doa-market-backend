@@ -13,19 +13,58 @@ router.get('/', async (req, res) => {
     const { status, search, startDate, endDate, page = 1, limit = 20, sellerId } = req.query;
     const offset = (Number(page) - 1) * Number(limit);
 
-    const where: any = {};
-    if (sellerId) where.sellerId = sellerId;
-    if (status) where.status = String(status).toLowerCase();
+    const conditions: string[] = [];
+    const replacements: any = { limit: Number(limit), offset };
+
+    const STATUS_MAP: Record<string, string> = {
+      pending: 'pending', calculating: 'calculated', calculated: 'calculated',
+      completed: 'paid', paid: 'paid', cancelled: 'cancelled', on_hold: 'on_hold',
+    };
+    const normalizedStatus = status ? STATUS_MAP[String(status).toLowerCase()] : undefined;
+
+    if (sellerId) { conditions.push(`s."sellerId" = :sellerId`); replacements.sellerId = sellerId; }
+    if (normalizedStatus) { conditions.push(`s.status = :status`); replacements.status = normalizedStatus; }
     if (startDate && endDate) {
-      where.startDate = { [Op.between]: [startDate, endDate] };
+      conditions.push(`s."startDate" BETWEEN :startDate AND :endDate`);
+      replacements.startDate = startDate;
+      replacements.endDate = endDate;
+    }
+    if (search) {
+      conditions.push(`(LOWER(sel."storeName") LIKE :search OR LOWER(u.name) LIKE :search OR LOWER(u.email) LIKE :search)`);
+      replacements.search = `%${String(search).toLowerCase()}%`;
     }
 
-    const { count, rows } = await Settlement.findAndCountAll({
-      where,
-      limit: Number(limit),
-      offset,
-      order: [['createdAt', 'DESC']],
-    });
+    const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+
+    const [rows, countRows] = await Promise.all([
+      sequelize.query(`
+        SELECT
+          s.*,
+          sel."storeName"   AS "sellerName",
+          u.email           AS "sellerEmail",
+          s."totalAmount"   AS "totalOrderAmount",
+          s."totalAmount"   AS "salesAmount",
+          s."feeAmount"     AS "commissionAmount",
+          s."feeAmount"     AS "totalCommission",
+          s."netAmount"     AS "settlementAmount",
+          s."netAmount"     AS "finalSettlementAmount"
+        FROM settlements s
+        LEFT JOIN sellers sel ON sel."userId" = s."sellerId"
+        LEFT JOIN users u ON u.id = s."sellerId"
+        ${whereClause}
+        ORDER BY s."createdAt" DESC
+        LIMIT :limit OFFSET :offset
+      `, { replacements, type: QueryTypes.SELECT }),
+      sequelize.query(`
+        SELECT COUNT(*) as cnt
+        FROM settlements s
+        LEFT JOIN sellers sel ON sel."userId" = s."sellerId"
+        LEFT JOIN users u ON u.id = s."sellerId"
+        ${whereClause}
+      `, { replacements, type: QueryTypes.SELECT }),
+    ]);
+
+    const count = Number((countRows[0] as any).cnt);
 
     res.json({
       success: true,
@@ -226,11 +265,12 @@ router.get('/partner/products/:productId', async (req, res) => {
 router.post('/process', async (req, res) => {
   try {
     const { settlementIds, commissionRate } = req.body;
+    const rate = Number(commissionRate) || 10;
     const settlements = await Settlement.findAll({ where: { id: { [Op.in]: settlementIds } } });
 
     for (const settlement of settlements) {
-      const feeAmount = Number(settlement.totalAmount) * (commissionRate / 100);
-      const netAmount = Number(settlement.totalAmount) - feeAmount;
+      const feeAmount = parseFloat((Number(settlement.totalAmount) * (rate / 100)).toFixed(2));
+      const netAmount = parseFloat((Number(settlement.totalAmount) - feeAmount).toFixed(2));
       await settlement.update({ feeAmount, netAmount, status: 'calculated' });
     }
 
@@ -254,6 +294,8 @@ router.post('/complete', async (req, res) => {
 // 정산 보류
 router.post('/hold', async (req, res) => {
   try {
+    const { settlementIds } = req.body;
+    await Settlement.update({ status: 'on_hold' }, { where: { id: { [Op.in]: settlementIds } } });
     res.json({ success: true, message: '정산이 보류되었습니다.' });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
@@ -263,6 +305,8 @@ router.post('/hold', async (req, res) => {
 // 정산 보류 해제
 router.post('/unhold', async (req, res) => {
   try {
+    const { settlementIds } = req.body;
+    await Settlement.update({ status: 'pending' }, { where: { id: { [Op.in]: settlementIds }, status: 'on_hold' } });
     res.json({ success: true, message: '정산 보류가 해제되었습니다.' });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
@@ -283,7 +327,7 @@ router.post('/cancel', async (req, res) => {
   }
 });
 
-// 정산 자동 생성 (완료된 주문에서 집계)
+// 정산 자동 생성 (order_items 기반 집계 — 환불 공제 + 중복 방지)
 router.post('/generate', async (req, res) => {
   try {
     const { startDate, endDate, commissionRate = 10, sellerId } = req.body;
@@ -292,54 +336,70 @@ router.post('/generate', async (req, res) => {
       return res.status(400).json({ success: false, message: 'startDate, endDate는 필수입니다.' });
     }
 
-    const conditions: string[] = [
-      `o.status IN ('delivered', 'completed')`,
-      `o."paymentStatus" = 'completed'`,
-      `o."createdAt" >= :startDate`,
-      `o."createdAt" <= :endDate`,
-      `o."sellerId" IS NOT NULL`,
-    ];
-    const replacements: any = { startDate, endDate };
+    const rate = Number(commissionRate) || 10;
+    const start = new Date(startDate as string);
+    const end   = new Date(endDate as string);
 
-    if (sellerId) {
-      conditions.push(`o."sellerId" = :sellerId`);
-      replacements.sellerId = sellerId;
-    }
+    // order_items 기반 집계: 판매자별 판매금액 + 환불금액 분리
+    const sellerCondition = sellerId ? `AND oi."sellerId" = :sellerId` : '';
+    const replacements: any = { startDate, endDate, ...(sellerId ? { sellerId } : {}) };
 
     const rows: any[] = await sequelize.query(`
       SELECT
-        o."sellerId",
-        SUM(o."totalAmount")::float AS "totalAmount",
-        COUNT(*)::int               AS "orderCount"
-      FROM orders o
-      WHERE ${conditions.join(' AND ')}
-      GROUP BY o."sellerId"
+        oi."sellerId",
+        SUM(CASE WHEN o."paymentStatus" = 'completed' THEN oi.subtotal ELSE 0 END)::float AS "salesAmount",
+        SUM(CASE WHEN o."paymentStatus" = 'refunded'  THEN oi.subtotal ELSE 0 END)::float AS "refundAmount",
+        COUNT(DISTINCT CASE WHEN o."paymentStatus" = 'completed' THEN o.id END)::int       AS "orderCount"
+      FROM order_items oi
+      JOIN orders o ON oi."orderId" = o.id
+      WHERE o.status IN ('delivered', 'completed')
+        AND o."paymentStatus" IN ('completed', 'refunded')
+        AND o."createdAt" >= :startDate
+        AND o."createdAt" <= :endDate
+        ${sellerCondition}
+      GROUP BY oi."sellerId"
+      HAVING SUM(CASE WHEN o."paymentStatus" = 'completed' THEN oi.subtotal ELSE 0 END) > 0
     `, { replacements, type: QueryTypes.SELECT });
 
     if (rows.length === 0) {
       return res.json({ success: true, data: [], message: '생성할 정산 데이터가 없습니다. (완료된 주문 없음)' });
     }
 
-    const rate = Number(commissionRate);
-    const created = [];
+    const created: any[] = [];
+    const skipped: any[] = [];
+
     for (const row of rows) {
-      const total = Number(row.totalAmount);
-      const fee   = parseFloat((total * rate / 100).toFixed(2));
-      const net   = parseFloat((total - fee).toFixed(2));
+      // 중복 정산 방지: 동일 판매자 + 동일 기간 이미 존재하면 건너뜀
+      const existing = await Settlement.findOne({ where: { sellerId: row.sellerId, startDate: start, endDate: end } });
+      if (existing) {
+        skipped.push({ sellerId: row.sellerId, existingId: existing.id });
+        continue;
+      }
+
+      const sales  = parseFloat(Number(row.salesAmount).toFixed(2));
+      const refund = parseFloat(Number(row.refundAmount).toFixed(2));
+      const total  = parseFloat((sales - refund).toFixed(2));
+      const fee    = parseFloat((total * rate / 100).toFixed(2));
+      const net    = parseFloat((total - fee).toFixed(2));
 
       const settlement = await Settlement.create({
-        sellerId:    row.sellerId,
-        startDate:   new Date(startDate as string),
-        endDate:     new Date(endDate as string),
-        totalAmount: total,
-        feeAmount:   fee,
-        netAmount:   net,
-        status:      'pending',
+        sellerId:     row.sellerId,
+        startDate:    start,
+        endDate:      end,
+        totalAmount:  total,
+        refundAmount: refund,
+        feeAmount:    fee,
+        netAmount:    net,
+        status:       'pending',
       });
       created.push(settlement);
     }
 
-    res.status(201).json({ success: true, data: created, total: created.length, message: `${created.length}개 정산이 생성되었습니다.` });
+    const msg = skipped.length > 0
+      ? `${created.length}개 생성, ${skipped.length}개 중복 건너뜀`
+      : `${created.length}개 정산이 생성되었습니다.`;
+
+    res.status(201).json({ success: true, data: created, skipped, total: created.length, message: msg });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
   }

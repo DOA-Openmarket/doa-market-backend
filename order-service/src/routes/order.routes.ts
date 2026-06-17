@@ -182,14 +182,15 @@ router.get('/:id/saga-status', async (req, res) => {
 router.patch('/:id/status', async (req, res) => {
   try {
     const { id } = req.params;
-    const { status } = req.body;
+    const { status, paymentStatus } = req.body;
 
     const order = await Order.findByPk(id);
     if (!order) {
       return res.status(404).json({ success: false, error: 'Order not found' });
     }
 
-    order.status = status;
+    if (status) order.status = status;
+    if (paymentStatus) order.paymentStatus = paymentStatus;
     await order.save();
 
     logger.info(`Order ${id} status updated to: ${status}`);

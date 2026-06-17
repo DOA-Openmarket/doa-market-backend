@@ -41,6 +41,9 @@ router.get('/', sellerController.getAll);
  */
 router.get('/stats', sellerController.getStats);
 
+router.get('/by-user/:userId', sellerController.getByUserId);
+router.put('/by-user/:userId', sellerController.updateByUserId);
+
 /**
  * @swagger
  * /api/v1/sellers/{id}:

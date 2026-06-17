@@ -236,12 +236,34 @@ router.get('/sellers', async (req, res) => {
 router.get('/sellers/:id', async (req, res) => {
   try {
     const SELLER_SERVICE_URL = process.env.SELLER_SERVICE_URL || 'http://seller-service:3011';
+    const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://user-service:3005';
     const response = await axios.get(`${SELLER_SERVICE_URL}/api/v1/sellers/${req.params.id}`, {
-      headers: {
-        Authorization: req.headers.authorization
+      headers: { Authorization: req.headers.authorization }
+    });
+    const seller = response.data.data || response.data;
+
+    // Enrich with user info (name, email, phone)
+    let name = '', email = '', phone = '';
+    try {
+      const userResponse = await axios.get(`${USER_SERVICE_URL}/api/v1/users/${seller.userId}`, {
+        headers: { Authorization: req.headers.authorization }
+      });
+      const user = userResponse.data.data || {};
+      name = user.name || '';
+      email = user.email || '';
+      phone = user.phone || '';
+    } catch {}
+
+    res.json({
+      success: true,
+      data: {
+        ...seller,
+        name,
+        email,
+        phone,
+        shop_name: seller.storeName,
       }
     });
-    res.json(response.data);
   } catch (error: any) {
     res.status(error.response?.status || 500).json({
       success: false,

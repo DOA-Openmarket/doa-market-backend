@@ -6,7 +6,7 @@ export class EmailService {
   private fromEmail: string;
 
   constructor() {
-    this.fromEmail = process.env.EMAIL_FROM || 'noreply@xn--9m1b13r66n.com';
+    this.fromEmail = process.env.EMAIL_FROM || 'motionbit.dev@gmail.com';
 
     // Initialize SES client with AWS profile for development
     this.sesClient = new SESClient({

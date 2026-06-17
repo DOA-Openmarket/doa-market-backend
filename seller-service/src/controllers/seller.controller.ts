@@ -61,9 +61,14 @@ export class SellerController {
   async update(req: Request, res: Response, next: NextFunction) {
     try {
       const data: UpdateSellerDto = {
-        storeName: req.body.storeName,
-        businessNumber: req.body.businessNumber,
+        storeName: req.body.shop_name || req.body.storeName,
+        businessNumber: req.body.business_number || req.body.businessNumber,
         status: req.body.status,
+        phone: req.body.phone,
+        bankType: req.body.bank_type,
+        bankAccount: req.body.bank_account,
+        depositorName: req.body.depositor_name,
+        ceoName: req.body.ceo_name,
       };
 
       const seller = await sellerService.update(req.params.id, data);
@@ -101,6 +106,34 @@ export class SellerController {
         data: seller,
         timestamp: new Date().toISOString(),
       });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getByUserId(req: Request, res: Response, next: NextFunction) {
+    try {
+      const seller = await sellerService.findByUserId(req.params.userId);
+      res.json({ success: true, data: seller, timestamp: new Date().toISOString() });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateByUserId(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data: UpdateSellerDto = {
+        storeName: req.body.shop_name || req.body.storeName,
+        businessNumber: req.body.business_number || req.body.businessNumber,
+        status: req.body.status,
+        phone: req.body.phone,
+        bankType: req.body.bank_type,
+        bankAccount: req.body.bank_account,
+        depositorName: req.body.depositor_name,
+        ceoName: req.body.ceo_name,
+      };
+      const seller = await sellerService.updateByUserId(req.params.userId, data);
+      res.json({ success: true, data: seller, timestamp: new Date().toISOString() });
     } catch (error) {
       next(error);
     }

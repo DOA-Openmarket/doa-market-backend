@@ -147,17 +147,15 @@ router.post('/:id/complete', async (req, res) => {
     });
 
     if (normalizedStatus === 'completed') {
-    // Notify order service to update order status to 'confirmed'
-    try {
-      await axios.patch(
-        `${ORDER_SERVICE_URL}/api/v1/orders/${payment.orderId}/status`,
-        { status: 'confirmed' },
-        { timeout: 5000 }
-      );
-    } catch (err: any) {
-      // Non-fatal: log but don't fail the payment completion
-      console.warn(`[payment] Failed to update order status for orderId=${payment.orderId}:`, err?.message);
-    }
+      try {
+        await axios.patch(
+          `${ORDER_SERVICE_URL}/api/v1/orders/${payment.orderId}/status`,
+          { status: 'confirmed', paymentStatus: 'completed' },
+          { timeout: 5000 }
+        );
+      } catch (err: any) {
+        console.warn(`[payment] Failed to update order status for orderId=${payment.orderId}:`, err?.message);
+      }
     }
 
     res.json({ success: true, data: payment });
@@ -205,7 +203,6 @@ router.post('/callback', async (req, res) => {
     const paymentId  = body.P_NOTI     || body.p_noti   || '';
 
     if (resultCode === '00') {
-      // 결제 성공 → DB 업데이트
       if (paymentId) {
         try {
           const payment = await Payment.findByPk(paymentId);
@@ -214,6 +211,13 @@ router.post('/callback', async (req, res) => {
               pgTransactionId: tid,
               status: 'completed',
               paidAt: new Date(),
+            });
+            await axios.patch(
+              `${ORDER_SERVICE_URL}/api/v1/orders/${payment.orderId}/status`,
+              { status: 'confirmed', paymentStatus: 'completed' },
+              { timeout: 5000 }
+            ).catch((err: any) => {
+              console.warn(`[payment] callback: Failed to update order for orderId=${payment.orderId}:`, err?.message);
             });
           }
         } catch (_) {}

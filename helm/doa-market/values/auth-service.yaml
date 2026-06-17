@@ -1,6 +1,6 @@
 image:
   repository: 478266318018.dkr.ecr.ap-northeast-2.amazonaws.com/doa-market-auth-service
-  tag: 55e8248
+  tag: f97db80
 
 serviceAccount:
   annotations: {}
@@ -26,8 +26,15 @@ env:
         name: naver-oauth-secrets
         key: client-secret
   - name: NAVER_CALLBACK_URL
-    value: "https://api.xn--9m1b13r66n.com/api/v1/auth/naver/callback"
+    value: "https://api.xn--pm2b831akpj.com/api/v1/auth/naver/callback"
   - name: DB_SYNC
     value: "true"
   - name: SELLER_SERVICE_URL
     value: "http://seller-service:3007"
+  - name: EMAIL_FROM
+    value: "noreply@xn--pm2b831akpj.com"
+  - name: RESEND_API_KEY
+    valueFrom:
+      secretKeyRef:
+        name: resend-secrets
+        key: api-key
